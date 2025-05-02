@@ -1,0 +1,438 @@
+ARM GAS  /tmp/ccKr9doE.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.eabi_attribute 28, 1
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 1
+  11              		.eabi_attribute 18, 4
+  12              		.file	"Time.c"
+  13              		.text
+  14              	.Ltext0:
+  15              		.cfi_sections	.debug_frame
+  16              		.section	.text.delay_us,"ax",%progbits
+  17              		.align	1
+  18              		.global	delay_us
+  19              		.arch armv7e-m
+  20              		.syntax unified
+  21              		.thumb
+  22              		.thumb_func
+  23              		.fpu fpv5-d16
+  25              	delay_us:
+  26              	.LVL0:
+  27              	.LFB394:
+  28              		.file 1 "Core/Src/Time.c"
+   1:Core/Src/Time.c **** /************** This document serves to manage time for the State Machine ************/
+   2:Core/Src/Time.c **** 
+   3:Core/Src/Time.c **** #include "Time.h"
+   4:Core/Src/Time.c **** #include "DefFuncs.h"
+   5:Core/Src/Time.c **** #include "GEKF.h"
+   6:Core/Src/Time.c **** #include "AttitudeEstimation.h"
+   7:Core/Src/Time.c **** #include "FEKF.h"
+   8:Core/Src/Time.c **** #include "StateMachine.h"
+   9:Core/Src/Time.c **** 
+  10:Core/Src/Time.c **** extern TIM_HandleTypeDef htim2;
+  11:Core/Src/Time.c **** extern TIM_HandleTypeDef htim3;
+  12:Core/Src/Time.c **** extern TIM_HandleTypeDef htim4;
+  13:Core/Src/Time.c **** extern sensors meas;
+  14:Core/Src/Time.c **** extern gekf gkal;
+  15:Core/Src/Time.c **** extern fekf fkal;
+  16:Core/Src/Time.c **** extern VehicleAtd atd;
+  17:Core/Src/Time.c **** extern VehicleStates States;
+  18:Core/Src/Time.c **** uint16_t lastTim_T3;
+  19:Core/Src/Time.c **** uint16_t lastTim_T4;
+  20:Core/Src/Time.c **** uint16_t currTim_T3;
+  21:Core/Src/Time.c **** uint16_t currTim_T4;
+  22:Core/Src/Time.c **** uint16_t elapsed_T3;
+  23:Core/Src/Time.c **** uint16_t elapsed_T4;
+  24:Core/Src/Time.c **** float timeSec;
+  25:Core/Src/Time.c **** uint8_t startUp_T3 = 1;
+  26:Core/Src/Time.c **** uint8_t startUp_T4 = 1;
+  27:Core/Src/Time.c **** 
+  28:Core/Src/Time.c **** void delay_us(uint32_t time)
+  29:Core/Src/Time.c **** {
+  29              		.loc 1 29 1 view -0
+ARM GAS  /tmp/ccKr9doE.s 			page 2
+
+
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  30:Core/Src/Time.c **** 	uint32_t initVal = TIM2->CNT;
+  34              		.loc 1 30 2 view .LVU1
+  35              		.loc 1 30 11 is_stmt 0 view .LVU2
+  36 0000 4FF08043 		mov	r3, #1073741824
+  37 0004 5A6A     		ldr	r2, [r3, #36]
+  38              	.LVL1:
+  31:Core/Src/Time.c **** //	uint32_t initVal = __HAL_TIM_GET_COUNTER(&htim2);
+  32:Core/Src/Time.c **** 
+  33:Core/Src/Time.c **** //	uint32_t val = initVal;
+  34:Core/Src/Time.c **** 	while ((TIM2->CNT - initVal) < time)
+  39              		.loc 1 34 2 is_stmt 1 view .LVU3
+  40              	.L2:
+  35:Core/Src/Time.c **** 	{
+  36:Core/Src/Time.c **** 
+  37:Core/Src/Time.c **** //		val = __HAL_TIM_GET_COUNTER(&htim2);
+  38:Core/Src/Time.c **** //		val = TIM2->CNT;
+  39:Core/Src/Time.c **** 	}
+  41              		.loc 1 39 2 discriminator 1 view .LVU4
+  34:Core/Src/Time.c **** 	{
+  42              		.loc 1 34 8 discriminator 1 view .LVU5
+  34:Core/Src/Time.c **** 	{
+  43              		.loc 1 34 14 is_stmt 0 discriminator 1 view .LVU6
+  44 0006 4FF08043 		mov	r3, #1073741824
+  45 000a 5B6A     		ldr	r3, [r3, #36]
+  34:Core/Src/Time.c **** 	{
+  46              		.loc 1 34 20 discriminator 1 view .LVU7
+  47 000c 9B1A     		subs	r3, r3, r2
+  34:Core/Src/Time.c **** 	{
+  48              		.loc 1 34 8 discriminator 1 view .LVU8
+  49 000e 8342     		cmp	r3, r0
+  50 0010 F9D3     		bcc	.L2
+  40:Core/Src/Time.c **** 
+  41:Core/Src/Time.c **** //	sendS("i", (val - initVal));space();sendS("i", val);space();sendS("i", initVal);newL();
+  42:Core/Src/Time.c **** 
+  43:Core/Src/Time.c **** }
+  51              		.loc 1 43 1 view .LVU9
+  52 0012 7047     		bx	lr
+  53              		.cfi_endproc
+  54              	.LFE394:
+  56              		.section	.text.HAL_TIM_PeriodElapsedCallback,"ax",%progbits
+  57              		.align	1
+  58              		.global	HAL_TIM_PeriodElapsedCallback
+  59              		.syntax unified
+  60              		.thumb
+  61              		.thumb_func
+  62              		.fpu fpv5-d16
+  64              	HAL_TIM_PeriodElapsedCallback:
+  65              	.LVL2:
+  66              	.LFB395:
+  44:Core/Src/Time.c **** 
+  45:Core/Src/Time.c **** void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+  46:Core/Src/Time.c **** {
+  67              		.loc 1 46 1 is_stmt 1 view -0
+ARM GAS  /tmp/ccKr9doE.s 			page 3
+
+
+  68              		.cfi_startproc
+  69              		@ args = 0, pretend = 0, frame = 0
+  70              		@ frame_needed = 0, uses_anonymous_args = 0
+  71              		.loc 1 46 1 is_stmt 0 view .LVU11
+  72 0000 10B5     		push	{r4, lr}
+  73              	.LCFI0:
+  74              		.cfi_def_cfa_offset 8
+  75              		.cfi_offset 4, -8
+  76              		.cfi_offset 14, -4
+  77 0002 0446     		mov	r4, r0
+  47:Core/Src/Time.c **** 	if (htim->Instance == TIM3)
+  78              		.loc 1 47 2 is_stmt 1 view .LVU12
+  79              		.loc 1 47 10 is_stmt 0 view .LVU13
+  80 0004 0268     		ldr	r2, [r0]
+  81              		.loc 1 47 5 view .LVU14
+  82 0006 1D4B     		ldr	r3, .L11
+  83 0008 9A42     		cmp	r2, r3
+  84 000a 04D0     		beq	.L9
+  85              	.LVL3:
+  86              	.L4:
+  48:Core/Src/Time.c **** 	{
+  49:Core/Src/Time.c **** 		if (startUp_T3)
+  50:Core/Src/Time.c **** 		{
+  51:Core/Src/Time.c **** 			lastTim_T3 = __HAL_TIM_GET_COUNTER(&htim2);
+  52:Core/Src/Time.c **** 			startUp_T3 = 0;
+  53:Core/Src/Time.c **** 		}
+  54:Core/Src/Time.c **** 		currTim_T3 = __HAL_TIM_GET_COUNTER(&htim2);
+  55:Core/Src/Time.c **** 		elapsed_T3 = (currTim_T3 - lastTim_T3);
+  56:Core/Src/Time.c **** //		timeSec = (float) elapsed_T3/1000000.0f;
+  57:Core/Src/Time.c **** 		lastTim_T3 = currTim_T3;
+  58:Core/Src/Time.c **** 		GroundEKF_newMeas(&gkal, &meas);
+  59:Core/Src/Time.c **** 
+  60:Core/Src/Time.c **** 		if (States.currentState > GROUND)
+  61:Core/Src/Time.c **** 		{
+  62:Core/Src/Time.c **** //			sendS("i", (int) elapsed_T3);sendS("c", "\n\r");  
+  63:Core/Src/Time.c **** //			sendMat((float *) &meas.meas[0], 1, 7);newL();
+  64:Core/Src/Time.c **** 			FlightEKF_newMeas(&fkal, &meas); 
+  65:Core/Src/Time.c **** 		}
+  66:Core/Src/Time.c **** 
+  67:Core/Src/Time.c **** 	}
+  68:Core/Src/Time.c **** 
+  69:Core/Src/Time.c **** 	if (htim->Instance == TIM4)
+  87              		.loc 1 69 2 is_stmt 1 view .LVU15
+  88              		.loc 1 69 10 is_stmt 0 view .LVU16
+  89 000c 2268     		ldr	r2, [r4]
+  90              		.loc 1 69 5 view .LVU17
+  91 000e 1C4B     		ldr	r3, .L11+4
+  92 0010 9A42     		cmp	r2, r3
+  93 0012 24D0     		beq	.L10
+  94              	.L3:
+  70:Core/Src/Time.c **** 	{
+  71:Core/Src/Time.c **** 		if (startUp_T4)
+  72:Core/Src/Time.c **** 		{
+  73:Core/Src/Time.c **** 			startUp_T4 = 0;
+  74:Core/Src/Time.c **** 		}
+  75:Core/Src/Time.c **** 
+  76:Core/Src/Time.c **** 
+ARM GAS  /tmp/ccKr9doE.s 			page 4
+
+
+  77:Core/Src/Time.c **** 		if (States.currentState > GROUND)
+  78:Core/Src/Time.c **** 		{
+  79:Core/Src/Time.c **** 			Attitude_newMeas(&atd, &meas);
+  80:Core/Src/Time.c **** 		}
+  81:Core/Src/Time.c **** 
+  82:Core/Src/Time.c **** 
+  83:Core/Src/Time.c **** 	}
+  84:Core/Src/Time.c **** }
+  95              		.loc 1 84 1 view .LVU18
+  96 0014 10BD     		pop	{r4, pc}
+  97              	.LVL4:
+  98              	.L9:
+  49:Core/Src/Time.c **** 		{
+  99              		.loc 1 49 3 is_stmt 1 view .LVU19
+  49:Core/Src/Time.c **** 		{
+ 100              		.loc 1 49 7 is_stmt 0 view .LVU20
+ 101 0016 1B4B     		ldr	r3, .L11+8
+ 102 0018 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  49:Core/Src/Time.c **** 		{
+ 103              		.loc 1 49 6 view .LVU21
+ 104 001a 3BB1     		cbz	r3, .L5
+  51:Core/Src/Time.c **** 			startUp_T3 = 0;
+ 105              		.loc 1 51 4 is_stmt 1 view .LVU22
+  51:Core/Src/Time.c **** 			startUp_T3 = 0;
+ 106              		.loc 1 51 17 is_stmt 0 view .LVU23
+ 107 001c 1A4B     		ldr	r3, .L11+12
+ 108 001e 1B68     		ldr	r3, [r3]
+ 109 0020 5A6A     		ldr	r2, [r3, #36]
+  51:Core/Src/Time.c **** 			startUp_T3 = 0;
+ 110              		.loc 1 51 15 view .LVU24
+ 111 0022 1A4B     		ldr	r3, .L11+16
+ 112 0024 1A80     		strh	r2, [r3]	@ movhi
+  52:Core/Src/Time.c **** 		}
+ 113              		.loc 1 52 4 is_stmt 1 view .LVU25
+  52:Core/Src/Time.c **** 		}
+ 114              		.loc 1 52 15 is_stmt 0 view .LVU26
+ 115 0026 174B     		ldr	r3, .L11+8
+ 116 0028 0022     		movs	r2, #0
+ 117 002a 1A70     		strb	r2, [r3]
+ 118              	.L5:
+  54:Core/Src/Time.c **** 		elapsed_T3 = (currTim_T3 - lastTim_T3);
+ 119              		.loc 1 54 3 is_stmt 1 view .LVU27
+  54:Core/Src/Time.c **** 		elapsed_T3 = (currTim_T3 - lastTim_T3);
+ 120              		.loc 1 54 16 is_stmt 0 view .LVU28
+ 121 002c 164B     		ldr	r3, .L11+12
+ 122 002e 1B68     		ldr	r3, [r3]
+ 123 0030 5B6A     		ldr	r3, [r3, #36]
+  54:Core/Src/Time.c **** 		elapsed_T3 = (currTim_T3 - lastTim_T3);
+ 124              		.loc 1 54 14 view .LVU29
+ 125 0032 9BB2     		uxth	r3, r3
+ 126 0034 164A     		ldr	r2, .L11+20
+ 127 0036 1380     		strh	r3, [r2]	@ movhi
+  55:Core/Src/Time.c **** //		timeSec = (float) elapsed_T3/1000000.0f;
+ 128              		.loc 1 55 3 is_stmt 1 view .LVU30
+  55:Core/Src/Time.c **** //		timeSec = (float) elapsed_T3/1000000.0f;
+ 129              		.loc 1 55 28 is_stmt 0 view .LVU31
+ 130 0038 1449     		ldr	r1, .L11+16
+ARM GAS  /tmp/ccKr9doE.s 			page 5
+
+
+ 131 003a 0A88     		ldrh	r2, [r1]
+ 132 003c 9A1A     		subs	r2, r3, r2
+  55:Core/Src/Time.c **** //		timeSec = (float) elapsed_T3/1000000.0f;
+ 133              		.loc 1 55 14 view .LVU32
+ 134 003e 1548     		ldr	r0, .L11+24
+ 135              	.LVL5:
+  55:Core/Src/Time.c **** //		timeSec = (float) elapsed_T3/1000000.0f;
+ 136              		.loc 1 55 14 view .LVU33
+ 137 0040 0280     		strh	r2, [r0]	@ movhi
+  57:Core/Src/Time.c **** 		GroundEKF_newMeas(&gkal, &meas);
+ 138              		.loc 1 57 3 is_stmt 1 view .LVU34
+  57:Core/Src/Time.c **** 		GroundEKF_newMeas(&gkal, &meas);
+ 139              		.loc 1 57 14 is_stmt 0 view .LVU35
+ 140 0042 0B80     		strh	r3, [r1]	@ movhi
+  58:Core/Src/Time.c **** 
+ 141              		.loc 1 58 3 is_stmt 1 view .LVU36
+ 142 0044 1449     		ldr	r1, .L11+28
+ 143 0046 1548     		ldr	r0, .L11+32
+ 144 0048 FFF7FEFF 		bl	GroundEKF_newMeas
+ 145              	.LVL6:
+  60:Core/Src/Time.c **** 		{
+ 146              		.loc 1 60 3 view .LVU37
+  60:Core/Src/Time.c **** 		{
+ 147              		.loc 1 60 13 is_stmt 0 view .LVU38
+ 148 004c 144B     		ldr	r3, .L11+36
+ 149 004e 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+  60:Core/Src/Time.c **** 		{
+ 150              		.loc 1 60 6 view .LVU39
+ 151 0050 012B     		cmp	r3, #1
+ 152 0052 DBD9     		bls	.L4
+  64:Core/Src/Time.c **** 		}
+ 153              		.loc 1 64 4 is_stmt 1 view .LVU40
+ 154 0054 1049     		ldr	r1, .L11+28
+ 155 0056 1348     		ldr	r0, .L11+40
+ 156 0058 FFF7FEFF 		bl	FlightEKF_newMeas
+ 157              	.LVL7:
+ 158 005c D6E7     		b	.L4
+ 159              	.L10:
+  71:Core/Src/Time.c **** 		{
+ 160              		.loc 1 71 3 view .LVU41
+  71:Core/Src/Time.c **** 		{
+ 161              		.loc 1 71 7 is_stmt 0 view .LVU42
+ 162 005e 124B     		ldr	r3, .L11+44
+ 163 0060 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  71:Core/Src/Time.c **** 		{
+ 164              		.loc 1 71 6 view .LVU43
+ 165 0062 13B1     		cbz	r3, .L7
+  73:Core/Src/Time.c **** 		}
+ 166              		.loc 1 73 4 is_stmt 1 view .LVU44
+  73:Core/Src/Time.c **** 		}
+ 167              		.loc 1 73 15 is_stmt 0 view .LVU45
+ 168 0064 104B     		ldr	r3, .L11+44
+ 169 0066 0022     		movs	r2, #0
+ 170 0068 1A70     		strb	r2, [r3]
+ 171              	.L7:
+  77:Core/Src/Time.c **** 		{
+ 172              		.loc 1 77 3 is_stmt 1 view .LVU46
+ARM GAS  /tmp/ccKr9doE.s 			page 6
+
+
+  77:Core/Src/Time.c **** 		{
+ 173              		.loc 1 77 13 is_stmt 0 view .LVU47
+ 174 006a 0D4B     		ldr	r3, .L11+36
+ 175 006c 5B78     		ldrb	r3, [r3, #1]	@ zero_extendqisi2
+  77:Core/Src/Time.c **** 		{
+ 176              		.loc 1 77 6 view .LVU48
+ 177 006e 012B     		cmp	r3, #1
+ 178 0070 D0D9     		bls	.L3
+  79:Core/Src/Time.c **** 		}
+ 179              		.loc 1 79 4 is_stmt 1 view .LVU49
+ 180 0072 0949     		ldr	r1, .L11+28
+ 181 0074 0D48     		ldr	r0, .L11+48
+ 182 0076 FFF7FEFF 		bl	Attitude_newMeas
+ 183              	.LVL8:
+ 184              		.loc 1 84 1 is_stmt 0 view .LVU50
+ 185 007a CBE7     		b	.L3
+ 186              	.L12:
+ 187              		.align	2
+ 188              	.L11:
+ 189 007c 00040040 		.word	1073742848
+ 190 0080 00080040 		.word	1073743872
+ 191 0084 00000000 		.word	.LANCHOR0
+ 192 0088 00000000 		.word	htim2
+ 193 008c 00000000 		.word	.LANCHOR1
+ 194 0090 00000000 		.word	.LANCHOR2
+ 195 0094 00000000 		.word	.LANCHOR3
+ 196 0098 00000000 		.word	meas
+ 197 009c 00000000 		.word	gkal
+ 198 00a0 00000000 		.word	States
+ 199 00a4 00000000 		.word	fkal
+ 200 00a8 00000000 		.word	.LANCHOR4
+ 201 00ac 00000000 		.word	atd
+ 202              		.cfi_endproc
+ 203              	.LFE395:
+ 205              		.global	startUp_T4
+ 206              		.global	startUp_T3
+ 207              		.global	timeSec
+ 208              		.global	elapsed_T4
+ 209              		.global	elapsed_T3
+ 210              		.global	currTim_T4
+ 211              		.global	currTim_T3
+ 212              		.global	lastTim_T4
+ 213              		.global	lastTim_T3
+ 214              		.section	.bss.currTim_T3,"aw",%nobits
+ 215              		.align	1
+ 216              		.set	.LANCHOR2,. + 0
+ 219              	currTim_T3:
+ 220 0000 0000     		.space	2
+ 221              		.section	.bss.currTim_T4,"aw",%nobits
+ 222              		.align	1
+ 225              	currTim_T4:
+ 226 0000 0000     		.space	2
+ 227              		.section	.bss.elapsed_T3,"aw",%nobits
+ 228              		.align	1
+ 229              		.set	.LANCHOR3,. + 0
+ 232              	elapsed_T3:
+ 233 0000 0000     		.space	2
+ARM GAS  /tmp/ccKr9doE.s 			page 7
+
+
+ 234              		.section	.bss.elapsed_T4,"aw",%nobits
+ 235              		.align	1
+ 238              	elapsed_T4:
+ 239 0000 0000     		.space	2
+ 240              		.section	.bss.lastTim_T3,"aw",%nobits
+ 241              		.align	1
+ 242              		.set	.LANCHOR1,. + 0
+ 245              	lastTim_T3:
+ 246 0000 0000     		.space	2
+ 247              		.section	.bss.lastTim_T4,"aw",%nobits
+ 248              		.align	1
+ 251              	lastTim_T4:
+ 252 0000 0000     		.space	2
+ 253              		.section	.bss.timeSec,"aw",%nobits
+ 254              		.align	2
+ 257              	timeSec:
+ 258 0000 00000000 		.space	4
+ 259              		.section	.data.startUp_T3,"aw"
+ 260              		.set	.LANCHOR0,. + 0
+ 263              	startUp_T3:
+ 264 0000 01       		.byte	1
+ 265              		.section	.data.startUp_T4,"aw"
+ 266              		.set	.LANCHOR4,. + 0
+ 269              	startUp_T4:
+ 270 0000 01       		.byte	1
+ 271              		.text
+ 272              	.Letext0:
+ 273              		.file 2 "/usr/lib/gcc/arm-none-eabi/10.3.1/include/stdint.h"
+ 274              		.file 3 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+ 275              		.file 4 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 276              		.file 5 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 277              		.file 6 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h"
+ 278              		.file 7 "Drivers/CMSIS/DSP/Include/arm_math.h"
+ 279              		.file 8 "Core/Inc/Sensors.h"
+ 280              		.file 9 "Core/Inc/GEKF.h"
+ 281              		.file 10 "Core/Inc/AttitudeEstimation.h"
+ 282              		.file 11 "Core/Inc/FEKF.h"
+ 283              		.file 12 "Core/Inc/StateMachine.h"
+ARM GAS  /tmp/ccKr9doE.s 			page 8
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 Time.c
+     /tmp/ccKr9doE.s:17     .text.delay_us:0000000000000000 $t
+     /tmp/ccKr9doE.s:25     .text.delay_us:0000000000000000 delay_us
+     /tmp/ccKr9doE.s:57     .text.HAL_TIM_PeriodElapsedCallback:0000000000000000 $t
+     /tmp/ccKr9doE.s:64     .text.HAL_TIM_PeriodElapsedCallback:0000000000000000 HAL_TIM_PeriodElapsedCallback
+     /tmp/ccKr9doE.s:189    .text.HAL_TIM_PeriodElapsedCallback:000000000000007c $d
+     /tmp/ccKr9doE.s:269    .data.startUp_T4:0000000000000000 startUp_T4
+     /tmp/ccKr9doE.s:263    .data.startUp_T3:0000000000000000 startUp_T3
+     /tmp/ccKr9doE.s:257    .bss.timeSec:0000000000000000 timeSec
+     /tmp/ccKr9doE.s:238    .bss.elapsed_T4:0000000000000000 elapsed_T4
+     /tmp/ccKr9doE.s:232    .bss.elapsed_T3:0000000000000000 elapsed_T3
+     /tmp/ccKr9doE.s:225    .bss.currTim_T4:0000000000000000 currTim_T4
+     /tmp/ccKr9doE.s:219    .bss.currTim_T3:0000000000000000 currTim_T3
+     /tmp/ccKr9doE.s:251    .bss.lastTim_T4:0000000000000000 lastTim_T4
+     /tmp/ccKr9doE.s:245    .bss.lastTim_T3:0000000000000000 lastTim_T3
+     /tmp/ccKr9doE.s:215    .bss.currTim_T3:0000000000000000 $d
+     /tmp/ccKr9doE.s:222    .bss.currTim_T4:0000000000000000 $d
+     /tmp/ccKr9doE.s:228    .bss.elapsed_T3:0000000000000000 $d
+     /tmp/ccKr9doE.s:235    .bss.elapsed_T4:0000000000000000 $d
+     /tmp/ccKr9doE.s:241    .bss.lastTim_T3:0000000000000000 $d
+     /tmp/ccKr9doE.s:248    .bss.lastTim_T4:0000000000000000 $d
+     /tmp/ccKr9doE.s:254    .bss.timeSec:0000000000000000 $d
+
+UNDEFINED SYMBOLS
+GroundEKF_newMeas
+FlightEKF_newMeas
+Attitude_newMeas
+htim2
+meas
+gkal
+States
+fkal
+atd

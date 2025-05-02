@@ -1,0 +1,337 @@
+ARM GAS  /tmp/cc7Lk8UD.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.eabi_attribute 28, 1
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 1
+  11              		.eabi_attribute 18, 4
+  12              		.file	"arm_mat_trans_q15.c"
+  13              		.text
+  14              	.Ltext0:
+  15              		.cfi_sections	.debug_frame
+  16              		.section	.text.arm_mat_trans_q15,"ax",%progbits
+  17              		.align	1
+  18              		.global	arm_mat_trans_q15
+  19              		.arch armv7e-m
+  20              		.syntax unified
+  21              		.thumb
+  22              		.thumb_func
+  23              		.fpu fpv5-d16
+  25              	arm_mat_trans_q15:
+  26              	.LVL0:
+  27              	.LFB145:
+  28              		.file 1 "Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c"
+   1:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** /* ----------------------------------------------------------------------
+   2:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * Project:      CMSIS DSP Library
+   3:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * Title:        arm_mat_trans_q15.c
+   4:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * Description:  Q15 matrix transpose
+   5:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  *
+   6:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * $Date:        18. March 2019
+   7:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * $Revision:    V1.6.0
+   8:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  *
+   9:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * Target Processor: Cortex-M cores
+  10:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * -------------------------------------------------------------------- */
+  11:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** /*
+  12:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * Copyright (C) 2010-2019 ARM Limited or its affiliates. All rights reserved.
+  13:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  *
+  14:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * SPDX-License-Identifier: Apache-2.0
+  15:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  *
+  16:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * Licensed under the Apache License, Version 2.0 (the License); you may
+  17:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * not use this file except in compliance with the License.
+  18:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * You may obtain a copy of the License at
+  19:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  *
+  20:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * www.apache.org/licenses/LICENSE-2.0
+  21:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  *
+  22:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * Unless required by applicable law or agreed to in writing, software
+  23:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+  24:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  25:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * See the License for the specific language governing permissions and
+  26:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  * limitations under the License.
+  27:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  */
+  28:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  29:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #include "arm_math.h"
+  30:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ARM GAS  /tmp/cc7Lk8UD.s 			page 2
+
+
+  31:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** /**
+  32:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   @ingroup groupMatrix
+  33:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  */
+  34:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  35:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** /**
+  36:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   @addtogroup MatrixTrans
+  37:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   @{
+  38:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  */
+  39:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  40:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** /**
+  41:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   @brief         Q15 matrix transpose.
+  42:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   @param[in]     pSrc      points to input matrix
+  43:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   @param[out]    pDst      points to output matrix
+  44:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   @return        execution status
+  45:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****                    - \ref ARM_MATH_SUCCESS       : Operation successful
+  46:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****                    - \ref ARM_MATH_SIZE_MISMATCH : Matrix size check failed
+  47:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****  */
+  48:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  49:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** arm_status arm_mat_trans_q15(
+  50:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   const arm_matrix_instance_q15 * pSrc,
+  51:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         arm_matrix_instance_q15 * pDst)
+  52:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** {
+  29              		.loc 1 52 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		.loc 1 52 1 is_stmt 0 view .LVU1
+  34 0000 70B5     		push	{r4, r5, r6, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 16
+  37              		.cfi_offset 4, -16
+  38              		.cfi_offset 5, -12
+  39              		.cfi_offset 6, -8
+  40              		.cfi_offset 14, -4
+  41 0002 0D46     		mov	r5, r1
+  53:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         q15_t *pIn = pSrc->pData;                      /* input data matrix pointer */
+  42              		.loc 1 53 9 is_stmt 1 view .LVU2
+  43              		.loc 1 53 16 is_stmt 0 view .LVU3
+  44 0004 4368     		ldr	r3, [r0, #4]
+  45              	.LVL1:
+  54:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         q15_t *pOut = pDst->pData;                     /* output data matrix pointer */
+  46              		.loc 1 54 9 is_stmt 1 view .LVU4
+  55:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         uint16_t nRows = pSrc->numRows;                /* number of rows */
+  47              		.loc 1 55 9 view .LVU5
+  48              		.loc 1 55 18 is_stmt 0 view .LVU6
+  49 0006 B0F800E0 		ldrh	lr, [r0]
+  50              	.LVL2:
+  56:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         uint16_t nCols = pSrc->numCols;                /* number of columns */
+  51              		.loc 1 56 9 is_stmt 1 view .LVU7
+  52              		.loc 1 56 18 is_stmt 0 view .LVU8
+  53 000a 4688     		ldrh	r6, [r0, #2]
+  54              	.LVL3:
+  57:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         uint32_t col, row = nRows, i = 0U;             /* Loop counters */
+  55              		.loc 1 57 9 is_stmt 1 view .LVU9
+  56              		.loc 1 57 23 is_stmt 0 view .LVU10
+  57 000c 7446     		mov	r4, lr
+  58              		.loc 1 57 36 view .LVU11
+ARM GAS  /tmp/cc7Lk8UD.s 			page 3
+
+
+  59 000e 0021     		movs	r1, #0
+  60              	.LVL4:
+  61              		.loc 1 57 36 view .LVU12
+  62 0010 0BE0     		b	.L4
+  63              	.LVL5:
+  64              	.L3:
+  58:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         arm_status status;                             /* status of matrix transpose */
+  59:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  60:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #if defined (ARM_MATH_LOOPUNROLL)
+  61:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         q31_t in;                                      /* variable to hold temporary output  */
+  62:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #endif
+  63:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  64:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #ifdef ARM_MATH_MATRIX_CHECK
+  65:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  66:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   /* Check for matrix mismatch condition */
+  67:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   if ((pSrc->numRows != pDst->numCols) ||
+  68:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       (pSrc->numCols != pDst->numRows)   )
+  69:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   {
+  70:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****     /* Set status as ARM_MATH_SIZE_MISMATCH */
+  71:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****     status = ARM_MATH_SIZE_MISMATCH;
+  72:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   }
+  73:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   else
+  74:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  75:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #endif /* #ifdef ARM_MATH_MATRIX_CHECK */
+  76:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  77:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   {
+  78:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****     /* Matrix transpose by exchanging the rows with columns */
+  79:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****     /* row loop */
+  80:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****     do
+  81:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****     {
+  82:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       /* Pointer pOut is set to starting address of column being processed */
+  83:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       pOut = pDst->pData + i;
+  84:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  85:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #if defined (ARM_MATH_LOOPUNROLL)
+  86:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  87:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       /* Loop unrolling: Compute 4 outputs at a time */
+  88:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       col = nCols >> 2U;
+  89:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  90:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       while (col > 0U)        /* column loop */
+  91:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       {
+  92:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Read two elements from row */
+  93:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         in = read_q15x2_ia ((q15_t **) &pIn);
+  94:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  95:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Unpack and store one element in  destination */
+  96:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #ifndef ARM_MATH_BIG_ENDIAN
+  97:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         *pOut = (q15_t) in;
+  98:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #else
+  99:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         *pOut = (q15_t) ((in & (q31_t) 0xffff0000) >> 16);
+ 100:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #endif /* #ifndef ARM_MATH_BIG_ENDIAN */
+ 101:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 102:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Update pointer pOut to point to next row of transposed matrix */
+ 103:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         pOut += nRows;
+ 104:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 105:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Unpack and store second element in destination */
+ 106:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #ifndef ARM_MATH_BIG_ENDIAN
+ 107:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         *pOut = (q15_t) ((in & (q31_t) 0xffff0000) >> 16);
+ 108:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #else
+ARM GAS  /tmp/cc7Lk8UD.s 			page 4
+
+
+ 109:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         *pOut = (q15_t) in;
+ 110:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #endif /* #ifndef ARM_MATH_BIG_ENDIAN */
+ 111:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 112:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Update  pointer pOut to point to next row of transposed matrix */
+ 113:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         pOut += nRows;
+ 114:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 115:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Read two elements from row */
+ 116:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         in = read_q15x2_ia ((q15_t **) &pIn);
+ 117:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 118:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Unpack and store one element in destination */
+ 119:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #ifndef ARM_MATH_BIG_ENDIAN
+ 120:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         *pOut = (q15_t) in;
+ 121:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #else
+ 122:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         *pOut = (q15_t) ((in & (q31_t) 0xffff0000) >> 16);
+ 123:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 124:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #endif /* #ifndef ARM_MATH_BIG_ENDIAN */
+ 125:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 126:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Update pointer pOut to point to next row of transposed matrix */
+ 127:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         pOut += nRows;
+ 128:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 129:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Unpack and store second element in destination */
+ 130:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #ifndef ARM_MATH_BIG_ENDIAN
+ 131:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         *pOut = (q15_t) ((in & (q31_t) 0xffff0000) >> 16);
+ 132:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #else
+ 133:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         *pOut = (q15_t) in;
+ 134:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #endif /* #ifndef ARM_MATH_BIG_ENDIAN */
+ 135:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 136:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Update pointer pOut to point to next row of transposed matrix */
+ 137:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         pOut += nRows;
+ 138:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 139:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Decrement column loop counter */
+ 140:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         col--;
+ 141:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       }
+ 142:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 143:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       /* Loop unrolling: Compute remaining outputs */
+ 144:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       col = nCols % 0x4U;
+ 145:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 146:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #else
+ 147:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 148:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       /* Initialize col with number of samples */
+ 149:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       col = nCols;
+ 150:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 151:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** #endif /* #if defined (ARM_MATH_LOOPUNROLL) */
+ 152:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 153:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       while (col > 0U)
+ 154:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       {
+ 155:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Read and store input element in destination */
+ 156:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         *pOut = *pIn++;
+  65              		.loc 1 156 9 is_stmt 1 view .LVU13
+  66              		.loc 1 156 17 is_stmt 0 view .LVU14
+  67 0012 33F902CB 		ldrsh	ip, [r3], #2
+  68              	.LVL6:
+  69              		.loc 1 156 15 view .LVU15
+  70 0016 A2F800C0 		strh	ip, [r2]	@ movhi
+ 157:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 158:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Update pointer pOut to point to next row of transposed matrix */
+ 159:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         pOut += nRows;
+ARM GAS  /tmp/cc7Lk8UD.s 			page 5
+
+
+  71              		.loc 1 159 9 is_stmt 1 view .LVU16
+  72              		.loc 1 159 14 is_stmt 0 view .LVU17
+  73 001a 02EB4E02 		add	r2, r2, lr, lsl #1
+  74              	.LVL7:
+ 160:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 161:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         /* Decrement column loop counter */
+ 162:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****         col--;
+  75              		.loc 1 162 9 is_stmt 1 view .LVU18
+  76              		.loc 1 162 12 is_stmt 0 view .LVU19
+  77 001e 0138     		subs	r0, r0, #1
+  78              	.LVL8:
+  79              	.L2:
+ 153:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       {
+  80              		.loc 1 153 13 is_stmt 1 view .LVU20
+  81 0020 0028     		cmp	r0, #0
+  82 0022 F6D1     		bne	.L3
+ 163:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       }
+ 164:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 165:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       i++;
+  83              		.loc 1 165 7 view .LVU21
+  84              		.loc 1 165 8 is_stmt 0 view .LVU22
+  85 0024 0131     		adds	r1, r1, #1
+  86              	.LVL9:
+ 166:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 167:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       /* Decrement row loop counter */
+ 168:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       row--;
+  87              		.loc 1 168 7 is_stmt 1 view .LVU23
+ 169:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 170:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****     } while (row > 0U);          /* row loop end */
+  88              		.loc 1 170 13 view .LVU24
+  89              		.loc 1 170 5 is_stmt 0 view .LVU25
+  90 0026 013C     		subs	r4, r4, #1
+  91              	.LVL10:
+  92              		.loc 1 170 5 view .LVU26
+  93 0028 04D0     		beq	.L6
+  94              	.LVL11:
+  95              	.L4:
+  58:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  96              		.loc 1 58 9 is_stmt 1 view .LVU27
+  80:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****     {
+  97              		.loc 1 80 5 view .LVU28
+  83:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  98              		.loc 1 83 7 view .LVU29
+  83:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+  99              		.loc 1 83 18 is_stmt 0 view .LVU30
+ 100 002a 6A68     		ldr	r2, [r5, #4]
+  83:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 101              		.loc 1 83 12 view .LVU31
+ 102 002c 02EB4102 		add	r2, r2, r1, lsl #1
+ 103              	.LVL12:
+ 149:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 104              		.loc 1 149 7 is_stmt 1 view .LVU32
+ 149:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 105              		.loc 1 149 11 is_stmt 0 view .LVU33
+ 106 0030 3046     		mov	r0, r6
+ 107              	.LVL13:
+ 153:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       {
+ARM GAS  /tmp/cc7Lk8UD.s 			page 6
+
+
+ 108              		.loc 1 153 7 is_stmt 1 view .LVU34
+ 153:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****       {
+ 109              		.loc 1 153 13 is_stmt 0 view .LVU35
+ 110 0032 F5E7     		b	.L2
+ 111              	.L6:
+ 171:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 172:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****     /* Set status as ARM_MATH_SUCCESS */
+ 173:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****     status = ARM_MATH_SUCCESS;
+ 112              		.loc 1 173 5 is_stmt 1 view .LVU36
+ 113              	.LVL14:
+ 174:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   }
+ 175:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** 
+ 176:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   /* Return to application */
+ 177:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c ****   return (status);
+ 114              		.loc 1 177 3 view .LVU37
+ 178:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_trans_q15.c **** }
+ 115              		.loc 1 178 1 is_stmt 0 view .LVU38
+ 116 0034 70BD     		pop	{r4, r5, r6, pc}
+ 117              		.loc 1 178 1 view .LVU39
+ 118              		.cfi_endproc
+ 119              	.LFE145:
+ 121              		.text
+ 122              	.Letext0:
+ 123              		.file 2 "/usr/lib/gcc/arm-none-eabi/10.3.1/include/stdint.h"
+ 124              		.file 3 "Drivers/CMSIS/DSP/Include/arm_math.h"
+ARM GAS  /tmp/cc7Lk8UD.s 			page 7
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 arm_mat_trans_q15.c
+     /tmp/cc7Lk8UD.s:17     .text.arm_mat_trans_q15:0000000000000000 $t
+     /tmp/cc7Lk8UD.s:25     .text.arm_mat_trans_q15:0000000000000000 arm_mat_trans_q15
+
+NO UNDEFINED SYMBOLS

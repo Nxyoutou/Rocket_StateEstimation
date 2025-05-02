@@ -1,0 +1,810 @@
+ARM GAS  /tmp/ccvPpPPi.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.eabi_attribute 28, 1
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 1
+  11              		.eabi_attribute 18, 4
+  12              		.file	"AttitudeEstimation.c"
+  13              		.text
+  14              	.Ltext0:
+  15              		.cfi_sections	.debug_frame
+  16              		.section	.text.Attitude_init,"ax",%progbits
+  17              		.align	1
+  18              		.global	Attitude_init
+  19              		.arch armv7e-m
+  20              		.syntax unified
+  21              		.thumb
+  22              		.thumb_func
+  23              		.fpu fpv5-d16
+  25              	Attitude_init:
+  26              	.LVL0:
+  27              	.LFB353:
+  28              		.file 1 "Core/Src/AttitudeEstimation.c"
+   1:Core/Src/AttitudeEstimation.c **** /************************** This document contains the Flight EKF Algorithm for State Estimation pu
+   2:Core/Src/AttitudeEstimation.c **** 
+   3:Core/Src/AttitudeEstimation.c **** #include "AttitudeEstimation.h"
+   4:Core/Src/AttitudeEstimation.c **** #include "init.h"
+   5:Core/Src/AttitudeEstimation.c **** #include "DefFuncs.h"
+   6:Core/Src/AttitudeEstimation.c **** #include "math.h" 
+   7:Core/Src/AttitudeEstimation.c **** #include "string.h"
+   8:Core/Src/AttitudeEstimation.c **** 
+   9:Core/Src/AttitudeEstimation.c **** void Attitude_init(VehicleAtd* atd)
+  10:Core/Src/AttitudeEstimation.c **** {
+  29              		.loc 1 10 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  11:Core/Src/AttitudeEstimation.c **** 	atd->qs = 1.0f;
+  34              		.loc 1 11 2 view .LVU1
+  35              		.loc 1 11 10 is_stmt 0 view .LVU2
+  36 0000 4FF07E53 		mov	r3, #1065353216
+  37 0004 0362     		str	r3, [r0, #32]	@ float
+  12:Core/Src/AttitudeEstimation.c **** 	atd->qx = 0.0f;
+  38              		.loc 1 12 2 is_stmt 1 view .LVU3
+  39              		.loc 1 12 10 is_stmt 0 view .LVU4
+  40 0006 0023     		movs	r3, #0
+  41 0008 4362     		str	r3, [r0, #36]	@ float
+  13:Core/Src/AttitudeEstimation.c **** 	atd->qy = 0.0f;
+  42              		.loc 1 13 2 is_stmt 1 view .LVU5
+  43              		.loc 1 13 10 is_stmt 0 view .LVU6
+  44 000a 8362     		str	r3, [r0, #40]	@ float
+  14:Core/Src/AttitudeEstimation.c **** 	atd->qz = 0.0f;
+ARM GAS  /tmp/ccvPpPPi.s 			page 2
+
+
+  45              		.loc 1 14 2 is_stmt 1 view .LVU7
+  46              		.loc 1 14 10 is_stmt 0 view .LVU8
+  47 000c C362     		str	r3, [r0, #44]	@ float
+  15:Core/Src/AttitudeEstimation.c **** 
+  16:Core/Src/AttitudeEstimation.c **** 	atd->qdelts = 0.0f;
+  48              		.loc 1 16 2 is_stmt 1 view .LVU9
+  49              		.loc 1 16 14 is_stmt 0 view .LVU10
+  50 000e 0360     		str	r3, [r0]	@ float
+  17:Core/Src/AttitudeEstimation.c **** 	atd->qdeltx = 0.0f;
+  51              		.loc 1 17 2 is_stmt 1 view .LVU11
+  52              		.loc 1 17 14 is_stmt 0 view .LVU12
+  53 0010 4360     		str	r3, [r0, #4]	@ float
+  18:Core/Src/AttitudeEstimation.c **** 	atd->qdelty = 0.0f;
+  54              		.loc 1 18 2 is_stmt 1 view .LVU13
+  55              		.loc 1 18 14 is_stmt 0 view .LVU14
+  56 0012 8360     		str	r3, [r0, #8]	@ float
+  19:Core/Src/AttitudeEstimation.c **** 	atd->qdeltz = 0.0f;
+  57              		.loc 1 19 2 is_stmt 1 view .LVU15
+  58              		.loc 1 19 14 is_stmt 0 view .LVU16
+  59 0014 C360     		str	r3, [r0, #12]	@ float
+  20:Core/Src/AttitudeEstimation.c **** 
+  21:Core/Src/AttitudeEstimation.c **** 	atd->timeStep = 15.0f/1000.0f;
+  60              		.loc 1 21 2 is_stmt 1 view .LVU17
+  61              		.loc 1 21 16 is_stmt 0 view .LVU18
+  62 0016 014B     		ldr	r3, .L2
+  63 0018 C364     		str	r3, [r0, #76]	@ float
+  22:Core/Src/AttitudeEstimation.c **** }
+  64              		.loc 1 22 1 view .LVU19
+  65 001a 7047     		bx	lr
+  66              	.L3:
+  67              		.align	2
+  68              	.L2:
+  69 001c 8FC2753C 		.word	1014350479
+  70              		.cfi_endproc
+  71              	.LFE353:
+  73              		.section	.text.Attitude_newMeas,"ax",%progbits
+  74              		.align	1
+  75              		.global	Attitude_newMeas
+  76              		.syntax unified
+  77              		.thumb
+  78              		.thumb_func
+  79              		.fpu fpv5-d16
+  81              	Attitude_newMeas:
+  82              	.LVL1:
+  83              	.LFB354:
+  23:Core/Src/AttitudeEstimation.c **** 
+  24:Core/Src/AttitudeEstimation.c **** void Attitude_newMeas(VehicleAtd* atd, sensors* meas)
+  25:Core/Src/AttitudeEstimation.c **** {
+  84              		.loc 1 25 1 is_stmt 1 view -0
+  85              		.cfi_startproc
+  86              		@ args = 0, pretend = 0, frame = 16
+  87              		@ frame_needed = 0, uses_anonymous_args = 0
+  88              		@ link register save eliminated.
+  89              		.loc 1 25 1 is_stmt 0 view .LVU21
+  90 0000 84B0     		sub	sp, sp, #16
+  91              	.LCFI0:
+  92              		.cfi_def_cfa_offset 16
+ARM GAS  /tmp/ccvPpPPi.s 			page 3
+
+
+  93 0002 0346     		mov	r3, r0
+  26:Core/Src/AttitudeEstimation.c **** 	float measC[3];
+  94              		.loc 1 26 2 is_stmt 1 view .LVU22
+  27:Core/Src/AttitudeEstimation.c **** 	measC[0] = meas->meas[3] - meas->gyrCalx; 
+  95              		.loc 1 27 2 view .LVU23
+  96              		.loc 1 27 23 is_stmt 0 view .LVU24
+  97 0004 D1ED037A 		vldr.32	s15, [r1, #12]
+  98              		.loc 1 27 33 view .LVU25
+  99 0008 91ED0B7A 		vldr.32	s14, [r1, #44]
+ 100              		.loc 1 27 27 view .LVU26
+ 101 000c 77EEC77A 		vsub.f32	s15, s15, s14
+ 102              		.loc 1 27 11 view .LVU27
+ 103 0010 CDED017A 		vstr.32	s15, [sp, #4]
+  28:Core/Src/AttitudeEstimation.c **** 	measC[1] = meas->meas[4] - meas->gyrCaly; 
+ 104              		.loc 1 28 2 is_stmt 1 view .LVU28
+ 105              		.loc 1 28 23 is_stmt 0 view .LVU29
+ 106 0014 D1ED047A 		vldr.32	s15, [r1, #16]
+ 107              		.loc 1 28 33 view .LVU30
+ 108 0018 91ED0C7A 		vldr.32	s14, [r1, #48]
+ 109              		.loc 1 28 27 view .LVU31
+ 110 001c 77EEC77A 		vsub.f32	s15, s15, s14
+ 111              		.loc 1 28 11 view .LVU32
+ 112 0020 CDED027A 		vstr.32	s15, [sp, #8]
+  29:Core/Src/AttitudeEstimation.c **** 	measC[2] = meas->meas[5] - meas->gyrCalz; 
+ 113              		.loc 1 29 2 is_stmt 1 view .LVU33
+ 114              		.loc 1 29 23 is_stmt 0 view .LVU34
+ 115 0024 D1ED057A 		vldr.32	s15, [r1, #20]
+ 116              		.loc 1 29 33 view .LVU35
+ 117 0028 91ED0D7A 		vldr.32	s14, [r1, #52]
+ 118              		.loc 1 29 27 view .LVU36
+ 119 002c 77EEC77A 		vsub.f32	s15, s15, s14
+ 120              		.loc 1 29 11 view .LVU37
+ 121 0030 CDED037A 		vstr.32	s15, [sp, #12]
+  30:Core/Src/AttitudeEstimation.c **** 	memcpy(&atd->gyr[0], &measC[0], 12);
+ 122              		.loc 1 30 2 is_stmt 1 view .LVU38
+ 123 0034 0DF1040C 		add	ip, sp, #4
+ 124 0038 BCE80700 		ldmia	ip!, {r0, r1, r2}
+ 125              	.LVL2:
+ 126              		.loc 1 30 2 is_stmt 0 view .LVU39
+ 127 003c 1863     		str	r0, [r3, #48]	@ unaligned
+ 128 003e 5963     		str	r1, [r3, #52]	@ unaligned
+ 129 0040 9A63     		str	r2, [r3, #56]	@ unaligned
+  31:Core/Src/AttitudeEstimation.c **** 
+  32:Core/Src/AttitudeEstimation.c **** //	sendS("f", measC[0]);sendS("c", "     ");sendS("f", measC[1]);sendS("c", "    ");sendS("f", meas
+  33:Core/Src/AttitudeEstimation.c **** 	atd->updateFlag = 1;
+ 130              		.loc 1 33 2 is_stmt 1 view .LVU40
+ 131              		.loc 1 33 18 is_stmt 0 view .LVU41
+ 132 0042 0122     		movs	r2, #1
+ 133 0044 83F83C20 		strb	r2, [r3, #60]
+  34:Core/Src/AttitudeEstimation.c **** }
+ 134              		.loc 1 34 1 view .LVU42
+ 135 0048 04B0     		add	sp, sp, #16
+ 136              	.LCFI1:
+ 137              		.cfi_def_cfa_offset 0
+ 138              		@ sp needed
+ 139 004a 7047     		bx	lr
+ 140              		.cfi_endproc
+ARM GAS  /tmp/ccvPpPPi.s 			page 4
+
+
+ 141              	.LFE354:
+ 143              		.section	.text.Attitude_PredictQuat,"ax",%progbits
+ 144              		.align	1
+ 145              		.global	Attitude_PredictQuat
+ 146              		.syntax unified
+ 147              		.thumb
+ 148              		.thumb_func
+ 149              		.fpu fpv5-d16
+ 151              	Attitude_PredictQuat:
+ 152              	.LVL3:
+ 153              	.LFB355:
+  35:Core/Src/AttitudeEstimation.c **** 
+  36:Core/Src/AttitudeEstimation.c **** void Attitude_PredictQuat(VehicleAtd* atd)
+  37:Core/Src/AttitudeEstimation.c **** {
+ 154              		.loc 1 37 1 is_stmt 1 view -0
+ 155              		.cfi_startproc
+ 156              		@ args = 0, pretend = 0, frame = 24
+ 157              		@ frame_needed = 0, uses_anonymous_args = 0
+  38:Core/Src/AttitudeEstimation.c **** 	if (atd->updateFlag)
+ 158              		.loc 1 38 2 view .LVU44
+ 159              		.loc 1 38 9 is_stmt 0 view .LVU45
+ 160 0000 90F83C30 		ldrb	r3, [r0, #60]	@ zero_extendqisi2
+ 161              		.loc 1 38 5 view .LVU46
+ 162 0004 03B9     		cbnz	r3, .L15
+ 163 0006 7047     		bx	lr
+ 164              	.L15:
+  37:Core/Src/AttitudeEstimation.c **** 	if (atd->updateFlag)
+ 165              		.loc 1 37 1 view .LVU47
+ 166 0008 10B5     		push	{r4, lr}
+ 167              	.LCFI2:
+ 168              		.cfi_def_cfa_offset 8
+ 169              		.cfi_offset 4, -8
+ 170              		.cfi_offset 14, -4
+ 171 000a 2DED068B 		vpush.64	{d8, d9, d10}
+ 172              	.LCFI3:
+ 173              		.cfi_def_cfa_offset 32
+ 174              		.cfi_offset 80, -32
+ 175              		.cfi_offset 81, -28
+ 176              		.cfi_offset 82, -24
+ 177              		.cfi_offset 83, -20
+ 178              		.cfi_offset 84, -16
+ 179              		.cfi_offset 85, -12
+ 180 000e 86B0     		sub	sp, sp, #24
+ 181              	.LCFI4:
+ 182              		.cfi_def_cfa_offset 56
+ 183 0010 0446     		mov	r4, r0
+ 184              	.LBB2:
+  39:Core/Src/AttitudeEstimation.c **** 	{
+  40:Core/Src/AttitudeEstimation.c **** 		float dt = atd->timeStep;
+ 185              		.loc 1 40 3 is_stmt 1 view .LVU48
+ 186              		.loc 1 40 9 is_stmt 0 view .LVU49
+ 187 0012 D0ED139A 		vldr.32	s19, [r0, #76]
+ 188              	.LVL4:
+  41:Core/Src/AttitudeEstimation.c **** 
+  42:Core/Src/AttitudeEstimation.c **** 		float w[3] = {atd->gyr[0], atd->gyr[1], atd->gyr[2]};
+ 189              		.loc 1 42 3 is_stmt 1 view .LVU50
+ 190              		.loc 1 42 25 is_stmt 0 view .LVU51
+ARM GAS  /tmp/ccvPpPPi.s 			page 5
+
+
+ 191 0016 90ED0C9A 		vldr.32	s18, [r0, #48]
+ 192              		.loc 1 42 9 view .LVU52
+ 193 001a 8DED009A 		vstr.32	s18, [sp]
+ 194              		.loc 1 42 38 view .LVU53
+ 195 001e 90ED0D8A 		vldr.32	s16, [r0, #52]
+ 196              		.loc 1 42 9 view .LVU54
+ 197 0022 8DED018A 		vstr.32	s16, [sp, #4]
+ 198              		.loc 1 42 51 view .LVU55
+ 199 0026 D0ED0E8A 		vldr.32	s17, [r0, #56]
+ 200              		.loc 1 42 9 view .LVU56
+ 201 002a CDED028A 		vstr.32	s17, [sp, #8]
+  43:Core/Src/AttitudeEstimation.c **** 		float w_n = sqrt(w[0]*w[0] + w[1]*w[1] + w[2]*w[2]);
+ 202              		.loc 1 43 3 is_stmt 1 view .LVU57
+ 203              		.loc 1 43 24 is_stmt 0 view .LVU58
+ 204 002e 29EE090A 		vmul.f32	s0, s18, s18
+ 205              		.loc 1 43 36 view .LVU59
+ 206 0032 68EE087A 		vmul.f32	s15, s16, s16
+ 207              		.loc 1 43 30 view .LVU60
+ 208 0036 30EE270A 		vadd.f32	s0, s0, s15
+ 209              		.loc 1 43 48 view .LVU61
+ 210 003a 68EEA87A 		vmul.f32	s15, s17, s17
+ 211              		.loc 1 43 42 view .LVU62
+ 212 003e 30EE270A 		vadd.f32	s0, s0, s15
+ 213              		.loc 1 43 15 view .LVU63
+ 214 0042 B7EEC00A 		vcvt.f64.f32	d0, s0
+ 215 0046 FFF7FEFF 		bl	sqrt
+ 216              	.LVL5:
+ 217              		.loc 1 43 9 view .LVU64
+ 218 004a B7EEC00B 		vcvt.f32.f64	s0, d0
+ 219              	.LVL6:
+  44:Core/Src/AttitudeEstimation.c **** 
+  45:Core/Src/AttitudeEstimation.c **** 		w[0] = (w_n == 0.0f ? (w[0] + 0.01f) : w[0]);
+ 220              		.loc 1 45 3 is_stmt 1 view .LVU65
+ 221              		.loc 1 45 40 is_stmt 0 view .LVU66
+ 222 004e B5EE400A 		vcmp.f32	s0, #0
+ 223 0052 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 224 0056 03D1     		bne	.L8
+ 225              		.loc 1 45 40 discriminator 1 view .LVU67
+ 226 0058 DFED687A 		vldr.32	s15, .L16
+ 227 005c 39EE279A 		vadd.f32	s18, s18, s15
+ 228              	.L8:
+ 229              		.loc 1 45 8 discriminator 4 view .LVU68
+ 230 0060 8DED009A 		vstr.32	s18, [sp]
+  46:Core/Src/AttitudeEstimation.c **** 		w[1] = (w_n == 0.0f ? (w[1] + 0.01f) : w[1]);
+ 231              		.loc 1 46 3 is_stmt 1 discriminator 4 view .LVU69
+ 232              		.loc 1 46 40 is_stmt 0 discriminator 4 view .LVU70
+ 233 0064 B5EE400A 		vcmp.f32	s0, #0
+ 234 0068 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 235 006c 03D1     		bne	.L9
+ 236              		.loc 1 46 40 discriminator 1 view .LVU71
+ 237 006e DFED637A 		vldr.32	s15, .L16
+ 238 0072 38EE278A 		vadd.f32	s16, s16, s15
+ 239              	.L9:
+ 240              		.loc 1 46 8 discriminator 4 view .LVU72
+ 241 0076 8DED018A 		vstr.32	s16, [sp, #4]
+  47:Core/Src/AttitudeEstimation.c **** 		w[2] = (w_n == 0.0f ? (w[2] + 0.01f) : w[2]);
+ 242              		.loc 1 47 3 is_stmt 1 discriminator 4 view .LVU73
+ARM GAS  /tmp/ccvPpPPi.s 			page 6
+
+
+ 243              		.loc 1 47 40 is_stmt 0 discriminator 4 view .LVU74
+ 244 007a B5EE400A 		vcmp.f32	s0, #0
+ 245 007e F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 246 0082 03D1     		bne	.L10
+ 247              		.loc 1 47 40 discriminator 1 view .LVU75
+ 248 0084 DFED5D7A 		vldr.32	s15, .L16
+ 249 0088 78EEA78A 		vadd.f32	s17, s17, s15
+ 250              	.L10:
+ 251              		.loc 1 47 8 discriminator 4 view .LVU76
+ 252 008c CDED028A 		vstr.32	s17, [sp, #8]
+  48:Core/Src/AttitudeEstimation.c **** 
+  49:Core/Src/AttitudeEstimation.c **** 		w_n = sqrt(w[0]*w[0] + w[1]*w[1] + w[2]*w[2]);
+ 253              		.loc 1 49 3 is_stmt 1 discriminator 4 view .LVU77
+ 254              		.loc 1 49 18 is_stmt 0 discriminator 4 view .LVU78
+ 255 0090 29EE090A 		vmul.f32	s0, s18, s18
+ 256              	.LVL7:
+ 257              		.loc 1 49 30 discriminator 4 view .LVU79
+ 258 0094 68EE087A 		vmul.f32	s15, s16, s16
+ 259              		.loc 1 49 24 discriminator 4 view .LVU80
+ 260 0098 30EE270A 		vadd.f32	s0, s0, s15
+ 261              		.loc 1 49 42 discriminator 4 view .LVU81
+ 262 009c 68EEA87A 		vmul.f32	s15, s17, s17
+ 263              		.loc 1 49 36 discriminator 4 view .LVU82
+ 264 00a0 30EE270A 		vadd.f32	s0, s0, s15
+ 265              		.loc 1 49 9 discriminator 4 view .LVU83
+ 266 00a4 B7EEC00A 		vcvt.f64.f32	d0, s0
+ 267 00a8 FFF7FEFF 		bl	sqrt
+ 268              	.LVL8:
+ 269              		.loc 1 49 7 discriminator 4 view .LVU84
+ 270 00ac B7EEC00B 		vcvt.f32.f64	s0, d0
+ 271              	.LVL9:
+  50:Core/Src/AttitudeEstimation.c **** 
+  51:Core/Src/AttitudeEstimation.c **** 		float axis[3] = {w[0]/w_n, w[1]/w_n, w[2]/w_n};
+ 272              		.loc 1 51 3 is_stmt 1 discriminator 4 view .LVU85
+ 273              		.loc 1 51 24 is_stmt 0 discriminator 4 view .LVU86
+ 274 00b0 89EE00AA 		vdiv.f32	s20, s18, s0
+ 275              		.loc 1 51 9 discriminator 4 view .LVU87
+ 276 00b4 8DED03AA 		vstr.32	s20, [sp, #12]
+ 277              		.loc 1 51 34 discriminator 4 view .LVU88
+ 278 00b8 88EE009A 		vdiv.f32	s18, s16, s0
+ 279              		.loc 1 51 9 discriminator 4 view .LVU89
+ 280 00bc 8DED049A 		vstr.32	s18, [sp, #16]
+ 281              		.loc 1 51 44 discriminator 4 view .LVU90
+ 282 00c0 88EE808A 		vdiv.f32	s16, s17, s0
+ 283              		.loc 1 51 9 discriminator 4 view .LVU91
+ 284 00c4 8DED058A 		vstr.32	s16, [sp, #20]
+  52:Core/Src/AttitudeEstimation.c **** 
+  53:Core/Src/AttitudeEstimation.c **** 		float angle = w_n*dt;
+ 285              		.loc 1 53 3 is_stmt 1 discriminator 4 view .LVU92
+ 286              		.loc 1 53 9 is_stmt 0 discriminator 4 view .LVU93
+ 287 00c8 69EE809A 		vmul.f32	s19, s19, s0
+ 288              	.LVL10:
+  54:Core/Src/AttitudeEstimation.c **** 
+  55:Core/Src/AttitudeEstimation.c **** 		atd->qdelts = cosf(angle/2.0f);
+ 289              		.loc 1 55 3 is_stmt 1 discriminator 4 view .LVU94
+ 290              		.loc 1 55 17 is_stmt 0 discriminator 4 view .LVU95
+ 291 00cc B6EE000A 		vmov.f32	s0, #5.0e-1
+ARM GAS  /tmp/ccvPpPPi.s 			page 7
+
+
+ 292              	.LVL11:
+ 293              		.loc 1 55 17 discriminator 4 view .LVU96
+ 294 00d0 69EE809A 		vmul.f32	s19, s19, s0
+ 295              	.LVL12:
+ 296              		.loc 1 55 17 discriminator 4 view .LVU97
+ 297 00d4 B0EE690A 		vmov.f32	s0, s19
+ 298 00d8 FFF7FEFF 		bl	cosf
+ 299              	.LVL13:
+ 300 00dc F0EE408A 		vmov.f32	s17, s0
+ 301              		.loc 1 55 15 discriminator 4 view .LVU98
+ 302 00e0 84ED000A 		vstr.32	s0, [r4]
+  56:Core/Src/AttitudeEstimation.c **** 		atd->qdeltx = axis[0]*sinf(angle/2.0f);
+ 303              		.loc 1 56 3 is_stmt 1 discriminator 4 view .LVU99
+ 304              		.loc 1 56 25 is_stmt 0 discriminator 4 view .LVU100
+ 305 00e4 B0EE690A 		vmov.f32	s0, s19
+ 306 00e8 FFF7FEFF 		bl	sinf
+ 307              	.LVL14:
+ 308              		.loc 1 56 24 discriminator 4 view .LVU101
+ 309 00ec 6AEE005A 		vmul.f32	s11, s20, s0
+ 310              		.loc 1 56 15 discriminator 4 view .LVU102
+ 311 00f0 C4ED015A 		vstr.32	s11, [r4, #4]
+  57:Core/Src/AttitudeEstimation.c **** 		atd->qdelty = axis[1]*sinf(angle/2.0f);
+ 312              		.loc 1 57 3 is_stmt 1 discriminator 4 view .LVU103
+ 313              		.loc 1 57 24 is_stmt 0 discriminator 4 view .LVU104
+ 314 00f4 29EE005A 		vmul.f32	s10, s18, s0
+ 315              		.loc 1 57 15 discriminator 4 view .LVU105
+ 316 00f8 84ED025A 		vstr.32	s10, [r4, #8]
+  58:Core/Src/AttitudeEstimation.c **** 		atd->qdeltz = axis[2]*sinf(angle/2.0f);
+ 317              		.loc 1 58 3 is_stmt 1 discriminator 4 view .LVU106
+ 318              		.loc 1 58 24 is_stmt 0 discriminator 4 view .LVU107
+ 319 00fc 68EE007A 		vmul.f32	s15, s16, s0
+ 320              		.loc 1 58 15 discriminator 4 view .LVU108
+ 321 0100 C4ED037A 		vstr.32	s15, [r4, #12]
+  59:Core/Src/AttitudeEstimation.c **** 
+  60:Core/Src/AttitudeEstimation.c **** 		atd->qtemps = atd->qs*atd->qdelts - atd->qx*atd->qdeltx - atd->qy*atd->qdelty - atd->qz*atd->qdel
+ 322              		.loc 1 60 3 is_stmt 1 discriminator 4 view .LVU109
+ 323              		.loc 1 60 20 is_stmt 0 discriminator 4 view .LVU110
+ 324 0104 D4ED083A 		vldr.32	s7, [r4, #32]
+ 325              		.loc 1 60 24 discriminator 4 view .LVU111
+ 326 0108 28EEA37A 		vmul.f32	s14, s17, s7
+ 327              		.loc 1 60 42 discriminator 4 view .LVU112
+ 328 010c 94ED094A 		vldr.32	s8, [r4, #36]
+ 329              		.loc 1 60 46 discriminator 4 view .LVU113
+ 330 0110 65EE846A 		vmul.f32	s13, s11, s8
+ 331              		.loc 1 60 37 discriminator 4 view .LVU114
+ 332 0114 37EE667A 		vsub.f32	s14, s14, s13
+ 333              		.loc 1 60 64 discriminator 4 view .LVU115
+ 334 0118 D4ED0A4A 		vldr.32	s9, [r4, #40]
+ 335              		.loc 1 60 68 discriminator 4 view .LVU116
+ 336 011c 65EE246A 		vmul.f32	s13, s10, s9
+ 337              		.loc 1 60 59 discriminator 4 view .LVU117
+ 338 0120 37EE667A 		vsub.f32	s14, s14, s13
+ 339              		.loc 1 60 86 discriminator 4 view .LVU118
+ 340 0124 94ED0B0A 		vldr.32	s0, [r4, #44]
+ 341              		.loc 1 60 90 discriminator 4 view .LVU119
+ 342 0128 67EE806A 		vmul.f32	s13, s15, s0
+ 343              		.loc 1 60 81 discriminator 4 view .LVU120
+ARM GAS  /tmp/ccvPpPPi.s 			page 8
+
+
+ 344 012c 37EE667A 		vsub.f32	s14, s14, s13
+ 345              		.loc 1 60 15 discriminator 4 view .LVU121
+ 346 0130 84ED047A 		vstr.32	s14, [r4, #16]
+  61:Core/Src/AttitudeEstimation.c **** 
+  62:Core/Src/AttitudeEstimation.c **** 		atd->qtempx = atd->qs*atd->qdeltx + atd->qx*atd->qdelts + atd->qy*atd->qdeltz - atd->qz*atd->qdel
+ 347              		.loc 1 62 3 is_stmt 1 discriminator 4 view .LVU122
+ 348              		.loc 1 62 24 is_stmt 0 discriminator 4 view .LVU123
+ 349 0134 25EEA36A 		vmul.f32	s12, s11, s7
+ 350              		.loc 1 62 46 discriminator 4 view .LVU124
+ 351 0138 68EE846A 		vmul.f32	s13, s17, s8
+ 352              		.loc 1 62 37 discriminator 4 view .LVU125
+ 353 013c 36EE266A 		vadd.f32	s12, s12, s13
+ 354              		.loc 1 62 68 discriminator 4 view .LVU126
+ 355 0140 67EEA46A 		vmul.f32	s13, s15, s9
+ 356              		.loc 1 62 59 discriminator 4 view .LVU127
+ 357 0144 36EE266A 		vadd.f32	s12, s12, s13
+ 358              		.loc 1 62 90 discriminator 4 view .LVU128
+ 359 0148 65EE006A 		vmul.f32	s13, s10, s0
+ 360              		.loc 1 62 81 discriminator 4 view .LVU129
+ 361 014c 36EE666A 		vsub.f32	s12, s12, s13
+ 362              		.loc 1 62 15 discriminator 4 view .LVU130
+ 363 0150 84ED056A 		vstr.32	s12, [r4, #20]
+  63:Core/Src/AttitudeEstimation.c **** 
+  64:Core/Src/AttitudeEstimation.c **** 		atd->qtempy = atd->qs*atd->qdelty - atd->qx*atd->qdeltz + atd->qy*atd->qdelts + atd->qz*atd->qdel
+ 364              		.loc 1 64 3 is_stmt 1 discriminator 4 view .LVU131
+ 365              		.loc 1 64 24 is_stmt 0 discriminator 4 view .LVU132
+ 366 0154 65EE236A 		vmul.f32	s13, s10, s7
+ 367              		.loc 1 64 46 discriminator 4 view .LVU133
+ 368 0158 27EE843A 		vmul.f32	s6, s15, s8
+ 369              		.loc 1 64 37 discriminator 4 view .LVU134
+ 370 015c 76EEC36A 		vsub.f32	s13, s13, s6
+ 371              		.loc 1 64 68 discriminator 4 view .LVU135
+ 372 0160 28EEA43A 		vmul.f32	s6, s17, s9
+ 373              		.loc 1 64 59 discriminator 4 view .LVU136
+ 374 0164 76EE836A 		vadd.f32	s13, s13, s6
+ 375              		.loc 1 64 90 discriminator 4 view .LVU137
+ 376 0168 25EE803A 		vmul.f32	s6, s11, s0
+ 377              		.loc 1 64 81 discriminator 4 view .LVU138
+ 378 016c 76EE836A 		vadd.f32	s13, s13, s6
+ 379              		.loc 1 64 15 discriminator 4 view .LVU139
+ 380 0170 C4ED066A 		vstr.32	s13, [r4, #24]
+  65:Core/Src/AttitudeEstimation.c **** 
+  66:Core/Src/AttitudeEstimation.c **** 		atd->qtempz = atd->qs*atd->qdeltz + atd->qx*atd->qdelty - atd->qy*atd->qdeltx + atd->qz*atd->qdel
+ 381              		.loc 1 66 3 is_stmt 1 discriminator 4 view .LVU140
+ 382              		.loc 1 66 24 is_stmt 0 discriminator 4 view .LVU141
+ 383 0174 67EEA37A 		vmul.f32	s15, s15, s7
+ 384              		.loc 1 66 46 discriminator 4 view .LVU142
+ 385 0178 25EE045A 		vmul.f32	s10, s10, s8
+ 386              		.loc 1 66 37 discriminator 4 view .LVU143
+ 387 017c 77EE857A 		vadd.f32	s15, s15, s10
+ 388              		.loc 1 66 68 discriminator 4 view .LVU144
+ 389 0180 65EEA45A 		vmul.f32	s11, s11, s9
+ 390              		.loc 1 66 59 discriminator 4 view .LVU145
+ 391 0184 77EEE57A 		vsub.f32	s15, s15, s11
+ 392              		.loc 1 66 90 discriminator 4 view .LVU146
+ 393 0188 28EE800A 		vmul.f32	s0, s17, s0
+ 394              		.loc 1 66 81 discriminator 4 view .LVU147
+ARM GAS  /tmp/ccvPpPPi.s 			page 9
+
+
+ 395 018c 37EE800A 		vadd.f32	s0, s15, s0
+ 396              		.loc 1 66 15 discriminator 4 view .LVU148
+ 397 0190 84ED070A 		vstr.32	s0, [r4, #28]
+  67:Core/Src/AttitudeEstimation.c **** 
+  68:Core/Src/AttitudeEstimation.c **** 		float q_n = sqrt(atd->qtemps*atd->qtemps + atd->qtempx*atd->qtempx + atd->qtempy*atd->qtempy + at
+ 398              		.loc 1 68 3 is_stmt 1 discriminator 4 view .LVU149
+ 399              		.loc 1 68 31 is_stmt 0 discriminator 4 view .LVU150
+ 400 0194 27EE077A 		vmul.f32	s14, s14, s14
+ 401              		.loc 1 68 57 discriminator 4 view .LVU151
+ 402 0198 26EE066A 		vmul.f32	s12, s12, s12
+ 403              		.loc 1 68 44 discriminator 4 view .LVU152
+ 404 019c 37EE067A 		vadd.f32	s14, s14, s12
+ 405              		.loc 1 68 83 discriminator 4 view .LVU153
+ 406 01a0 66EEA66A 		vmul.f32	s13, s13, s13
+ 407              		.loc 1 68 70 discriminator 4 view .LVU154
+ 408 01a4 37EE267A 		vadd.f32	s14, s14, s13
+ 409              		.loc 1 68 109 discriminator 4 view .LVU155
+ 410 01a8 20EE000A 		vmul.f32	s0, s0, s0
+ 411              		.loc 1 68 96 discriminator 4 view .LVU156
+ 412 01ac 37EE000A 		vadd.f32	s0, s14, s0
+ 413              		.loc 1 68 15 discriminator 4 view .LVU157
+ 414 01b0 B7EEC00A 		vcvt.f64.f32	d0, s0
+ 415 01b4 FFF7FEFF 		bl	sqrt
+ 416              	.LVL15:
+ 417              		.loc 1 68 9 discriminator 4 view .LVU158
+ 418 01b8 B7EEC00B 		vcvt.f32.f64	s0, d0
+ 419              	.LVL16:
+  69:Core/Src/AttitudeEstimation.c **** 
+  70:Core/Src/AttitudeEstimation.c **** 		atd->qs = atd->qtemps/q_n;
+ 420              		.loc 1 70 3 is_stmt 1 discriminator 4 view .LVU159
+ 421              		.loc 1 70 16 is_stmt 0 discriminator 4 view .LVU160
+ 422 01bc 94ED047A 		vldr.32	s14, [r4, #16]
+ 423              		.loc 1 70 24 discriminator 4 view .LVU161
+ 424 01c0 C7EE007A 		vdiv.f32	s15, s14, s0
+ 425              		.loc 1 70 11 discriminator 4 view .LVU162
+ 426 01c4 C4ED087A 		vstr.32	s15, [r4, #32]
+  71:Core/Src/AttitudeEstimation.c **** 		atd->qx = atd->qtempx/q_n;
+ 427              		.loc 1 71 3 is_stmt 1 discriminator 4 view .LVU163
+ 428              		.loc 1 71 16 is_stmt 0 discriminator 4 view .LVU164
+ 429 01c8 94ED057A 		vldr.32	s14, [r4, #20]
+ 430              		.loc 1 71 24 discriminator 4 view .LVU165
+ 431 01cc C7EE007A 		vdiv.f32	s15, s14, s0
+ 432              		.loc 1 71 11 discriminator 4 view .LVU166
+ 433 01d0 C4ED097A 		vstr.32	s15, [r4, #36]
+  72:Core/Src/AttitudeEstimation.c **** 		atd->qy = atd->qtempy/q_n;
+ 434              		.loc 1 72 3 is_stmt 1 discriminator 4 view .LVU167
+ 435              		.loc 1 72 16 is_stmt 0 discriminator 4 view .LVU168
+ 436 01d4 94ED067A 		vldr.32	s14, [r4, #24]
+ 437              		.loc 1 72 24 discriminator 4 view .LVU169
+ 438 01d8 C7EE007A 		vdiv.f32	s15, s14, s0
+ 439              		.loc 1 72 11 discriminator 4 view .LVU170
+ 440 01dc C4ED0A7A 		vstr.32	s15, [r4, #40]
+  73:Core/Src/AttitudeEstimation.c **** 		atd->qz = atd->qtempz/q_n;
+ 441              		.loc 1 73 3 is_stmt 1 discriminator 4 view .LVU171
+ 442              		.loc 1 73 16 is_stmt 0 discriminator 4 view .LVU172
+ 443 01e0 94ED077A 		vldr.32	s14, [r4, #28]
+ 444              		.loc 1 73 24 discriminator 4 view .LVU173
+ARM GAS  /tmp/ccvPpPPi.s 			page 10
+
+
+ 445 01e4 C7EE007A 		vdiv.f32	s15, s14, s0
+ 446              		.loc 1 73 11 discriminator 4 view .LVU174
+ 447 01e8 C4ED0B7A 		vstr.32	s15, [r4, #44]
+  74:Core/Src/AttitudeEstimation.c **** 
+  75:Core/Src/AttitudeEstimation.c **** 
+  76:Core/Src/AttitudeEstimation.c **** 		atd->updateFlag = 0;
+ 448              		.loc 1 76 3 is_stmt 1 discriminator 4 view .LVU175
+ 449              		.loc 1 76 19 is_stmt 0 discriminator 4 view .LVU176
+ 450 01ec 0023     		movs	r3, #0
+ 451 01ee 84F83C30 		strb	r3, [r4, #60]
+ 452              	.LBE2:
+  77:Core/Src/AttitudeEstimation.c **** 	}
+  78:Core/Src/AttitudeEstimation.c **** }
+ 453              		.loc 1 78 1 discriminator 4 view .LVU177
+ 454 01f2 06B0     		add	sp, sp, #24
+ 455              	.LCFI5:
+ 456              		.cfi_def_cfa_offset 32
+ 457              		@ sp needed
+ 458 01f4 BDEC068B 		vldm	sp!, {d8-d10}
+ 459              	.LCFI6:
+ 460              		.cfi_restore 84
+ 461              		.cfi_restore 85
+ 462              		.cfi_restore 82
+ 463              		.cfi_restore 83
+ 464              		.cfi_restore 80
+ 465              		.cfi_restore 81
+ 466              		.cfi_def_cfa_offset 8
+ 467 01f8 10BD     		pop	{r4, pc}
+ 468              	.LVL17:
+ 469              	.L17:
+ 470              		.loc 1 78 1 discriminator 4 view .LVU178
+ 471 01fa 00BF     		.align	2
+ 472              	.L16:
+ 473 01fc 0AD7233C 		.word	1008981770
+ 474              		.cfi_endproc
+ 475              	.LFE355:
+ 477              		.section	.text.Attitude_QuatToEuler,"ax",%progbits
+ 478              		.align	1
+ 479              		.global	Attitude_QuatToEuler
+ 480              		.syntax unified
+ 481              		.thumb
+ 482              		.thumb_func
+ 483              		.fpu fpv5-d16
+ 485              	Attitude_QuatToEuler:
+ 486              	.LVL18:
+ 487              	.LFB356:
+  79:Core/Src/AttitudeEstimation.c **** 
+  80:Core/Src/AttitudeEstimation.c **** void Attitude_QuatToEuler(VehicleAtd* atd)
+  81:Core/Src/AttitudeEstimation.c **** {
+ 488              		.loc 1 81 1 is_stmt 1 view -0
+ 489              		.cfi_startproc
+ 490              		@ args = 0, pretend = 0, frame = 0
+ 491              		@ frame_needed = 0, uses_anonymous_args = 0
+ 492              		.loc 1 81 1 is_stmt 0 view .LVU180
+ 493 0000 10B5     		push	{r4, lr}
+ 494              	.LCFI7:
+ 495              		.cfi_def_cfa_offset 8
+ARM GAS  /tmp/ccvPpPPi.s 			page 11
+
+
+ 496              		.cfi_offset 4, -8
+ 497              		.cfi_offset 14, -4
+ 498 0002 2DED028B 		vpush.64	{d8}
+ 499              	.LCFI8:
+ 500              		.cfi_def_cfa_offset 16
+ 501              		.cfi_offset 80, -16
+ 502              		.cfi_offset 81, -12
+ 503 0006 0446     		mov	r4, r0
+  82:Core/Src/AttitudeEstimation.c **** 	atd->euler[0] = 57.295f*atan2f(2.0f*(atd->qy*atd->qz + atd->qx*atd->qs), (atd->qs*atd->qs - atd->q
+ 504              		.loc 1 82 2 is_stmt 1 view .LVU181
+ 505              		.loc 1 82 42 is_stmt 0 view .LVU182
+ 506 0008 90ED0A7A 		vldr.32	s14, [r0, #40]
+ 507              		.loc 1 82 50 view .LVU183
+ 508 000c D0ED0B0A 		vldr.32	s1, [r0, #44]
+ 509              		.loc 1 82 46 view .LVU184
+ 510 0010 27EE200A 		vmul.f32	s0, s14, s1
+ 511              		.loc 1 82 60 view .LVU185
+ 512 0014 D0ED096A 		vldr.32	s13, [r0, #36]
+ 513              		.loc 1 82 68 view .LVU186
+ 514 0018 D0ED087A 		vldr.32	s15, [r0, #32]
+ 515              		.loc 1 82 64 view .LVU187
+ 516 001c 26EEA76A 		vmul.f32	s12, s13, s15
+ 517              		.loc 1 82 55 view .LVU188
+ 518 0020 30EE060A 		vadd.f32	s0, s0, s12
+ 519              		.loc 1 82 83 view .LVU189
+ 520 0024 67EEA77A 		vmul.f32	s15, s15, s15
+ 521              		.loc 1 82 101 view .LVU190
+ 522 0028 66EEA66A 		vmul.f32	s13, s13, s13
+ 523              		.loc 1 82 92 view .LVU191
+ 524 002c 77EEE67A 		vsub.f32	s15, s15, s13
+ 525              		.loc 1 82 119 view .LVU192
+ 526 0030 27EE077A 		vmul.f32	s14, s14, s14
+ 527              		.loc 1 82 110 view .LVU193
+ 528 0034 77EEC77A 		vsub.f32	s15, s15, s14
+ 529              		.loc 1 82 137 view .LVU194
+ 530 0038 60EEA00A 		vmul.f32	s1, s1, s1
+ 531              		.loc 1 82 26 view .LVU195
+ 532 003c 77EEA00A 		vadd.f32	s1, s15, s1
+ 533 0040 30EE000A 		vadd.f32	s0, s0, s0
+ 534 0044 FFF7FEFF 		bl	atan2f
+ 535              	.LVL19:
+ 536              		.loc 1 82 25 view .LVU196
+ 537 0048 9FED218A 		vldr.32	s16, .L20
+ 538 004c 20EE080A 		vmul.f32	s0, s0, s16
+ 539              		.loc 1 82 16 view .LVU197
+ 540 0050 84ED100A 		vstr.32	s0, [r4, #64]
+  83:Core/Src/AttitudeEstimation.c **** 	atd->euler[1] = 57.295f*asinf(2.0f*(atd->qy*atd->qs - atd->qx*atd->qz));
+ 541              		.loc 1 83 2 is_stmt 1 view .LVU198
+ 542              		.loc 1 83 41 is_stmt 0 view .LVU199
+ 543 0054 94ED0A0A 		vldr.32	s0, [r4, #40]
+ 544              		.loc 1 83 49 view .LVU200
+ 545 0058 D4ED087A 		vldr.32	s15, [r4, #32]
+ 546              		.loc 1 83 45 view .LVU201
+ 547 005c 20EE270A 		vmul.f32	s0, s0, s15
+ 548              		.loc 1 83 59 view .LVU202
+ 549 0060 D4ED097A 		vldr.32	s15, [r4, #36]
+ 550              		.loc 1 83 67 view .LVU203
+ARM GAS  /tmp/ccvPpPPi.s 			page 12
+
+
+ 551 0064 94ED0B7A 		vldr.32	s14, [r4, #44]
+ 552              		.loc 1 83 63 view .LVU204
+ 553 0068 67EE877A 		vmul.f32	s15, s15, s14
+ 554              		.loc 1 83 54 view .LVU205
+ 555 006c 30EE670A 		vsub.f32	s0, s0, s15
+ 556              		.loc 1 83 26 view .LVU206
+ 557 0070 30EE000A 		vadd.f32	s0, s0, s0
+ 558 0074 FFF7FEFF 		bl	asinf
+ 559              	.LVL20:
+ 560              		.loc 1 83 25 view .LVU207
+ 561 0078 20EE080A 		vmul.f32	s0, s0, s16
+ 562              		.loc 1 83 16 view .LVU208
+ 563 007c 84ED110A 		vstr.32	s0, [r4, #68]
+  84:Core/Src/AttitudeEstimation.c **** 	atd->euler[2] = 57.295f*atan2f(2.0f*(atd->qx*atd->qy + atd->qz*atd->qs), atd->qs*atd->qs + atd->qx
+ 564              		.loc 1 84 2 is_stmt 1 view .LVU209
+ 565              		.loc 1 84 42 is_stmt 0 view .LVU210
+ 566 0080 D4ED096A 		vldr.32	s13, [r4, #36]
+ 567              		.loc 1 84 50 view .LVU211
+ 568 0084 94ED0A7A 		vldr.32	s14, [r4, #40]
+ 569              		.loc 1 84 46 view .LVU212
+ 570 0088 26EE870A 		vmul.f32	s0, s13, s14
+ 571              		.loc 1 84 60 view .LVU213
+ 572 008c D4ED0B0A 		vldr.32	s1, [r4, #44]
+ 573              		.loc 1 84 68 view .LVU214
+ 574 0090 D4ED087A 		vldr.32	s15, [r4, #32]
+ 575              		.loc 1 84 64 view .LVU215
+ 576 0094 20EEA76A 		vmul.f32	s12, s1, s15
+ 577              		.loc 1 84 55 view .LVU216
+ 578 0098 30EE060A 		vadd.f32	s0, s0, s12
+ 579              		.loc 1 84 82 view .LVU217
+ 580 009c 67EEA77A 		vmul.f32	s15, s15, s15
+ 581              		.loc 1 84 100 view .LVU218
+ 582 00a0 66EEA66A 		vmul.f32	s13, s13, s13
+ 583              		.loc 1 84 91 view .LVU219
+ 584 00a4 77EEA67A 		vadd.f32	s15, s15, s13
+ 585              		.loc 1 84 118 view .LVU220
+ 586 00a8 27EE077A 		vmul.f32	s14, s14, s14
+ 587              		.loc 1 84 109 view .LVU221
+ 588 00ac 77EEC77A 		vsub.f32	s15, s15, s14
+ 589              		.loc 1 84 136 view .LVU222
+ 590 00b0 60EEA00A 		vmul.f32	s1, s1, s1
+ 591              		.loc 1 84 26 view .LVU223
+ 592 00b4 77EEE00A 		vsub.f32	s1, s15, s1
+ 593 00b8 30EE000A 		vadd.f32	s0, s0, s0
+ 594 00bc FFF7FEFF 		bl	atan2f
+ 595              	.LVL21:
+ 596              		.loc 1 84 25 view .LVU224
+ 597 00c0 20EE080A 		vmul.f32	s0, s0, s16
+ 598              		.loc 1 84 16 view .LVU225
+ 599 00c4 84ED120A 		vstr.32	s0, [r4, #72]
+  85:Core/Src/AttitudeEstimation.c **** }
+ 600              		.loc 1 85 1 view .LVU226
+ 601 00c8 BDEC028B 		vldm	sp!, {d8}
+ 602              	.LCFI9:
+ 603              		.cfi_restore 80
+ 604              		.cfi_restore 81
+ 605              		.cfi_def_cfa_offset 8
+ARM GAS  /tmp/ccvPpPPi.s 			page 13
+
+
+ 606 00cc 10BD     		pop	{r4, pc}
+ 607              	.LVL22:
+ 608              	.L21:
+ 609              		.loc 1 85 1 view .LVU227
+ 610 00ce 00BF     		.align	2
+ 611              	.L20:
+ 612 00d0 142E6542 		.word	1113927188
+ 613              		.cfi_endproc
+ 614              	.LFE356:
+ 616              		.section	.text.Attitude_run,"ax",%progbits
+ 617              		.align	1
+ 618              		.global	Attitude_run
+ 619              		.syntax unified
+ 620              		.thumb
+ 621              		.thumb_func
+ 622              		.fpu fpv5-d16
+ 624              	Attitude_run:
+ 625              	.LVL23:
+ 626              	.LFB357:
+  86:Core/Src/AttitudeEstimation.c **** 
+  87:Core/Src/AttitudeEstimation.c **** void Attitude_run(VehicleAtd* atd)
+  88:Core/Src/AttitudeEstimation.c **** {
+ 627              		.loc 1 88 1 is_stmt 1 view -0
+ 628              		.cfi_startproc
+ 629              		@ args = 0, pretend = 0, frame = 0
+ 630              		@ frame_needed = 0, uses_anonymous_args = 0
+ 631              		.loc 1 88 1 is_stmt 0 view .LVU229
+ 632 0000 10B5     		push	{r4, lr}
+ 633              	.LCFI10:
+ 634              		.cfi_def_cfa_offset 8
+ 635              		.cfi_offset 4, -8
+ 636              		.cfi_offset 14, -4
+ 637 0002 0446     		mov	r4, r0
+  89:Core/Src/AttitudeEstimation.c **** 	Attitude_PredictQuat(atd);
+ 638              		.loc 1 89 2 is_stmt 1 view .LVU230
+ 639 0004 FFF7FEFF 		bl	Attitude_PredictQuat
+ 640              	.LVL24:
+  90:Core/Src/AttitudeEstimation.c **** 	Attitude_QuatToEuler(atd);
+ 641              		.loc 1 90 2 view .LVU231
+ 642 0008 2046     		mov	r0, r4
+ 643 000a FFF7FEFF 		bl	Attitude_QuatToEuler
+ 644              	.LVL25:
+  91:Core/Src/AttitudeEstimation.c **** 
+  92:Core/Src/AttitudeEstimation.c **** 
+  93:Core/Src/AttitudeEstimation.c **** //	sendS("f", atd->gyr[0]);sendS("c", "      ");sendS("f", atd->gyr[1]);sendS("c", "      ");sendS(
+  94:Core/Src/AttitudeEstimation.c **** //	sendS("f", atd->euler[0]);sendS("c", "      ");sendS("f", atd->euler[1]);sendS("c", "\n\r");
+  95:Core/Src/AttitudeEstimation.c **** }
+ 645              		.loc 1 95 1 is_stmt 0 view .LVU232
+ 646 000e 10BD     		pop	{r4, pc}
+ 647              		.loc 1 95 1 view .LVU233
+ 648              		.cfi_endproc
+ 649              	.LFE357:
+ 651              		.text
+ 652              	.Letext0:
+ 653              		.file 2 "/usr/include/newlib/machine/_default_types.h"
+ 654              		.file 3 "/usr/include/newlib/sys/_stdint.h"
+ 655              		.file 4 "Core/Inc/Sensors.h"
+ARM GAS  /tmp/ccvPpPPi.s 			page 14
+
+
+ 656              		.file 5 "Core/Inc/AttitudeEstimation.h"
+ 657              		.file 6 "/usr/include/newlib/math.h"
+ARM GAS  /tmp/ccvPpPPi.s 			page 15
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 AttitudeEstimation.c
+     /tmp/ccvPpPPi.s:17     .text.Attitude_init:0000000000000000 $t
+     /tmp/ccvPpPPi.s:25     .text.Attitude_init:0000000000000000 Attitude_init
+     /tmp/ccvPpPPi.s:69     .text.Attitude_init:000000000000001c $d
+     /tmp/ccvPpPPi.s:74     .text.Attitude_newMeas:0000000000000000 $t
+     /tmp/ccvPpPPi.s:81     .text.Attitude_newMeas:0000000000000000 Attitude_newMeas
+     /tmp/ccvPpPPi.s:144    .text.Attitude_PredictQuat:0000000000000000 $t
+     /tmp/ccvPpPPi.s:151    .text.Attitude_PredictQuat:0000000000000000 Attitude_PredictQuat
+     /tmp/ccvPpPPi.s:473    .text.Attitude_PredictQuat:00000000000001fc $d
+     /tmp/ccvPpPPi.s:478    .text.Attitude_QuatToEuler:0000000000000000 $t
+     /tmp/ccvPpPPi.s:485    .text.Attitude_QuatToEuler:0000000000000000 Attitude_QuatToEuler
+     /tmp/ccvPpPPi.s:612    .text.Attitude_QuatToEuler:00000000000000d0 $d
+     /tmp/ccvPpPPi.s:617    .text.Attitude_run:0000000000000000 $t
+     /tmp/ccvPpPPi.s:624    .text.Attitude_run:0000000000000000 Attitude_run
+
+UNDEFINED SYMBOLS
+sqrt
+cosf
+sinf
+atan2f
+asinf

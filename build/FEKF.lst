@@ -1,0 +1,3059 @@
+ARM GAS  /tmp/ccAdnLOt.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.eabi_attribute 28, 1
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 1
+  11              		.eabi_attribute 18, 4
+  12              		.file	"FEKF.c"
+  13              		.text
+  14              	.Ltext0:
+  15              		.cfi_sections	.debug_frame
+  16              		.section	.text.FlightEKF_init,"ax",%progbits
+  17              		.align	1
+  18              		.global	FlightEKF_init
+  19              		.arch armv7e-m
+  20              		.syntax unified
+  21              		.thumb
+  22              		.thumb_func
+  23              		.fpu fpv5-d16
+  25              	FlightEKF_init:
+  26              	.LVL0:
+  27              	.LFB394:
+  28              		.file 1 "Core/Src/FEKF.c"
+   1:Core/Src/FEKF.c **** /************************** This document contains the Flight EKF Algorithm for State Estimation pu
+   2:Core/Src/FEKF.c **** 
+   3:Core/Src/FEKF.c **** #include "FEKF.h"
+   4:Core/Src/FEKF.c **** #include "arm_math.h"
+   5:Core/Src/FEKF.c **** #include "string.h"
+   6:Core/Src/FEKF.c **** #include "DefFuncs.h"
+   7:Core/Src/FEKF.c **** #include "init.h"
+   8:Core/Src/FEKF.c **** #include "StateMachine.h"
+   9:Core/Src/FEKF.c **** 
+  10:Core/Src/FEKF.c **** extern TIM_HandleTypeDef htim2;
+  11:Core/Src/FEKF.c **** extern VehicleStates States;
+  12:Core/Src/FEKF.c **** 
+  13:Core/Src/FEKF.c **** float dist[3] = {0.0f, 0.0f, 0.0f};
+  14:Core/Src/FEKF.c **** 
+  15:Core/Src/FEKF.c **** float cleanB[11]; 
+  16:Core/Src/FEKF.c **** float survive;
+  17:Core/Src/FEKF.c **** 
+  18:Core/Src/FEKF.c **** uint8_t firstIntegration = 1;
+  19:Core/Src/FEKF.c **** uint16_t last_upd;
+  20:Core/Src/FEKF.c **** 
+  21:Core/Src/FEKF.c **** float At[6 * 6];
+  22:Core/Src/FEKF.c **** float PAt[6 * 6];
+  23:Core/Src/FEKF.c **** float APAt[6 * 6];
+  24:Core/Src/FEKF.c **** float Ht[6 * 6];
+  25:Core/Src/FEKF.c **** float PHt[6 * 6];
+  26:Core/Src/FEKF.c **** 
+  27:Core/Src/FEKF.c **** void FlightEKF_init(fekf* fkal, float Q, float R)
+  28:Core/Src/FEKF.c **** {
+  29              		.loc 1 28 1 view -0
+  30              		.cfi_startproc
+ARM GAS  /tmp/ccAdnLOt.s 			page 2
+
+
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		.loc 1 28 1 is_stmt 0 view .LVU1
+  34 0000 2DE9F047 		push	{r4, r5, r6, r7, r8, r9, r10, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 32
+  37              		.cfi_offset 4, -32
+  38              		.cfi_offset 5, -28
+  39              		.cfi_offset 6, -24
+  40              		.cfi_offset 7, -20
+  41              		.cfi_offset 8, -16
+  42              		.cfi_offset 9, -12
+  43              		.cfi_offset 10, -8
+  44              		.cfi_offset 14, -4
+  45 0004 2DED028B 		vpush.64	{d8}
+  46              	.LCFI1:
+  47              		.cfi_def_cfa_offset 40
+  48              		.cfi_offset 80, -40
+  49              		.cfi_offset 81, -36
+  50 0008 0446     		mov	r4, r0
+  51 000a F0EE408A 		vmov.f32	s17, s0
+  52 000e B0EE608A 		vmov.f32	s16, s1
+  29:Core/Src/FEKF.c **** 
+  30:Core/Src/FEKF.c **** 	fkal->f = (float *) &cleanB;
+  53              		.loc 1 30 2 is_stmt 1 view .LVU2
+  54              		.loc 1 30 10 is_stmt 0 view .LVU3
+  55 0012 894B     		ldr	r3, .L5
+  56 0014 C0F8E830 		str	r3, [r0, #232]
+  31:Core/Src/FEKF.c **** 
+  32:Core/Src/FEKF.c ****  	arm_mat_init_f32(&fkal->x, 6, 1, x_init_6); 
+  57              		.loc 1 32 3 is_stmt 1 view .LVU4
+  58 0018 884B     		ldr	r3, .L5+4
+  59 001a 0122     		movs	r2, #1
+  60 001c 0621     		movs	r1, #6
+  61 001e FFF7FEFF 		bl	arm_mat_init_f32
+  62              	.LVL1:
+  33:Core/Src/FEKF.c **** 
+  34:Core/Src/FEKF.c **** 	arm_mat_init_f32(&fkal->z, 6, 1, z_init_6);
+  63              		.loc 1 34 2 view .LVU5
+  64 0022 874B     		ldr	r3, .L5+8
+  65 0024 0122     		movs	r2, #1
+  66 0026 0621     		movs	r1, #6
+  67 0028 04F10800 		add	r0, r4, #8
+  68 002c FFF7FEFF 		bl	arm_mat_init_f32
+  69              	.LVL2:
+  35:Core/Src/FEKF.c **** 
+  36:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->P, 6, 6, PI6x6);
+  70              		.loc 1 36 9 view .LVU6
+  71 0030 844B     		ldr	r3, .L5+12
+  72 0032 0622     		movs	r2, #6
+  73 0034 1146     		mov	r1, r2
+  74 0036 04F11000 		add	r0, r4, #16
+  75 003a FFF7FEFF 		bl	arm_mat_init_f32
+  76              	.LVL3:
+  37:Core/Src/FEKF.c **** 
+  38:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->A, 6, 6, AI6x6);
+  77              		.loc 1 38 9 view .LVU7
+ARM GAS  /tmp/ccAdnLOt.s 			page 3
+
+
+  78 003e 824B     		ldr	r3, .L5+16
+  79 0040 0622     		movs	r2, #6
+  80 0042 1146     		mov	r1, r2
+  81 0044 04F11800 		add	r0, r4, #24
+  82 0048 FFF7FEFF 		bl	arm_mat_init_f32
+  83              	.LVL4:
+  39:Core/Src/FEKF.c **** 
+  40:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->C, 6, 1, C_init_6);
+  84              		.loc 1 40 9 view .LVU8
+  85 004c 7F4B     		ldr	r3, .L5+20
+  86 004e 0122     		movs	r2, #1
+  87 0050 0621     		movs	r1, #6
+  88 0052 04F12000 		add	r0, r4, #32
+  89 0056 FFF7FEFF 		bl	arm_mat_init_f32
+  90              	.LVL5:
+  41:Core/Src/FEKF.c **** 
+  42:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->H, 6, 6, HI6x6);
+  91              		.loc 1 42 9 view .LVU9
+  92 005a 7D4B     		ldr	r3, .L5+24
+  93 005c 0622     		movs	r2, #6
+  94 005e 1146     		mov	r1, r2
+  95 0060 04F12800 		add	r0, r4, #40
+  96 0064 FFF7FEFF 		bl	arm_mat_init_f32
+  97              	.LVL6:
+  43:Core/Src/FEKF.c **** 
+  44:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->K, 6, 6, K_init_6x6);
+  98              		.loc 1 44 9 view .LVU10
+  99 0068 7A4B     		ldr	r3, .L5+28
+ 100 006a 0622     		movs	r2, #6
+ 101 006c 1146     		mov	r1, r2
+ 102 006e 04F13000 		add	r0, r4, #48
+ 103 0072 FFF7FEFF 		bl	arm_mat_init_f32
+ 104              	.LVL7:
+  45:Core/Src/FEKF.c **** 
+  46:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->Q, 6, 6, QI6x6);
+ 105              		.loc 1 46 9 view .LVU11
+ 106 0076 784B     		ldr	r3, .L5+32
+ 107 0078 0622     		movs	r2, #6
+ 108 007a 1146     		mov	r1, r2
+ 109 007c 04F13800 		add	r0, r4, #56
+ 110 0080 FFF7FEFF 		bl	arm_mat_init_f32
+ 111              	.LVL8:
+  47:Core/Src/FEKF.c **** 
+  48:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->R, 6, 6, RI6x6);
+ 112              		.loc 1 48 9 view .LVU12
+ 113 0084 754B     		ldr	r3, .L5+36
+ 114 0086 0622     		movs	r2, #6
+ 115 0088 1146     		mov	r1, r2
+ 116 008a 04F14000 		add	r0, r4, #64
+ 117 008e FFF7FEFF 		bl	arm_mat_init_f32
+ 118              	.LVL9:
+  49:Core/Src/FEKF.c **** 
+  50:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->At, 6, 6, At);
+ 119              		.loc 1 50 9 view .LVU13
+ 120 0092 734B     		ldr	r3, .L5+40
+ 121 0094 0622     		movs	r2, #6
+ 122 0096 1146     		mov	r1, r2
+ARM GAS  /tmp/ccAdnLOt.s 			page 4
+
+
+ 123 0098 04F14800 		add	r0, r4, #72
+ 124 009c FFF7FEFF 		bl	arm_mat_init_f32
+ 125              	.LVL10:
+  51:Core/Src/FEKF.c **** 
+  52:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->PAt, 6, 6, PAt);
+ 126              		.loc 1 52 9 view .LVU14
+ 127 00a0 704B     		ldr	r3, .L5+44
+ 128 00a2 0622     		movs	r2, #6
+ 129 00a4 1146     		mov	r1, r2
+ 130 00a6 04F15000 		add	r0, r4, #80
+ 131 00aa FFF7FEFF 		bl	arm_mat_init_f32
+ 132              	.LVL11:
+  53:Core/Src/FEKF.c **** 
+  54:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->APAt, 6, 6, APAt);
+ 133              		.loc 1 54 9 view .LVU15
+ 134 00ae 6E4B     		ldr	r3, .L5+48
+ 135 00b0 0622     		movs	r2, #6
+ 136 00b2 1146     		mov	r1, r2
+ 137 00b4 04F15800 		add	r0, r4, #88
+ 138 00b8 FFF7FEFF 		bl	arm_mat_init_f32
+ 139              	.LVL12:
+  55:Core/Src/FEKF.c **** 
+  56:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->Ht, 6, 6, Ht);
+ 140              		.loc 1 56 9 view .LVU16
+ 141 00bc 6B4B     		ldr	r3, .L5+52
+ 142 00be 0622     		movs	r2, #6
+ 143 00c0 1146     		mov	r1, r2
+ 144 00c2 04F16000 		add	r0, r4, #96
+ 145 00c6 FFF7FEFF 		bl	arm_mat_init_f32
+ 146              	.LVL13:
+  57:Core/Src/FEKF.c **** 
+  58:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->PHt, 6, 6, PHt);
+ 147              		.loc 1 58 9 view .LVU17
+ 148 00ca 694B     		ldr	r3, .L5+56
+ 149 00cc 0622     		movs	r2, #6
+ 150 00ce 1146     		mov	r1, r2
+ 151 00d0 04F16800 		add	r0, r4, #104
+ 152 00d4 FFF7FEFF 		bl	arm_mat_init_f32
+ 153              	.LVL14:
+  59:Core/Src/FEKF.c **** 
+  60:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->HPHt, 6, 6, HPHt6x6);
+ 154              		.loc 1 60 9 view .LVU18
+ 155 00d8 664B     		ldr	r3, .L5+60
+ 156 00da 0622     		movs	r2, #6
+ 157 00dc 1146     		mov	r1, r2
+ 158 00de 04F17000 		add	r0, r4, #112
+ 159 00e2 FFF7FEFF 		bl	arm_mat_init_f32
+ 160              	.LVL15:
+  61:Core/Src/FEKF.c **** 
+  62:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->HPHtR, 6, 6, HPHtR6x6);
+ 161              		.loc 1 62 9 view .LVU19
+ 162 00e6 04F1780A 		add	r10, r4, #120
+ 163 00ea 634B     		ldr	r3, .L5+64
+ 164 00ec 0622     		movs	r2, #6
+ 165 00ee 1146     		mov	r1, r2
+ 166 00f0 5046     		mov	r0, r10
+ 167 00f2 FFF7FEFF 		bl	arm_mat_init_f32
+ARM GAS  /tmp/ccAdnLOt.s 			page 5
+
+
+ 168              	.LVL16:
+  63:Core/Src/FEKF.c **** 
+  64:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->HPHtRI, 6, 6, HPHtRI6x6);
+ 169              		.loc 1 64 9 view .LVU20
+ 170 00f6 04F18009 		add	r9, r4, #128
+ 171 00fa 604B     		ldr	r3, .L5+68
+ 172 00fc 0622     		movs	r2, #6
+ 173 00fe 1146     		mov	r1, r2
+ 174 0100 4846     		mov	r0, r9
+ 175 0102 FFF7FEFF 		bl	arm_mat_init_f32
+ 176              	.LVL17:
+  65:Core/Src/FEKF.c **** 
+  66:Core/Src/FEKF.c **** 	arm_mat_init_f32(&fkal->HPHtRIHt, 6, 6, HPHtRIHt6x6);
+ 177              		.loc 1 66 2 view .LVU21
+ 178 0106 04F18805 		add	r5, r4, #136
+ 179 010a 5D4E     		ldr	r6, .L5+72
+ 180 010c 3346     		mov	r3, r6
+ 181 010e 0622     		movs	r2, #6
+ 182 0110 1146     		mov	r1, r2
+ 183 0112 2846     		mov	r0, r5
+ 184 0114 FFF7FEFF 		bl	arm_mat_init_f32
+ 185              	.LVL18:
+  67:Core/Src/FEKF.c **** 
+  68:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->HPHtRIHt, 6, 6, HPHtRIHt6x6);
+ 186              		.loc 1 68 9 view .LVU22
+ 187 0118 3346     		mov	r3, r6
+ 188 011a 0622     		movs	r2, #6
+ 189 011c 1146     		mov	r1, r2
+ 190 011e 2846     		mov	r0, r5
+ 191 0120 FFF7FEFF 		bl	arm_mat_init_f32
+ 192              	.LVL19:
+  69:Core/Src/FEKF.c **** 
+  70:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->KH, 6, 6, KH6x6);
+ 193              		.loc 1 70 9 view .LVU23
+ 194 0124 04F19008 		add	r8, r4, #144
+ 195 0128 564B     		ldr	r3, .L5+76
+ 196 012a 0622     		movs	r2, #6
+ 197 012c 1146     		mov	r1, r2
+ 198 012e 4046     		mov	r0, r8
+ 199 0130 FFF7FEFF 		bl	arm_mat_init_f32
+ 200              	.LVL20:
+  71:Core/Src/FEKF.c **** 
+  72:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->IKH, 6, 6, IKH6x6);
+ 201              		.loc 1 72 9 view .LVU24
+ 202 0134 04F19807 		add	r7, r4, #152
+ 203 0138 534B     		ldr	r3, .L5+80
+ 204 013a 0622     		movs	r2, #6
+ 205 013c 1146     		mov	r1, r2
+ 206 013e 3846     		mov	r0, r7
+ 207 0140 FFF7FEFF 		bl	arm_mat_init_f32
+ 208              	.LVL21:
+  73:Core/Src/FEKF.c **** 
+  74:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->IKHP, 6, 6, IKHP6x6);
+ 209              		.loc 1 74 9 view .LVU25
+ 210 0144 04F1A006 		add	r6, r4, #160
+ 211 0148 504B     		ldr	r3, .L5+84
+ 212 014a 0622     		movs	r2, #6
+ARM GAS  /tmp/ccAdnLOt.s 			page 6
+
+
+ 213 014c 1146     		mov	r1, r2
+ 214 014e 3046     		mov	r0, r6
+ 215 0150 FFF7FEFF 		bl	arm_mat_init_f32
+ 216              	.LVL22:
+  75:Core/Src/FEKF.c **** 
+  76:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->y, 6, 1, y6);
+ 217              		.loc 1 76 9 view .LVU26
+ 218 0154 04F1A805 		add	r5, r4, #168
+ 219 0158 4D4B     		ldr	r3, .L5+88
+ 220 015a 0122     		movs	r2, #1
+ 221 015c 0621     		movs	r1, #6
+ 222 015e 2846     		mov	r0, r5
+ 223 0160 FFF7FEFF 		bl	arm_mat_init_f32
+ 224              	.LVL23:
+  77:Core/Src/FEKF.c **** 
+  78:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->y, 6, 1, Ky6);
+ 225              		.loc 1 78 9 view .LVU27
+ 226 0164 4B4B     		ldr	r3, .L5+92
+ 227 0166 0122     		movs	r2, #1
+ 228 0168 0621     		movs	r1, #6
+ 229 016a 2846     		mov	r0, r5
+ 230 016c FFF7FEFF 		bl	arm_mat_init_f32
+ 231              	.LVL24:
+  79:Core/Src/FEKF.c **** 
+  80:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->y, 6, 1, xtemp6);
+ 232              		.loc 1 80 9 view .LVU28
+ 233 0170 494B     		ldr	r3, .L5+96
+ 234 0172 0122     		movs	r2, #1
+ 235 0174 0621     		movs	r1, #6
+ 236 0176 2846     		mov	r0, r5
+ 237 0178 FFF7FEFF 		bl	arm_mat_init_f32
+ 238              	.LVL25:
+  81:Core/Src/FEKF.c **** 
+  82:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->y, 6, 1, Ptemp6x6);
+ 239              		.loc 1 82 9 view .LVU29
+ 240 017c 474B     		ldr	r3, .L5+100
+ 241 017e 0122     		movs	r2, #1
+ 242 0180 0621     		movs	r1, #6
+ 243 0182 2846     		mov	r0, r5
+ 244 0184 FFF7FEFF 		bl	arm_mat_init_f32
+ 245              	.LVL26:
+  83:Core/Src/FEKF.c **** 
+  84:Core/Src/FEKF.c **** 
+  85:Core/Src/FEKF.c **** 
+  86:Core/Src/FEKF.c **** 
+  87:Core/Src/FEKF.c **** 
+  88:Core/Src/FEKF.c **** 
+  89:Core/Src/FEKF.c **** 
+  90:Core/Src/FEKF.c **** 
+  91:Core/Src/FEKF.c ****         for (int i = 0; i < 7; i++)
+ 246              		.loc 1 91 9 view .LVU30
+ 247              	.LBB2:
+ 248              		.loc 1 91 14 view .LVU31
+ 249              		.loc 1 91 18 is_stmt 0 view .LVU32
+ 250 0188 0023     		movs	r3, #0
+ 251              		.loc 1 91 9 view .LVU33
+ 252 018a 12E0     		b	.L2
+ARM GAS  /tmp/ccAdnLOt.s 			page 7
+
+
+ 253              	.LVL27:
+ 254              	.L3:
+  92:Core/Src/FEKF.c ****         {
+  93:Core/Src/FEKF.c ****                 fkal->Q.pData[i*8] = fkal->Q.pData[i*8] * Q;
+ 255              		.loc 1 93 17 is_stmt 1 discriminator 3 view .LVU34
+ 256              		.loc 1 93 45 is_stmt 0 discriminator 3 view .LVU35
+ 257 018c E26B     		ldr	r2, [r4, #60]
+ 258              		.loc 1 93 51 discriminator 3 view .LVU36
+ 259 018e 02EB4312 		add	r2, r2, r3, lsl #5
+ 260 0192 D2ED007A 		vldr.32	s15, [r2]
+ 261              		.loc 1 93 57 discriminator 3 view .LVU37
+ 262 0196 67EEA87A 		vmul.f32	s15, s15, s17
+ 263              		.loc 1 93 36 discriminator 3 view .LVU38
+ 264 019a C2ED007A 		vstr.32	s15, [r2]
+  94:Core/Src/FEKF.c ****                 fkal->R.pData[i*8] = fkal->R.pData[i*8] * R;
+ 265              		.loc 1 94 17 is_stmt 1 discriminator 3 view .LVU39
+ 266              		.loc 1 94 45 is_stmt 0 discriminator 3 view .LVU40
+ 267 019e 626C     		ldr	r2, [r4, #68]
+ 268              		.loc 1 94 51 discriminator 3 view .LVU41
+ 269 01a0 02EB4312 		add	r2, r2, r3, lsl #5
+ 270 01a4 D2ED007A 		vldr.32	s15, [r2]
+ 271              		.loc 1 94 57 discriminator 3 view .LVU42
+ 272 01a8 67EE887A 		vmul.f32	s15, s15, s16
+ 273              		.loc 1 94 36 discriminator 3 view .LVU43
+ 274 01ac C2ED007A 		vstr.32	s15, [r2]
+  91:Core/Src/FEKF.c ****         {
+ 275              		.loc 1 91 32 is_stmt 1 discriminator 3 view .LVU44
+  91:Core/Src/FEKF.c ****         {
+ 276              		.loc 1 91 33 is_stmt 0 discriminator 3 view .LVU45
+ 277 01b0 0133     		adds	r3, r3, #1
+ 278              	.LVL28:
+ 279              	.L2:
+  91:Core/Src/FEKF.c ****         {
+ 280              		.loc 1 91 25 is_stmt 1 discriminator 1 view .LVU46
+  91:Core/Src/FEKF.c ****         {
+ 281              		.loc 1 91 9 is_stmt 0 discriminator 1 view .LVU47
+ 282 01b2 062B     		cmp	r3, #6
+ 283 01b4 EADD     		ble	.L3
+ 284              	.LBE2:
+  95:Core/Src/FEKF.c ****         }
+  96:Core/Src/FEKF.c **** 
+  97:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->HPHtR, 6, 6, HPHtR6x6);
+ 285              		.loc 1 97 9 is_stmt 1 view .LVU48
+ 286 01b6 304B     		ldr	r3, .L5+64
+ 287              	.LVL29:
+ 288              		.loc 1 97 9 is_stmt 0 view .LVU49
+ 289 01b8 0622     		movs	r2, #6
+ 290 01ba 1146     		mov	r1, r2
+ 291 01bc 5046     		mov	r0, r10
+ 292 01be FFF7FEFF 		bl	arm_mat_init_f32
+ 293              	.LVL30:
+  98:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->HPHtRI, 6, 6, HPHtRI6x6);
+ 294              		.loc 1 98 9 is_stmt 1 view .LVU50
+ 295 01c2 2E4B     		ldr	r3, .L5+68
+ 296 01c4 0622     		movs	r2, #6
+ 297 01c6 1146     		mov	r1, r2
+ 298 01c8 4846     		mov	r0, r9
+ARM GAS  /tmp/ccAdnLOt.s 			page 8
+
+
+ 299 01ca FFF7FEFF 		bl	arm_mat_init_f32
+ 300              	.LVL31:
+  99:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->KH, 6, 6, KH6x6);
+ 301              		.loc 1 99 9 view .LVU51
+ 302 01ce 2D4B     		ldr	r3, .L5+76
+ 303 01d0 0622     		movs	r2, #6
+ 304 01d2 1146     		mov	r1, r2
+ 305 01d4 4046     		mov	r0, r8
+ 306 01d6 FFF7FEFF 		bl	arm_mat_init_f32
+ 307              	.LVL32:
+ 100:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->IKH, 6, 6, IKH6x6);
+ 308              		.loc 1 100 9 view .LVU52
+ 309 01da 2B4B     		ldr	r3, .L5+80
+ 310 01dc 0622     		movs	r2, #6
+ 311 01de 1146     		mov	r1, r2
+ 312 01e0 3846     		mov	r0, r7
+ 313 01e2 FFF7FEFF 		bl	arm_mat_init_f32
+ 314              	.LVL33:
+ 101:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->IKHP, 6, 6, IKHP6x6);
+ 315              		.loc 1 101 9 view .LVU53
+ 316 01e6 294B     		ldr	r3, .L5+84
+ 317 01e8 0622     		movs	r2, #6
+ 318 01ea 1146     		mov	r1, r2
+ 319 01ec 3046     		mov	r0, r6
+ 320 01ee FFF7FEFF 		bl	arm_mat_init_f32
+ 321              	.LVL34:
+ 102:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->Ptemp, 6, 6, Ptemp6x6);
+ 322              		.loc 1 102 9 view .LVU54
+ 323 01f2 2A4B     		ldr	r3, .L5+100
+ 324 01f4 0622     		movs	r2, #6
+ 325 01f6 1146     		mov	r1, r2
+ 326 01f8 04F1C000 		add	r0, r4, #192
+ 327 01fc FFF7FEFF 		bl	arm_mat_init_f32
+ 328              	.LVL35:
+ 103:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->y, 6, 1, y6);
+ 329              		.loc 1 103 9 view .LVU55
+ 330 0200 234B     		ldr	r3, .L5+88
+ 331 0202 0122     		movs	r2, #1
+ 332 0204 0621     		movs	r1, #6
+ 333 0206 2846     		mov	r0, r5
+ 334 0208 FFF7FEFF 		bl	arm_mat_init_f32
+ 335              	.LVL36:
+ 104:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->Ky, 6, 1, Ky6);
+ 336              		.loc 1 104 9 view .LVU56
+ 337 020c 214B     		ldr	r3, .L5+92
+ 338 020e 0122     		movs	r2, #1
+ 339 0210 0621     		movs	r1, #6
+ 340 0212 04F1B000 		add	r0, r4, #176
+ 341 0216 FFF7FEFF 		bl	arm_mat_init_f32
+ 342              	.LVL37:
+ 105:Core/Src/FEKF.c ****         arm_mat_init_f32(&fkal->xtemp, 6, 1, xtemp6);
+ 343              		.loc 1 105 9 view .LVU57
+ 344 021a 1F4B     		ldr	r3, .L5+96
+ 345 021c 0122     		movs	r2, #1
+ 346 021e 0621     		movs	r1, #6
+ 347 0220 04F1B800 		add	r0, r4, #184
+ 348 0224 FFF7FEFF 		bl	arm_mat_init_f32
+ARM GAS  /tmp/ccAdnLOt.s 			page 9
+
+
+ 349              	.LVL38:
+ 106:Core/Src/FEKF.c **** 
+ 107:Core/Src/FEKF.c ****         fkal->armed = 0; 
+ 350              		.loc 1 107 9 view .LVU58
+ 351              		.loc 1 107 21 is_stmt 0 view .LVU59
+ 352 0228 0023     		movs	r3, #0
+ 353 022a 84F8C830 		strb	r3, [r4, #200]
+ 108:Core/Src/FEKF.c **** 
+ 109:Core/Src/FEKF.c **** }
+ 354              		.loc 1 109 1 view .LVU60
+ 355 022e BDEC028B 		vldm	sp!, {d8}
+ 356              	.LCFI2:
+ 357              		.cfi_restore 80
+ 358              		.cfi_restore 81
+ 359              		.cfi_def_cfa_offset 32
+ 360              	.LVL39:
+ 361              		.loc 1 109 1 view .LVU61
+ 362 0232 BDE8F087 		pop	{r4, r5, r6, r7, r8, r9, r10, pc}
+ 363              	.LVL40:
+ 364              	.L6:
+ 365              		.loc 1 109 1 view .LVU62
+ 366 0236 00BF     		.align	2
+ 367              	.L5:
+ 368 0238 00000000 		.word	.LANCHOR0
+ 369 023c 00000000 		.word	x_init_6
+ 370 0240 00000000 		.word	z_init_6
+ 371 0244 00000000 		.word	PI6x6
+ 372 0248 00000000 		.word	AI6x6
+ 373 024c 00000000 		.word	C_init_6
+ 374 0250 00000000 		.word	HI6x6
+ 375 0254 00000000 		.word	K_init_6x6
+ 376 0258 00000000 		.word	QI6x6
+ 377 025c 00000000 		.word	RI6x6
+ 378 0260 00000000 		.word	.LANCHOR1
+ 379 0264 00000000 		.word	.LANCHOR2
+ 380 0268 00000000 		.word	.LANCHOR3
+ 381 026c 00000000 		.word	.LANCHOR4
+ 382 0270 00000000 		.word	.LANCHOR5
+ 383 0274 00000000 		.word	HPHt6x6
+ 384 0278 00000000 		.word	HPHtR6x6
+ 385 027c 00000000 		.word	HPHtRI6x6
+ 386 0280 00000000 		.word	HPHtRIHt6x6
+ 387 0284 00000000 		.word	KH6x6
+ 388 0288 00000000 		.word	IKH6x6
+ 389 028c 00000000 		.word	IKHP6x6
+ 390 0290 00000000 		.word	y6
+ 391 0294 00000000 		.word	Ky6
+ 392 0298 00000000 		.word	xtemp6
+ 393 029c 00000000 		.word	Ptemp6x6
+ 394              		.cfi_endproc
+ 395              	.LFE394:
+ 397              		.section	.text.FlightEKF_newMeas,"ax",%progbits
+ 398              		.align	1
+ 399              		.global	FlightEKF_newMeas
+ 400              		.syntax unified
+ 401              		.thumb
+ 402              		.thumb_func
+ARM GAS  /tmp/ccAdnLOt.s 			page 10
+
+
+ 403              		.fpu fpv5-d16
+ 405              	FlightEKF_newMeas:
+ 406              	.LVL41:
+ 407              	.LFB395:
+ 110:Core/Src/FEKF.c **** 
+ 111:Core/Src/FEKF.c **** void FlightEKF_newMeas(fekf* fkal, sensors* meas)
+ 112:Core/Src/FEKF.c **** {
+ 408              		.loc 1 112 1 is_stmt 1 view -0
+ 409              		.cfi_startproc
+ 410              		@ args = 0, pretend = 0, frame = 32
+ 411              		@ frame_needed = 0, uses_anonymous_args = 0
+ 412              		.loc 1 112 1 is_stmt 0 view .LVU64
+ 413 0000 00B5     		push	{lr}
+ 414              	.LCFI3:
+ 415              		.cfi_def_cfa_offset 4
+ 416              		.cfi_offset 14, -4
+ 417 0002 89B0     		sub	sp, sp, #36
+ 418              	.LCFI4:
+ 419              		.cfi_def_cfa_offset 40
+ 420 0004 8646     		mov	lr, r0
+ 113:Core/Src/FEKF.c **** 	float measC[7];
+ 421              		.loc 1 113 2 is_stmt 1 view .LVU65
+ 114:Core/Src/FEKF.c **** 	measC[0] = meas->meas[0] - meas->accCalx;
+ 422              		.loc 1 114 2 view .LVU66
+ 423              		.loc 1 114 23 is_stmt 0 view .LVU67
+ 424 0006 D1ED007A 		vldr.32	s15, [r1]
+ 425              		.loc 1 114 33 view .LVU68
+ 426 000a 91ED087A 		vldr.32	s14, [r1, #32]
+ 427              		.loc 1 114 27 view .LVU69
+ 428 000e 77EEC77A 		vsub.f32	s15, s15, s14
+ 429              		.loc 1 114 11 view .LVU70
+ 430 0012 CDED017A 		vstr.32	s15, [sp, #4]
+ 115:Core/Src/FEKF.c **** 	measC[1] = meas->meas[1] - meas->accCaly;
+ 431              		.loc 1 115 2 is_stmt 1 view .LVU71
+ 432              		.loc 1 115 23 is_stmt 0 view .LVU72
+ 433 0016 D1ED017A 		vldr.32	s15, [r1, #4]
+ 434              		.loc 1 115 33 view .LVU73
+ 435 001a 91ED097A 		vldr.32	s14, [r1, #36]
+ 436              		.loc 1 115 27 view .LVU74
+ 437 001e 77EEC77A 		vsub.f32	s15, s15, s14
+ 438              		.loc 1 115 11 view .LVU75
+ 439 0022 CDED027A 		vstr.32	s15, [sp, #8]
+ 116:Core/Src/FEKF.c **** 	measC[2] = meas->meas[2] - meas->accCalz;
+ 440              		.loc 1 116 2 is_stmt 1 view .LVU76
+ 441              		.loc 1 116 23 is_stmt 0 view .LVU77
+ 442 0026 D1ED027A 		vldr.32	s15, [r1, #8]
+ 443              		.loc 1 116 33 view .LVU78
+ 444 002a 91ED0A7A 		vldr.32	s14, [r1, #40]
+ 445              		.loc 1 116 27 view .LVU79
+ 446 002e 77EEC77A 		vsub.f32	s15, s15, s14
+ 447              		.loc 1 116 11 view .LVU80
+ 448 0032 CDED037A 		vstr.32	s15, [sp, #12]
+ 117:Core/Src/FEKF.c **** 	measC[3] = meas->meas[3] - meas->gyrCalx;
+ 449              		.loc 1 117 2 is_stmt 1 view .LVU81
+ 450              		.loc 1 117 23 is_stmt 0 view .LVU82
+ 451 0036 D1ED037A 		vldr.32	s15, [r1, #12]
+ 452              		.loc 1 117 33 view .LVU83
+ARM GAS  /tmp/ccAdnLOt.s 			page 11
+
+
+ 453 003a 91ED0B7A 		vldr.32	s14, [r1, #44]
+ 454              		.loc 1 117 27 view .LVU84
+ 455 003e 77EEC77A 		vsub.f32	s15, s15, s14
+ 456              		.loc 1 117 11 view .LVU85
+ 457 0042 CDED047A 		vstr.32	s15, [sp, #16]
+ 118:Core/Src/FEKF.c **** 	measC[4] = meas->meas[4] - meas->gyrCaly;
+ 458              		.loc 1 118 2 is_stmt 1 view .LVU86
+ 459              		.loc 1 118 23 is_stmt 0 view .LVU87
+ 460 0046 D1ED047A 		vldr.32	s15, [r1, #16]
+ 461              		.loc 1 118 33 view .LVU88
+ 462 004a 91ED0C7A 		vldr.32	s14, [r1, #48]
+ 463              		.loc 1 118 27 view .LVU89
+ 464 004e 77EEC77A 		vsub.f32	s15, s15, s14
+ 465              		.loc 1 118 11 view .LVU90
+ 466 0052 CDED057A 		vstr.32	s15, [sp, #20]
+ 119:Core/Src/FEKF.c **** 	measC[5] = meas->meas[5] - meas->gyrCalz;
+ 467              		.loc 1 119 2 is_stmt 1 view .LVU91
+ 468              		.loc 1 119 23 is_stmt 0 view .LVU92
+ 469 0056 D1ED057A 		vldr.32	s15, [r1, #20]
+ 470              		.loc 1 119 33 view .LVU93
+ 471 005a 91ED0D7A 		vldr.32	s14, [r1, #52]
+ 472              		.loc 1 119 27 view .LVU94
+ 473 005e 77EEC77A 		vsub.f32	s15, s15, s14
+ 474              		.loc 1 119 11 view .LVU95
+ 475 0062 CDED067A 		vstr.32	s15, [sp, #24]
+ 120:Core/Src/FEKF.c **** 	measC[6] = meas->meas[6] - meas->AltCal;
+ 476              		.loc 1 120 2 is_stmt 1 view .LVU96
+ 477              		.loc 1 120 23 is_stmt 0 view .LVU97
+ 478 0066 D1ED067A 		vldr.32	s15, [r1, #24]
+ 479              		.loc 1 120 33 view .LVU98
+ 480 006a 91ED0E7A 		vldr.32	s14, [r1, #56]
+ 481              		.loc 1 120 27 view .LVU99
+ 482 006e 77EEC77A 		vsub.f32	s15, s15, s14
+ 483              		.loc 1 120 11 view .LVU100
+ 484 0072 CDED077A 		vstr.32	s15, [sp, #28]
+ 121:Core/Src/FEKF.c **** 
+ 122:Core/Src/FEKF.c **** //	sendMat((float *) &meas->meas[0], 1, 7);newL();
+ 123:Core/Src/FEKF.c **** 
+ 124:Core/Src/FEKF.c **** 	memcpy(&fkal->meas[0], &measC[0], sizeof(measC));
+ 485              		.loc 1 124 2 is_stmt 1 view .LVU101
+ 486 0076 0DF1040C 		add	ip, sp, #4
+ 487 007a BCE80F00 		ldmia	ip!, {r0, r1, r2, r3}
+ 488              	.LVL42:
+ 489              		.loc 1 124 2 is_stmt 0 view .LVU102
+ 490 007e CEF8CC00 		str	r0, [lr, #204]	@ unaligned
+ 491 0082 CEF8D010 		str	r1, [lr, #208]	@ unaligned
+ 492 0086 CEF8D420 		str	r2, [lr, #212]	@ unaligned
+ 493 008a CEF8D830 		str	r3, [lr, #216]	@ unaligned
+ 494 008e BCE80700 		ldmia	ip!, {r0, r1, r2}
+ 495 0092 CEF8DC00 		str	r0, [lr, #220]	@ unaligned
+ 496 0096 CEF8E010 		str	r1, [lr, #224]	@ unaligned
+ 497 009a CEF8E420 		str	r2, [lr, #228]	@ unaligned
+ 125:Core/Src/FEKF.c **** //	sendMat((float *) &measC[0], 1, 7);newL();
+ 126:Core/Src/FEKF.c **** 	fkal->updateFlag = 1;
+ 498              		.loc 1 126 2 is_stmt 1 view .LVU103
+ 499              		.loc 1 126 19 is_stmt 0 view .LVU104
+ 500 009e 0123     		movs	r3, #1
+ARM GAS  /tmp/ccAdnLOt.s 			page 12
+
+
+ 501 00a0 8EF8EC30 		strb	r3, [lr, #236]
+ 127:Core/Src/FEKF.c **** 
+ 128:Core/Src/FEKF.c **** }
+ 502              		.loc 1 128 1 view .LVU105
+ 503 00a4 09B0     		add	sp, sp, #36
+ 504              	.LCFI5:
+ 505              		.cfi_def_cfa_offset 4
+ 506              		@ sp needed
+ 507 00a6 5DF804FB 		ldr	pc, [sp], #4
+ 508              		.cfi_endproc
+ 509              	.LFE395:
+ 511              		.section	.text.FlightEKF_CoriolisFree,"ax",%progbits
+ 512              		.align	1
+ 513              		.global	FlightEKF_CoriolisFree
+ 514              		.syntax unified
+ 515              		.thumb
+ 516              		.thumb_func
+ 517              		.fpu fpv5-d16
+ 519              	FlightEKF_CoriolisFree:
+ 520              	.LVL43:
+ 521              	.LFB396:
+ 129:Core/Src/FEKF.c **** 
+ 130:Core/Src/FEKF.c **** void FlightEKF_CoriolisFree(fekf* fkal, VehicleAtd* atd)
+ 131:Core/Src/FEKF.c **** {
+ 522              		.loc 1 131 1 is_stmt 1 view -0
+ 523              		.cfi_startproc
+ 524              		@ args = 0, pretend = 0, frame = 72
+ 525              		@ frame_needed = 0, uses_anonymous_args = 0
+ 526              		.loc 1 131 1 is_stmt 0 view .LVU107
+ 527 0000 10B5     		push	{r4, lr}
+ 528              	.LCFI6:
+ 529              		.cfi_def_cfa_offset 8
+ 530              		.cfi_offset 4, -8
+ 531              		.cfi_offset 14, -4
+ 532 0002 92B0     		sub	sp, sp, #72
+ 533              	.LCFI7:
+ 534              		.cfi_def_cfa_offset 80
+ 132:Core/Src/FEKF.c **** 	memcpy(fkal->f, &fkal->meas[0], 28);
+ 535              		.loc 1 132 2 is_stmt 1 view .LVU108
+ 536              		.loc 1 132 13 is_stmt 0 view .LVU109
+ 537 0004 D0F8E830 		ldr	r3, [r0, #232]
+ 538              		.loc 1 132 2 view .LVU110
+ 539 0008 D0F8CCE0 		ldr	lr, [r0, #204]	@ unaligned
+ 540 000c D0F8D0C0 		ldr	ip, [r0, #208]	@ unaligned
+ 541 0010 D0F8D420 		ldr	r2, [r0, #212]	@ unaligned
+ 542 0014 D0F8D840 		ldr	r4, [r0, #216]	@ unaligned
+ 543 0018 C3F800E0 		str	lr, [r3]	@ unaligned
+ 544 001c C3F804C0 		str	ip, [r3, #4]	@ unaligned
+ 545 0020 9A60     		str	r2, [r3, #8]	@ unaligned
+ 546 0022 DC60     		str	r4, [r3, #12]	@ unaligned
+ 547 0024 D0F8DCE0 		ldr	lr, [r0, #220]	@ unaligned
+ 548 0028 D0F8E0C0 		ldr	ip, [r0, #224]	@ unaligned
+ 549 002c D0F8E420 		ldr	r2, [r0, #228]	@ unaligned
+ 550 0030 C3F810E0 		str	lr, [r3, #16]	@ unaligned
+ 551 0034 C3F814C0 		str	ip, [r3, #20]	@ unaligned
+ 552 0038 9A61     		str	r2, [r3, #24]	@ unaligned
+ 133:Core/Src/FEKF.c **** 
+ARM GAS  /tmp/ccAdnLOt.s 			page 13
+
+
+ 134:Core/Src/FEKF.c **** 	if (firstIntegration)
+ 553              		.loc 1 134 2 is_stmt 1 view .LVU111
+ 554              		.loc 1 134 6 is_stmt 0 view .LVU112
+ 555 003a 884B     		ldr	r3, .L12
+ 556 003c 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 557              		.loc 1 134 5 view .LVU113
+ 558 003e 3BB1     		cbz	r3, .L10
+ 135:Core/Src/FEKF.c **** 	{
+ 136:Core/Src/FEKF.c **** 		last_upd = __HAL_TIM_GET_COUNTER(&htim2);
+ 559              		.loc 1 136 3 is_stmt 1 view .LVU114
+ 560              		.loc 1 136 14 is_stmt 0 view .LVU115
+ 561 0040 874B     		ldr	r3, .L12+4
+ 562 0042 1B68     		ldr	r3, [r3]
+ 563 0044 5A6A     		ldr	r2, [r3, #36]
+ 564              		.loc 1 136 12 view .LVU116
+ 565 0046 874B     		ldr	r3, .L12+8
+ 566 0048 1A80     		strh	r2, [r3]	@ movhi
+ 137:Core/Src/FEKF.c **** 		firstIntegration = 0;
+ 567              		.loc 1 137 3 is_stmt 1 view .LVU117
+ 568              		.loc 1 137 20 is_stmt 0 view .LVU118
+ 569 004a 844B     		ldr	r3, .L12
+ 570 004c 0022     		movs	r2, #0
+ 571 004e 1A70     		strb	r2, [r3]
+ 572              	.L10:
+ 138:Core/Src/FEKF.c **** 	}
+ 139:Core/Src/FEKF.c **** 
+ 140:Core/Src/FEKF.c **** 
+ 141:Core/Src/FEKF.c **** 	uint16_t current_upd = __HAL_TIM_GET_COUNTER(&htim2);
+ 573              		.loc 1 141 2 is_stmt 1 view .LVU119
+ 574              		.loc 1 141 25 is_stmt 0 view .LVU120
+ 575 0050 834B     		ldr	r3, .L12+4
+ 576 0052 1B68     		ldr	r3, [r3]
+ 577 0054 5A6A     		ldr	r2, [r3, #36]
+ 578              		.loc 1 141 11 view .LVU121
+ 579 0056 92B2     		uxth	r2, r2
+ 580              	.LVL44:
+ 142:Core/Src/FEKF.c **** 	uint16_t dt = current_upd - last_upd;
+ 581              		.loc 1 142 2 is_stmt 1 view .LVU122
+ 582              		.loc 1 142 28 is_stmt 0 view .LVU123
+ 583 0058 824C     		ldr	r4, .L12+8
+ 584 005a 2388     		ldrh	r3, [r4]
+ 585              		.loc 1 142 11 view .LVU124
+ 586 005c D31A     		subs	r3, r2, r3
+ 587 005e 9BB2     		uxth	r3, r3
+ 588              	.LVL45:
+ 143:Core/Src/FEKF.c **** 	last_upd = current_upd;
+ 589              		.loc 1 143 2 is_stmt 1 view .LVU125
+ 590              		.loc 1 143 11 is_stmt 0 view .LVU126
+ 591 0060 2280     		strh	r2, [r4]	@ movhi
+ 144:Core/Src/FEKF.c **** 	fkal->timeStep = (float) dt/1000000.0f;
+ 592              		.loc 1 144 2 is_stmt 1 view .LVU127
+ 593              		.loc 1 144 19 is_stmt 0 view .LVU128
+ 594 0062 07EE903A 		vmov	s15, r3	@ int
+ 595 0066 F8EE677A 		vcvt.f32.u32	s15, s15
+ 596              		.loc 1 144 29 view .LVU129
+ 597 006a DFED7F6A 		vldr.32	s13, .L12+12
+ 598 006e 87EEA67A 		vdiv.f32	s14, s15, s13
+ARM GAS  /tmp/ccAdnLOt.s 			page 14
+
+
+ 599              		.loc 1 144 17 view .LVU130
+ 600 0072 80ED3C7A 		vstr.32	s14, [r0, #240]
+ 145:Core/Src/FEKF.c **** 
+ 146:Core/Src/FEKF.c **** 	fkal->f[7]  = atd->qs;
+ 601              		.loc 1 146 2 is_stmt 1 view .LVU131
+ 602              		.loc 1 146 6 is_stmt 0 view .LVU132
+ 603 0076 D0F8E830 		ldr	r3, [r0, #232]
+ 604              	.LVL46:
+ 605              		.loc 1 146 19 view .LVU133
+ 606 007a 0A6A     		ldr	r2, [r1, #32]	@ float
+ 607              	.LVL47:
+ 608              		.loc 1 146 14 view .LVU134
+ 609 007c DA61     		str	r2, [r3, #28]	@ float
+ 147:Core/Src/FEKF.c **** 	fkal->f[8]  = atd->qx;
+ 610              		.loc 1 147 2 is_stmt 1 view .LVU135
+ 611              		.loc 1 147 6 is_stmt 0 view .LVU136
+ 612 007e D0F8E830 		ldr	r3, [r0, #232]
+ 613              		.loc 1 147 19 view .LVU137
+ 614 0082 4A6A     		ldr	r2, [r1, #36]	@ float
+ 615              		.loc 1 147 14 view .LVU138
+ 616 0084 1A62     		str	r2, [r3, #32]	@ float
+ 148:Core/Src/FEKF.c **** 	fkal->f[9]  = atd->qy;
+ 617              		.loc 1 148 2 is_stmt 1 view .LVU139
+ 618              		.loc 1 148 6 is_stmt 0 view .LVU140
+ 619 0086 D0F8E830 		ldr	r3, [r0, #232]
+ 620              		.loc 1 148 19 view .LVU141
+ 621 008a 8A6A     		ldr	r2, [r1, #40]	@ float
+ 622              		.loc 1 148 14 view .LVU142
+ 623 008c 5A62     		str	r2, [r3, #36]	@ float
+ 149:Core/Src/FEKF.c **** 	fkal->f[10] = atd->qz;
+ 624              		.loc 1 149 2 is_stmt 1 view .LVU143
+ 625              		.loc 1 149 6 is_stmt 0 view .LVU144
+ 626 008e D0F8E830 		ldr	r3, [r0, #232]
+ 627              		.loc 1 149 19 view .LVU145
+ 628 0092 CA6A     		ldr	r2, [r1, #44]	@ float
+ 629              		.loc 1 149 14 view .LVU146
+ 630 0094 9A62     		str	r2, [r3, #40]	@ float
+ 150:Core/Src/FEKF.c **** 	float qs = fkal->f[7];
+ 631              		.loc 1 150 2 is_stmt 1 view .LVU147
+ 632              		.loc 1 150 17 is_stmt 0 view .LVU148
+ 633 0096 D0F8E830 		ldr	r3, [r0, #232]
+ 634              		.loc 1 150 8 view .LVU149
+ 635 009a D3ED076A 		vldr.32	s13, [r3, #28]
+ 636              	.LVL48:
+ 151:Core/Src/FEKF.c **** 	float qx = fkal->f[8];
+ 637              		.loc 1 151 2 is_stmt 1 view .LVU150
+ 638              		.loc 1 151 8 is_stmt 0 view .LVU151
+ 639 009e D3ED083A 		vldr.32	s7, [r3, #32]
+ 640              	.LVL49:
+ 152:Core/Src/FEKF.c **** 	float qy = fkal->f[9];
+ 641              		.loc 1 152 2 is_stmt 1 view .LVU152
+ 642              		.loc 1 152 8 is_stmt 0 view .LVU153
+ 643 00a2 D3ED097A 		vldr.32	s15, [r3, #36]
+ 644              	.LVL50:
+ 153:Core/Src/FEKF.c **** 	float qz = fkal->f[10];
+ 645              		.loc 1 153 2 is_stmt 1 view .LVU154
+ 646              		.loc 1 153 8 is_stmt 0 view .LVU155
+ARM GAS  /tmp/ccAdnLOt.s 			page 15
+
+
+ 647 00a6 93ED0A5A 		vldr.32	s10, [r3, #40]
+ 648              	.LVL51:
+ 154:Core/Src/FEKF.c **** 	fkal->z.pData[4] = fkal->meas[6];
+ 649              		.loc 1 154 2 is_stmt 1 view .LVU156
+ 650              		.loc 1 154 9 is_stmt 0 view .LVU157
+ 651 00aa C368     		ldr	r3, [r0, #12]
+ 652              		.loc 1 154 31 view .LVU158
+ 653 00ac D0F8E420 		ldr	r2, [r0, #228]	@ float
+ 654              		.loc 1 154 19 view .LVU159
+ 655 00b0 1A61     		str	r2, [r3, #16]	@ float
+ 155:Core/Src/FEKF.c **** 
+ 156:Core/Src/FEKF.c **** 
+ 157:Core/Src/FEKF.c **** 	float q_mat[9] = {2.0f*(qs*qs + qx*qx) - 1.0f, 2.0f*(qx*qy + qz*qs)       , 2.0f*(qx*qz - qy*qs),
+ 656              		.loc 1 157 2 is_stmt 1 view .LVU160
+ 657              		.loc 1 157 28 is_stmt 0 view .LVU161
+ 658 00b2 26EEA67A 		vmul.f32	s14, s13, s13
+ 659              		.loc 1 157 36 view .LVU162
+ 660 00b6 23EEA36A 		vmul.f32	s12, s7, s7
+ 661              		.loc 1 157 32 view .LVU163
+ 662 00ba 37EE066A 		vadd.f32	s12, s14, s12
+ 663              		.loc 1 157 24 view .LVU164
+ 664 00be 36EE066A 		vadd.f32	s12, s12, s12
+ 665              		.loc 1 157 41 view .LVU165
+ 666 00c2 B7EE003A 		vmov.f32	s6, #1.0e+0
+ 667 00c6 36EE436A 		vsub.f32	s12, s12, s6
+ 668              		.loc 1 157 8 view .LVU166
+ 669 00ca 8DED096A 		vstr.32	s12, [sp, #36]
+ 670              		.loc 1 157 57 view .LVU167
+ 671 00ce 23EEA74A 		vmul.f32	s8, s7, s15
+ 672              		.loc 1 157 65 view .LVU168
+ 673 00d2 66EE855A 		vmul.f32	s11, s13, s10
+ 674              		.loc 1 157 61 view .LVU169
+ 675 00d6 34EE256A 		vadd.f32	s12, s8, s11
+ 676              		.loc 1 157 53 view .LVU170
+ 677 00da 36EE066A 		vadd.f32	s12, s12, s12
+ 678              		.loc 1 157 8 view .LVU171
+ 679 00de 8DED0A6A 		vstr.32	s12, [sp, #40]
+ 680              		.loc 1 157 86 view .LVU172
+ 681 00e2 63EE854A 		vmul.f32	s9, s7, s10
+ 682              		.loc 1 157 94 view .LVU173
+ 683 00e6 66EEA72A 		vmul.f32	s5, s13, s15
+ 684              		.loc 1 157 90 view .LVU174
+ 685 00ea 34EEE26A 		vsub.f32	s12, s9, s5
+ 686              		.loc 1 157 82 view .LVU175
+ 687 00ee 36EE066A 		vadd.f32	s12, s12, s12
+ 688              		.loc 1 157 8 view .LVU176
+ 689 00f2 8DED0B6A 		vstr.32	s12, [sp, #44]
+ 158:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 690              		.loc 1 158 18 view .LVU177
+ 691 00f6 34EE654A 		vsub.f32	s8, s8, s11
+ 692              		.loc 1 158 10 view .LVU178
+ 693 00fa 34EE044A 		vadd.f32	s8, s8, s8
+ 157:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 694              		.loc 1 157 8 view .LVU179
+ 695 00fe 8DED0C4A 		vstr.32	s8, [sp, #48]
+ 696              		.loc 1 158 51 view .LVU180
+ 697 0102 67EEA75A 		vmul.f32	s11, s15, s15
+ARM GAS  /tmp/ccAdnLOt.s 			page 16
+
+
+ 698              		.loc 1 158 47 view .LVU181
+ 699 0106 77EE255A 		vadd.f32	s11, s14, s11
+ 700              		.loc 1 158 39 view .LVU182
+ 701 010a 75EEA55A 		vadd.f32	s11, s11, s11
+ 702              		.loc 1 158 56 view .LVU183
+ 703 010e 75EEC35A 		vsub.f32	s11, s11, s6
+ 157:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 704              		.loc 1 157 8 view .LVU184
+ 705 0112 CDED0D5A 		vstr.32	s11, [sp, #52]
+ 706              		.loc 1 158 72 view .LVU185
+ 707 0116 67EE857A 		vmul.f32	s15, s15, s10
+ 708              	.LVL52:
+ 709              		.loc 1 158 80 view .LVU186
+ 710 011a 66EEA36A 		vmul.f32	s13, s13, s7
+ 711              	.LVL53:
+ 712              		.loc 1 158 76 view .LVU187
+ 713 011e 37EEA64A 		vadd.f32	s8, s15, s13
+ 714              		.loc 1 158 68 view .LVU188
+ 715 0122 34EE044A 		vadd.f32	s8, s8, s8
+ 157:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 716              		.loc 1 157 8 view .LVU189
+ 717 0126 8DED0E4A 		vstr.32	s8, [sp, #56]
+ 159:Core/Src/FEKF.c **** 			  2.0f*(qx*qz + qy*qs)       , 2.0f*(qy*qz - qs*qx)       , 2.0f*(qs*qs + qz*qz) - 1.0f};
+ 718              		.loc 1 159 18 view .LVU190
+ 719 012a 74EEA25A 		vadd.f32	s11, s9, s5
+ 720              		.loc 1 159 10 view .LVU191
+ 721 012e 75EEA55A 		vadd.f32	s11, s11, s11
+ 157:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 722              		.loc 1 157 8 view .LVU192
+ 723 0132 CDED0F5A 		vstr.32	s11, [sp, #60]
+ 724              		.loc 1 159 47 view .LVU193
+ 725 0136 77EEE67A 		vsub.f32	s15, s15, s13
+ 726              		.loc 1 159 39 view .LVU194
+ 727 013a 77EEA77A 		vadd.f32	s15, s15, s15
+ 157:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 728              		.loc 1 157 8 view .LVU195
+ 729 013e CDED107A 		vstr.32	s15, [sp, #64]
+ 730              		.loc 1 159 80 view .LVU196
+ 731 0142 25EE055A 		vmul.f32	s10, s10, s10
+ 732              	.LVL54:
+ 733              		.loc 1 159 76 view .LVU197
+ 734 0146 37EE057A 		vadd.f32	s14, s14, s10
+ 735              		.loc 1 159 68 view .LVU198
+ 736 014a 37EE077A 		vadd.f32	s14, s14, s14
+ 737              		.loc 1 159 85 view .LVU199
+ 738 014e 37EE437A 		vsub.f32	s14, s14, s6
+ 157:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 739              		.loc 1 157 8 view .LVU200
+ 740 0152 8DED117A 		vstr.32	s14, [sp, #68]
+ 160:Core/Src/FEKF.c **** 
+ 161:Core/Src/FEKF.c **** 	float gx = 9.81f*q_mat[2];
+ 741              		.loc 1 161 2 is_stmt 1 view .LVU201
+ 742              		.loc 1 161 8 is_stmt 0 view .LVU202
+ 743 0156 DFED457A 		vldr.32	s15, .L12+16
+ 744 015a 26EE275A 		vmul.f32	s10, s12, s15
+ 745              	.LVL55:
+ 162:Core/Src/FEKF.c **** 	float gy = 9.81f*q_mat[5];
+ARM GAS  /tmp/ccAdnLOt.s 			page 17
+
+
+ 746              		.loc 1 162 2 is_stmt 1 view .LVU203
+ 747              		.loc 1 162 8 is_stmt 0 view .LVU204
+ 748 015e 64EE270A 		vmul.f32	s1, s8, s15
+ 749              	.LVL56:
+ 163:Core/Src/FEKF.c **** 	float gz = 9.81f*q_mat[8];
+ 750              		.loc 1 163 2 is_stmt 1 view .LVU205
+ 751              		.loc 1 163 8 is_stmt 0 view .LVU206
+ 752 0162 27EE277A 		vmul.f32	s14, s14, s15
+ 753              	.LVL57:
+ 164:Core/Src/FEKF.c **** 
+ 165:Core/Src/FEKF.c **** 	
+ 166:Core/Src/FEKF.c **** 	float wx = fkal->f[3];
+ 754              		.loc 1 166 2 is_stmt 1 view .LVU207
+ 755              		.loc 1 166 17 is_stmt 0 view .LVU208
+ 756 0166 D0F8E820 		ldr	r2, [r0, #232]
+ 757              		.loc 1 166 8 view .LVU209
+ 758 016a D2ED035A 		vldr.32	s11, [r2, #12]
+ 759              	.LVL58:
+ 167:Core/Src/FEKF.c **** 	float wy = fkal->f[4];
+ 760              		.loc 1 167 2 is_stmt 1 view .LVU210
+ 761              		.loc 1 167 8 is_stmt 0 view .LVU211
+ 762 016e D2ED047A 		vldr.32	s15, [r2, #16]
+ 763              	.LVL59:
+ 168:Core/Src/FEKF.c **** 	float wz = fkal->f[5];
+ 764              		.loc 1 168 2 is_stmt 1 view .LVU212
+ 765              		.loc 1 168 8 is_stmt 0 view .LVU213
+ 766 0172 92ED056A 		vldr.32	s12, [r2, #20]
+ 767              	.LVL60:
+ 169:Core/Src/FEKF.c **** 
+ 170:Core/Src/FEKF.c **** 	float coriolis_mat[9] = {((-1.0f)*wy*wy - wz*wz), (wy*wy)                , (wz*wz),
+ 768              		.loc 1 170 2 is_stmt 1 view .LVU214
+ 769              		.loc 1 170 38 is_stmt 0 view .LVU215
+ 770 0176 27EEE74A 		vnmul.f32	s8, s15, s15
+ 771              		.loc 1 170 46 view .LVU216
+ 772 017a 66EE064A 		vmul.f32	s9, s12, s12
+ 773              		.loc 1 170 42 view .LVU217
+ 774 017e 34EE644A 		vsub.f32	s8, s8, s9
+ 775              		.loc 1 170 8 view .LVU218
+ 776 0182 8DED004A 		vstr.32	s8, [sp]
+ 777              		.loc 1 170 55 view .LVU219
+ 778 0186 27EEA73A 		vmul.f32	s6, s15, s15
+ 779              		.loc 1 170 8 view .LVU220
+ 780 018a 8DED013A 		vstr.32	s6, [sp, #4]
+ 781 018e CDED024A 		vstr.32	s9, [sp, #8]
+ 171:Core/Src/FEKF.c **** 			         (wx*wy)                , ((-1.0f)*wx*wx - wz*wz), (wy*wz),
+ 782              		.loc 1 171 16 view .LVU221
+ 783 0192 25EEA72A 		vmul.f32	s4, s11, s15
+ 170:Core/Src/FEKF.c **** 			         (wx*wy)                , ((-1.0f)*wx*wx - wz*wz), (wy*wz),
+ 784              		.loc 1 170 8 view .LVU222
+ 785 0196 8DED032A 		vstr.32	s4, [sp, #12]
+ 786              		.loc 1 171 49 view .LVU223
+ 787 019a 65EEE56A 		vnmul.f32	s13, s11, s11
+ 788              		.loc 1 171 53 view .LVU224
+ 789 019e 76EEE42A 		vsub.f32	s5, s13, s9
+ 170:Core/Src/FEKF.c **** 			         (wx*wy)                , ((-1.0f)*wx*wx - wz*wz), (wy*wz),
+ 790              		.loc 1 170 8 view .LVU225
+ 791 01a2 CDED042A 		vstr.32	s5, [sp, #16]
+ARM GAS  /tmp/ccAdnLOt.s 			page 18
+
+
+ 792              		.loc 1 171 66 view .LVU226
+ 793 01a6 67EE863A 		vmul.f32	s7, s15, s12
+ 794              	.LVL61:
+ 170:Core/Src/FEKF.c **** 			         (wx*wy)                , ((-1.0f)*wx*wx - wz*wz), (wy*wz),
+ 795              		.loc 1 170 8 view .LVU227
+ 796 01aa CDED053A 		vstr.32	s7, [sp, #20]
+ 172:Core/Src/FEKF.c **** 				 (wx*wz)                , (wy*wz)                , ((-1.0f)*wx*wx - wy*wy)};
+ 797              		.loc 1 172 9 view .LVU228
+ 798 01ae 65EE861A 		vmul.f32	s3, s11, s12
+ 170:Core/Src/FEKF.c **** 			         (wx*wy)                , ((-1.0f)*wx*wx - wz*wz), (wy*wz),
+ 799              		.loc 1 170 8 view .LVU229
+ 800 01b2 CDED061A 		vstr.32	s3, [sp, #24]
+ 801 01b6 CDED073A 		vstr.32	s7, [sp, #28]
+ 802              		.loc 1 172 71 view .LVU230
+ 803 01ba 36EEC31A 		vsub.f32	s2, s13, s6
+ 170:Core/Src/FEKF.c **** 			         (wx*wy)                , ((-1.0f)*wx*wx - wz*wz), (wy*wz),
+ 804              		.loc 1 170 8 view .LVU231
+ 805 01be 8DED081A 		vstr.32	s2, [sp, #32]
+ 173:Core/Src/FEKF.c **** 
+ 174:Core/Src/FEKF.c **** 	fkal->f[0] = fkal->f[0] + coriolis_mat[0]*dist[0] + coriolis_mat[1]*dist[1] + coriolis_mat[2]*dist
+ 806              		.loc 1 174 2 is_stmt 1 view .LVU232
+ 807              		.loc 1 174 22 is_stmt 0 view .LVU233
+ 808 01c2 D2ED005A 		vldr.32	s11, [r2]
+ 809              	.LVL62:
+ 810              		.loc 1 174 48 view .LVU234
+ 811 01c6 2A4B     		ldr	r3, .L12+20
+ 812 01c8 93ED006A 		vldr.32	s12, [r3]
+ 813              	.LVL63:
+ 814              		.loc 1 174 43 view .LVU235
+ 815 01cc 24EE066A 		vmul.f32	s12, s8, s12
+ 816              		.loc 1 174 26 view .LVU236
+ 817 01d0 35EE866A 		vadd.f32	s12, s11, s12
+ 818              		.loc 1 174 74 view .LVU237
+ 819 01d4 D3ED017A 		vldr.32	s15, [r3, #4]
+ 820              	.LVL64:
+ 821              		.loc 1 174 69 view .LVU238
+ 822 01d8 23EE273A 		vmul.f32	s6, s6, s15
+ 823              		.loc 1 174 52 view .LVU239
+ 824 01dc 36EE036A 		vadd.f32	s12, s12, s6
+ 825              		.loc 1 174 100 view .LVU240
+ 826 01e0 D3ED027A 		vldr.32	s15, [r3, #8]
+ 827              		.loc 1 174 95 view .LVU241
+ 828 01e4 64EEA74A 		vmul.f32	s9, s9, s15
+ 829              		.loc 1 174 78 view .LVU242
+ 830 01e8 36EE246A 		vadd.f32	s12, s12, s9
+ 831              		.loc 1 174 104 view .LVU243
+ 832 01ec 36EE056A 		vadd.f32	s12, s12, s10
+ 833              		.loc 1 174 13 view .LVU244
+ 834 01f0 82ED006A 		vstr.32	s12, [r2]
+ 835              	.LVL65:
+ 175:Core/Src/FEKF.c **** 	fkal->f[1] = fkal->f[1] + coriolis_mat[3]*dist[0] + coriolis_mat[4]*dist[1] + coriolis_mat[5]*dist
+ 836              		.loc 1 175 2 is_stmt 1 view .LVU245
+ 837              		.loc 1 175 19 is_stmt 0 view .LVU246
+ 838 01f4 D0F8E820 		ldr	r2, [r0, #232]
+ 839              	.LVL66:
+ 840              		.loc 1 175 22 view .LVU247
+ 841 01f8 D2ED016A 		vldr.32	s13, [r2, #4]
+ARM GAS  /tmp/ccAdnLOt.s 			page 19
+
+
+ 842              		.loc 1 175 48 view .LVU248
+ 843 01fc 93ED006A 		vldr.32	s12, [r3]
+ 844              		.loc 1 175 43 view .LVU249
+ 845 0200 22EE062A 		vmul.f32	s4, s4, s12
+ 846              		.loc 1 175 26 view .LVU250
+ 847 0204 76EE826A 		vadd.f32	s13, s13, s4
+ 848              		.loc 1 175 74 view .LVU251
+ 849 0208 D3ED017A 		vldr.32	s15, [r3, #4]
+ 850              		.loc 1 175 69 view .LVU252
+ 851 020c 62EEA72A 		vmul.f32	s5, s5, s15
+ 852              		.loc 1 175 52 view .LVU253
+ 853 0210 76EEA26A 		vadd.f32	s13, s13, s5
+ 854              		.loc 1 175 100 view .LVU254
+ 855 0214 D3ED025A 		vldr.32	s11, [r3, #8]
+ 856              		.loc 1 175 95 view .LVU255
+ 857 0218 63EEA55A 		vmul.f32	s11, s7, s11
+ 858              		.loc 1 175 78 view .LVU256
+ 859 021c 76EEA56A 		vadd.f32	s13, s13, s11
+ 860              		.loc 1 175 104 view .LVU257
+ 861 0220 76EEA06A 		vadd.f32	s13, s13, s1
+ 862              		.loc 1 175 13 view .LVU258
+ 863 0224 C2ED016A 		vstr.32	s13, [r2, #4]
+ 176:Core/Src/FEKF.c **** 	fkal->f[2] = fkal->f[2] + coriolis_mat[6]*dist[0] + coriolis_mat[7]*dist[1] + coriolis_mat[8]*dist
+ 864              		.loc 1 176 2 is_stmt 1 view .LVU259
+ 865              		.loc 1 176 19 is_stmt 0 view .LVU260
+ 866 0228 D0F8E820 		ldr	r2, [r0, #232]
+ 867              		.loc 1 176 22 view .LVU261
+ 868 022c D2ED027A 		vldr.32	s15, [r2, #8]
+ 869              		.loc 1 176 43 view .LVU262
+ 870 0230 21EE866A 		vmul.f32	s12, s3, s12
+ 871              		.loc 1 176 26 view .LVU263
+ 872 0234 77EE867A 		vadd.f32	s15, s15, s12
+ 873              		.loc 1 176 74 view .LVU264
+ 874 0238 D3ED016A 		vldr.32	s13, [r3, #4]
+ 875              		.loc 1 176 69 view .LVU265
+ 876 023c 63EEA66A 		vmul.f32	s13, s7, s13
+ 877              		.loc 1 176 52 view .LVU266
+ 878 0240 77EEA67A 		vadd.f32	s15, s15, s13
+ 879              		.loc 1 176 100 view .LVU267
+ 880 0244 D3ED026A 		vldr.32	s13, [r3, #8]
+ 881              		.loc 1 176 95 view .LVU268
+ 882 0248 61EE266A 		vmul.f32	s13, s2, s13
+ 883              		.loc 1 176 78 view .LVU269
+ 884 024c 77EEA67A 		vadd.f32	s15, s15, s13
+ 885              		.loc 1 176 104 view .LVU270
+ 886 0250 37EE877A 		vadd.f32	s14, s15, s14
+ 887              	.LVL67:
+ 888              		.loc 1 176 13 view .LVU271
+ 889 0254 82ED027A 		vstr.32	s14, [r2, #8]
+ 177:Core/Src/FEKF.c **** 
+ 178:Core/Src/FEKF.c **** //	sendS("f", fkal->f[0]);space();sendS("f", fkal->f[1]);space();sendS("f", fkal->f[2]);newL();
+ 179:Core/Src/FEKF.c **** 
+ 180:Core/Src/FEKF.c **** }
+ 890              		.loc 1 180 1 view .LVU272
+ 891 0258 12B0     		add	sp, sp, #72
+ 892              	.LCFI8:
+ 893              		.cfi_def_cfa_offset 8
+ARM GAS  /tmp/ccAdnLOt.s 			page 20
+
+
+ 894              		@ sp needed
+ 895 025a 10BD     		pop	{r4, pc}
+ 896              	.LVL68:
+ 897              	.L13:
+ 898              		.loc 1 180 1 view .LVU273
+ 899              		.align	2
+ 900              	.L12:
+ 901 025c 00000000 		.word	.LANCHOR6
+ 902 0260 00000000 		.word	htim2
+ 903 0264 00000000 		.word	.LANCHOR7
+ 904 0268 00247449 		.word	1232348160
+ 905 026c C3F51C41 		.word	1092416963
+ 906 0270 00000000 		.word	.LANCHOR8
+ 907              		.cfi_endproc
+ 908              	.LFE396:
+ 910              		.section	.text.FlightEKF_TransitionFunction,"ax",%progbits
+ 911              		.align	1
+ 912              		.global	FlightEKF_TransitionFunction
+ 913              		.syntax unified
+ 914              		.thumb
+ 915              		.thumb_func
+ 916              		.fpu fpv5-d16
+ 918              	FlightEKF_TransitionFunction:
+ 919              	.LVL69:
+ 920              	.LFB397:
+ 181:Core/Src/FEKF.c **** 
+ 182:Core/Src/FEKF.c **** void FlightEKF_TransitionFunction(fekf* fkal)
+ 183:Core/Src/FEKF.c **** {
+ 921              		.loc 1 183 1 is_stmt 1 view -0
+ 922              		.cfi_startproc
+ 923              		@ args = 0, pretend = 0, frame = 40
+ 924              		@ frame_needed = 0, uses_anonymous_args = 0
+ 925              		@ link register save eliminated.
+ 926              		.loc 1 183 1 is_stmt 0 view .LVU275
+ 927 0000 8AB0     		sub	sp, sp, #40
+ 928              	.LCFI9:
+ 929              		.cfi_def_cfa_offset 40
+ 184:Core/Src/FEKF.c **** 
+ 185:Core/Src/FEKF.c **** 	float dt = fkal->timeStep;
+ 930              		.loc 1 185 2 is_stmt 1 view .LVU276
+ 931              		.loc 1 185 8 is_stmt 0 view .LVU277
+ 932 0002 D0ED3C3A 		vldr.32	s7, [r0, #240]
+ 933              	.LVL70:
+ 186:Core/Src/FEKF.c **** 
+ 187:Core/Src/FEKF.c **** 	float qs = fkal->f[7];
+ 934              		.loc 1 187 2 is_stmt 1 view .LVU278
+ 935              		.loc 1 187 17 is_stmt 0 view .LVU279
+ 936 0006 D0F8E830 		ldr	r3, [r0, #232]
+ 937              		.loc 1 187 8 view .LVU280
+ 938 000a D3ED072A 		vldr.32	s5, [r3, #28]
+ 939              	.LVL71:
+ 188:Core/Src/FEKF.c **** 	float qx = (-1.0f)*fkal->f[8];
+ 940              		.loc 1 188 2 is_stmt 1 view .LVU281
+ 941              		.loc 1 188 28 is_stmt 0 view .LVU282
+ 942 000e 93ED085A 		vldr.32	s10, [r3, #32]
+ 943              	.LVL72:
+ 189:Core/Src/FEKF.c **** 	float qy = (-1.0f)*fkal->f[9];
+ARM GAS  /tmp/ccAdnLOt.s 			page 21
+
+
+ 944              		.loc 1 189 2 is_stmt 1 view .LVU283
+ 945              		.loc 1 189 28 is_stmt 0 view .LVU284
+ 946 0012 D3ED096A 		vldr.32	s13, [r3, #36]
+ 947              	.LVL73:
+ 190:Core/Src/FEKF.c **** 	float qz = (-1.0f)*fkal->f[10];
+ 948              		.loc 1 190 2 is_stmt 1 view .LVU285
+ 949              		.loc 1 190 28 is_stmt 0 view .LVU286
+ 950 0016 D3ED0A4A 		vldr.32	s9, [r3, #40]
+ 951              	.LVL74:
+ 191:Core/Src/FEKF.c **** 
+ 192:Core/Src/FEKF.c **** 	float q_mat[9] = {2.0f*(qs*qs + qx*qx) - 1.0f, 2.0f*(qx*qy + qz*qs)       , 2.0f*(qx*qz - qy*qs),
+ 952              		.loc 1 192 2 is_stmt 1 view .LVU287
+ 953              		.loc 1 192 28 is_stmt 0 view .LVU288
+ 954 001a 22EEA26A 		vmul.f32	s12, s5, s5
+ 955              		.loc 1 192 36 view .LVU289
+ 956 001e 65EE057A 		vmul.f32	s15, s10, s10
+ 957              		.loc 1 192 32 view .LVU290
+ 958 0022 76EE277A 		vadd.f32	s15, s12, s15
+ 959              		.loc 1 192 24 view .LVU291
+ 960 0026 77EEA77A 		vadd.f32	s15, s15, s15
+ 961              		.loc 1 192 41 view .LVU292
+ 962 002a B7EE001A 		vmov.f32	s2, #1.0e+0
+ 963 002e 77EEC17A 		vsub.f32	s15, s15, s2
+ 964              		.loc 1 192 8 view .LVU293
+ 965 0032 CDED017A 		vstr.32	s15, [sp, #4]
+ 966              		.loc 1 192 57 view .LVU294
+ 967 0036 25EE263A 		vmul.f32	s6, s10, s13
+ 968              		.loc 1 192 65 view .LVU295
+ 969 003a 24EEE24A 		vnmul.f32	s8, s9, s5
+ 970              		.loc 1 192 61 view .LVU296
+ 971 003e 33EE042A 		vadd.f32	s4, s6, s8
+ 972              		.loc 1 192 53 view .LVU297
+ 973 0042 32EE022A 		vadd.f32	s4, s4, s4
+ 974              		.loc 1 192 8 view .LVU298
+ 975 0046 8DED022A 		vstr.32	s4, [sp, #8]
+ 976              		.loc 1 192 86 view .LVU299
+ 977 004a 25EE247A 		vmul.f32	s14, s10, s9
+ 978              		.loc 1 192 94 view .LVU300
+ 979 004e 66EEE20A 		vnmul.f32	s1, s13, s5
+ 980              		.loc 1 192 90 view .LVU301
+ 981 0052 77EE601A 		vsub.f32	s3, s14, s1
+ 982              		.loc 1 192 82 view .LVU302
+ 983 0056 71EEA11A 		vadd.f32	s3, s3, s3
+ 984              		.loc 1 192 8 view .LVU303
+ 985 005a CDED031A 		vstr.32	s3, [sp, #12]
+ 193:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 986              		.loc 1 193 18 view .LVU304
+ 987 005e 33EE443A 		vsub.f32	s6, s6, s8
+ 988              		.loc 1 193 10 view .LVU305
+ 989 0062 33EE033A 		vadd.f32	s6, s6, s6
+ 192:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 990              		.loc 1 192 8 view .LVU306
+ 991 0066 8DED043A 		vstr.32	s6, [sp, #16]
+ 992              		.loc 1 193 51 view .LVU307
+ 993 006a 26EEA64A 		vmul.f32	s8, s13, s13
+ 994              		.loc 1 193 47 view .LVU308
+ 995 006e 36EE044A 		vadd.f32	s8, s12, s8
+ARM GAS  /tmp/ccAdnLOt.s 			page 22
+
+
+ 996              		.loc 1 193 39 view .LVU309
+ 997 0072 34EE044A 		vadd.f32	s8, s8, s8
+ 998              		.loc 1 193 56 view .LVU310
+ 999 0076 34EE414A 		vsub.f32	s8, s8, s2
+ 192:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 1000              		.loc 1 192 8 view .LVU311
+ 1001 007a 8DED054A 		vstr.32	s8, [sp, #20]
+ 1002              		.loc 1 193 72 view .LVU312
+ 1003 007e 66EEA46A 		vmul.f32	s13, s13, s9
+ 1004              	.LVL75:
+ 1005              		.loc 1 193 80 view .LVU313
+ 1006 0082 25EE625A 		vnmul.f32	s10, s10, s5
+ 1007              	.LVL76:
+ 1008              		.loc 1 193 76 view .LVU314
+ 1009 0086 76EE852A 		vadd.f32	s5, s13, s10
+ 1010              	.LVL77:
+ 1011              		.loc 1 193 68 view .LVU315
+ 1012 008a 72EEA22A 		vadd.f32	s5, s5, s5
+ 192:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 1013              		.loc 1 192 8 view .LVU316
+ 1014 008e CDED062A 		vstr.32	s5, [sp, #24]
+ 194:Core/Src/FEKF.c **** 			  2.0f*(qx*qz + qy*qs)       , 2.0f*(qy*qz - qs*qx)       , 2.0f*(qs*qs + qz*qz) - 1.0f};
+ 1015              		.loc 1 194 18 view .LVU317
+ 1016 0092 37EE207A 		vadd.f32	s14, s14, s1
+ 1017              		.loc 1 194 10 view .LVU318
+ 1018 0096 37EE077A 		vadd.f32	s14, s14, s14
+ 192:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 1019              		.loc 1 192 8 view .LVU319
+ 1020 009a 8DED077A 		vstr.32	s14, [sp, #28]
+ 1021              		.loc 1 194 47 view .LVU320
+ 1022 009e 76EEC56A 		vsub.f32	s13, s13, s10
+ 1023              		.loc 1 194 39 view .LVU321
+ 1024 00a2 76EEA66A 		vadd.f32	s13, s13, s13
+ 192:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 1025              		.loc 1 192 8 view .LVU322
+ 1026 00a6 CDED086A 		vstr.32	s13, [sp, #32]
+ 1027              		.loc 1 194 80 view .LVU323
+ 1028 00aa 64EEA44A 		vmul.f32	s9, s9, s9
+ 1029              	.LVL78:
+ 1030              		.loc 1 194 76 view .LVU324
+ 1031 00ae 36EE246A 		vadd.f32	s12, s12, s9
+ 1032              		.loc 1 194 68 view .LVU325
+ 1033 00b2 36EE066A 		vadd.f32	s12, s12, s12
+ 1034              		.loc 1 194 85 view .LVU326
+ 1035 00b6 36EE416A 		vsub.f32	s12, s12, s2
+ 192:Core/Src/FEKF.c **** 			  2.0f*(qx*qy - qz*qs)       , 2.0f*(qs*qs + qy*qy) - 1.0f, 2.0f*(qy*qz + qx*qs),
+ 1036              		.loc 1 192 8 view .LVU327
+ 1037 00ba 8DED096A 		vstr.32	s12, [sp, #36]
+ 195:Core/Src/FEKF.c **** 
+ 196:Core/Src/FEKF.c **** 	float acc_inert_x = q_mat[0]*fkal->f[0] + q_mat[1]*fkal->f[1] + q_mat[2]*fkal->f[2];
+ 1038              		.loc 1 196 2 is_stmt 1 view .LVU328
+ 1039              		.loc 1 196 38 is_stmt 0 view .LVU329
+ 1040 00be 93ED001A 		vldr.32	s2, [r3]
+ 1041              		.loc 1 196 30 view .LVU330
+ 1042 00c2 67EE815A 		vmul.f32	s11, s15, s2
+ 1043              		.loc 1 196 60 view .LVU331
+ 1044 00c6 D3ED014A 		vldr.32	s9, [r3, #4]
+ARM GAS  /tmp/ccAdnLOt.s 			page 23
+
+
+ 1045              		.loc 1 196 52 view .LVU332
+ 1046 00ca 22EE242A 		vmul.f32	s4, s4, s9
+ 1047              		.loc 1 196 42 view .LVU333
+ 1048 00ce 75EE825A 		vadd.f32	s11, s11, s4
+ 1049              		.loc 1 196 82 view .LVU334
+ 1050 00d2 93ED025A 		vldr.32	s10, [r3, #8]
+ 1051              		.loc 1 196 74 view .LVU335
+ 1052 00d6 61EE851A 		vmul.f32	s3, s3, s10
+ 1053              		.loc 1 196 8 view .LVU336
+ 1054 00da 75EEA15A 		vadd.f32	s11, s11, s3
+ 1055              	.LVL79:
+ 197:Core/Src/FEKF.c **** 	float acc_inert_y = q_mat[3]*fkal->f[0] + q_mat[4]*fkal->f[1] + q_mat[5]*fkal->f[2];
+ 1056              		.loc 1 197 2 is_stmt 1 view .LVU337
+ 1057              		.loc 1 197 30 is_stmt 0 view .LVU338
+ 1058 00de 63EE017A 		vmul.f32	s15, s6, s2
+ 1059              		.loc 1 197 52 view .LVU339
+ 1060 00e2 24EE244A 		vmul.f32	s8, s8, s9
+ 1061              		.loc 1 197 42 view .LVU340
+ 1062 00e6 77EE847A 		vadd.f32	s15, s15, s8
+ 1063              		.loc 1 197 74 view .LVU341
+ 1064 00ea 62EE852A 		vmul.f32	s5, s5, s10
+ 1065              		.loc 1 197 8 view .LVU342
+ 1066 00ee 77EEA27A 		vadd.f32	s15, s15, s5
+ 1067              	.LVL80:
+ 198:Core/Src/FEKF.c **** 	float acc_inert_z = q_mat[6]*fkal->f[0] + q_mat[7]*fkal->f[1] + q_mat[8]*fkal->f[2];
+ 1068              		.loc 1 198 2 is_stmt 1 view .LVU343
+ 1069              		.loc 1 198 30 is_stmt 0 view .LVU344
+ 1070 00f2 27EE017A 		vmul.f32	s14, s14, s2
+ 1071              		.loc 1 198 52 view .LVU345
+ 1072 00f6 66EEA46A 		vmul.f32	s13, s13, s9
+ 1073              		.loc 1 198 42 view .LVU346
+ 1074 00fa 37EE267A 		vadd.f32	s14, s14, s13
+ 1075              		.loc 1 198 74 view .LVU347
+ 1076 00fe 26EE056A 		vmul.f32	s12, s12, s10
+ 1077              		.loc 1 198 8 view .LVU348
+ 1078 0102 37EE067A 		vadd.f32	s14, s14, s12
+ 1079              	.LVL81:
+ 199:Core/Src/FEKF.c **** 
+ 200:Core/Src/FEKF.c **** 	fkal->x.pData[1] = fkal->x.pData[1] + acc_inert_x*dt;
+ 1080              		.loc 1 200 2 is_stmt 1 view .LVU349
+ 1081              		.loc 1 200 28 is_stmt 0 view .LVU350
+ 1082 0106 4368     		ldr	r3, [r0, #4]
+ 1083              	.LVL82:
+ 1084              		.loc 1 200 34 view .LVU351
+ 1085 0108 93ED016A 		vldr.32	s12, [r3, #4]
+ 1086              		.loc 1 200 51 view .LVU352
+ 1087 010c 63EEA56A 		vmul.f32	s13, s7, s11
+ 1088              		.loc 1 200 38 view .LVU353
+ 1089 0110 76EE266A 		vadd.f32	s13, s12, s13
+ 1090              		.loc 1 200 19 view .LVU354
+ 1091 0114 C3ED016A 		vstr.32	s13, [r3, #4]
+ 1092              	.LVL83:
+ 201:Core/Src/FEKF.c **** 	fkal->x.pData[3] = fkal->x.pData[3] + acc_inert_y*dt;
+ 1093              		.loc 1 201 2 is_stmt 1 view .LVU355
+ 1094              		.loc 1 201 28 is_stmt 0 view .LVU356
+ 1095 0118 4368     		ldr	r3, [r0, #4]
+ 1096              		.loc 1 201 34 view .LVU357
+ARM GAS  /tmp/ccAdnLOt.s 			page 24
+
+
+ 1097 011a D3ED036A 		vldr.32	s13, [r3, #12]
+ 1098              		.loc 1 201 51 view .LVU358
+ 1099 011e 63EEA77A 		vmul.f32	s15, s7, s15
+ 1100              	.LVL84:
+ 1101              		.loc 1 201 38 view .LVU359
+ 1102 0122 76EEA77A 		vadd.f32	s15, s13, s15
+ 1103              		.loc 1 201 19 view .LVU360
+ 1104 0126 C3ED037A 		vstr.32	s15, [r3, #12]
+ 202:Core/Src/FEKF.c **** 	fkal->x.pData[5] = fkal->x.pData[5] + acc_inert_z*dt;
+ 1105              		.loc 1 202 2 is_stmt 1 view .LVU361
+ 1106              		.loc 1 202 28 is_stmt 0 view .LVU362
+ 1107 012a 4368     		ldr	r3, [r0, #4]
+ 1108              		.loc 1 202 34 view .LVU363
+ 1109 012c D3ED057A 		vldr.32	s15, [r3, #20]
+ 1110              		.loc 1 202 51 view .LVU364
+ 1111 0130 23EE877A 		vmul.f32	s14, s7, s14
+ 1112              	.LVL85:
+ 1113              		.loc 1 202 38 view .LVU365
+ 1114 0134 37EE877A 		vadd.f32	s14, s15, s14
+ 1115              		.loc 1 202 19 view .LVU366
+ 1116 0138 83ED057A 		vstr.32	s14, [r3, #20]
+ 203:Core/Src/FEKF.c **** 
+ 204:Core/Src/FEKF.c **** 	fkal->x.pData[0] = fkal->x.pData[0] + fkal->x.pData[1]*dt;/* + 0.5f*acc_inert_x*dt*dt;*/
+ 1117              		.loc 1 204 2 is_stmt 1 view .LVU367
+ 1118              		.loc 1 204 28 is_stmt 0 view .LVU368
+ 1119 013c 4368     		ldr	r3, [r0, #4]
+ 1120              		.loc 1 204 34 view .LVU369
+ 1121 013e D3ED007A 		vldr.32	s15, [r3]
+ 1122              		.loc 1 204 53 view .LVU370
+ 1123 0142 93ED017A 		vldr.32	s14, [r3, #4]
+ 1124              		.loc 1 204 56 view .LVU371
+ 1125 0146 27EE237A 		vmul.f32	s14, s14, s7
+ 1126              		.loc 1 204 38 view .LVU372
+ 1127 014a 77EE877A 		vadd.f32	s15, s15, s14
+ 1128              		.loc 1 204 19 view .LVU373
+ 1129 014e C3ED007A 		vstr.32	s15, [r3]
+ 205:Core/Src/FEKF.c **** 	fkal->x.pData[2] = fkal->x.pData[2] + fkal->x.pData[3]*dt;/* + 0.5f*acc_inert_x*dt*dt;*/
+ 1130              		.loc 1 205 2 is_stmt 1 view .LVU374
+ 1131              		.loc 1 205 28 is_stmt 0 view .LVU375
+ 1132 0152 4368     		ldr	r3, [r0, #4]
+ 1133              		.loc 1 205 34 view .LVU376
+ 1134 0154 D3ED027A 		vldr.32	s15, [r3, #8]
+ 1135              		.loc 1 205 53 view .LVU377
+ 1136 0158 93ED037A 		vldr.32	s14, [r3, #12]
+ 1137              		.loc 1 205 56 view .LVU378
+ 1138 015c 27EE237A 		vmul.f32	s14, s14, s7
+ 1139              		.loc 1 205 38 view .LVU379
+ 1140 0160 77EE877A 		vadd.f32	s15, s15, s14
+ 1141              		.loc 1 205 19 view .LVU380
+ 1142 0164 C3ED027A 		vstr.32	s15, [r3, #8]
+ 206:Core/Src/FEKF.c **** 	fkal->x.pData[4] = fkal->x.pData[4] + fkal->x.pData[5]*dt;/* + 0.5f*acc_inert_x*dt*dt;*/
+ 1143              		.loc 1 206 2 is_stmt 1 view .LVU381
+ 1144              		.loc 1 206 28 is_stmt 0 view .LVU382
+ 1145 0168 4368     		ldr	r3, [r0, #4]
+ 1146              		.loc 1 206 34 view .LVU383
+ 1147 016a D3ED047A 		vldr.32	s15, [r3, #16]
+ 1148              		.loc 1 206 53 view .LVU384
+ARM GAS  /tmp/ccAdnLOt.s 			page 25
+
+
+ 1149 016e 93ED057A 		vldr.32	s14, [r3, #20]
+ 1150              		.loc 1 206 56 view .LVU385
+ 1151 0172 67EE233A 		vmul.f32	s7, s14, s7
+ 1152              	.LVL86:
+ 1153              		.loc 1 206 38 view .LVU386
+ 1154 0176 77EEA33A 		vadd.f32	s7, s15, s7
+ 1155              		.loc 1 206 19 view .LVU387
+ 1156 017a C3ED043A 		vstr.32	s7, [r3, #16]
+ 207:Core/Src/FEKF.c **** 	
+ 208:Core/Src/FEKF.c **** //	sendS("f", acc_inert_x);space();sendS("f", acc_inert_y);space();sendS("f", acc_inert_z);newL();
+ 209:Core/Src/FEKF.c **** //	sendS("f", fkal->x.pData[4]);space();sendS("f", fkal->x.pData[5]);newL();
+ 210:Core/Src/FEKF.c **** 
+ 211:Core/Src/FEKF.c **** }
+ 1157              		.loc 1 211 1 view .LVU388
+ 1158 017e 0AB0     		add	sp, sp, #40
+ 1159              	.LCFI10:
+ 1160              		.cfi_def_cfa_offset 0
+ 1161              	.LVL87:
+ 1162              		.loc 1 211 1 view .LVU389
+ 1163              		@ sp needed
+ 1164 0180 7047     		bx	lr
+ 1165              		.cfi_endproc
+ 1166              	.LFE397:
+ 1168              		.section	.text.FlightEKF_TransitionJacobian,"ax",%progbits
+ 1169              		.align	1
+ 1170              		.global	FlightEKF_TransitionJacobian
+ 1171              		.syntax unified
+ 1172              		.thumb
+ 1173              		.thumb_func
+ 1174              		.fpu fpv5-d16
+ 1176              	FlightEKF_TransitionJacobian:
+ 1177              	.LVL88:
+ 1178              	.LFB398:
+ 212:Core/Src/FEKF.c **** 
+ 213:Core/Src/FEKF.c **** void FlightEKF_TransitionJacobian(fekf* fkal)
+ 214:Core/Src/FEKF.c **** {
+ 1179              		.loc 1 214 1 is_stmt 1 view -0
+ 1180              		.cfi_startproc
+ 1181              		@ args = 0, pretend = 0, frame = 0
+ 1182              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1183              		@ link register save eliminated.
+ 1184              		.loc 1 214 1 is_stmt 0 view .LVU391
+ 1185 0000 10B4     		push	{r4}
+ 1186              	.LCFI11:
+ 1187              		.cfi_def_cfa_offset 4
+ 1188              		.cfi_offset 4, -4
+ 215:Core/Src/FEKF.c **** 	
+ 216:Core/Src/FEKF.c **** 	float dt = fkal->timeStep;
+ 1189              		.loc 1 216 2 is_stmt 1 view .LVU392
+ 1190              		.loc 1 216 8 is_stmt 0 view .LVU393
+ 1191 0002 D0F8F010 		ldr	r1, [r0, #240]	@ float
+ 1192              	.LVL89:
+ 217:Core/Src/FEKF.c **** 
+ 218:Core/Src/FEKF.c **** 	/* Jacobian of 1. and 2. states (x, vx) (1./2. Row) */
+ 219:Core/Src/FEKF.c **** 	fkal->A.pData[0] = 1.0f;
+ 1193              		.loc 1 219 2 is_stmt 1 view .LVU394
+ 1194              		.loc 1 219 9 is_stmt 0 view .LVU395
+ARM GAS  /tmp/ccAdnLOt.s 			page 26
+
+
+ 1195 0006 C369     		ldr	r3, [r0, #28]
+ 1196              		.loc 1 219 19 view .LVU396
+ 1197 0008 4FF07E52 		mov	r2, #1065353216
+ 1198 000c 1A60     		str	r2, [r3]	@ float
+ 220:Core/Src/FEKF.c **** 	fkal->A.pData[1] = dt;
+ 1199              		.loc 1 220 2 is_stmt 1 view .LVU397
+ 1200              		.loc 1 220 9 is_stmt 0 view .LVU398
+ 1201 000e C369     		ldr	r3, [r0, #28]
+ 1202              		.loc 1 220 19 view .LVU399
+ 1203 0010 5960     		str	r1, [r3, #4]	@ float
+ 221:Core/Src/FEKF.c **** 	fkal->A.pData[2] = 0.0f;
+ 1204              		.loc 1 221 2 is_stmt 1 view .LVU400
+ 1205              		.loc 1 221 19 is_stmt 0 view .LVU401
+ 1206 0012 0023     		movs	r3, #0
+ 1207 0014 C469     		ldr	r4, [r0, #28]
+ 1208 0016 A360     		str	r3, [r4, #8]	@ float
+ 222:Core/Src/FEKF.c **** 	fkal->A.pData[3] = 0.0f;
+ 1209              		.loc 1 222 2 is_stmt 1 view .LVU402
+ 1210              		.loc 1 222 19 is_stmt 0 view .LVU403
+ 1211 0018 C469     		ldr	r4, [r0, #28]
+ 1212 001a E360     		str	r3, [r4, #12]	@ float
+ 223:Core/Src/FEKF.c **** 	fkal->A.pData[4] = 0.0f;
+ 1213              		.loc 1 223 2 is_stmt 1 view .LVU404
+ 1214              		.loc 1 223 19 is_stmt 0 view .LVU405
+ 1215 001c C469     		ldr	r4, [r0, #28]
+ 1216 001e 2361     		str	r3, [r4, #16]	@ float
+ 224:Core/Src/FEKF.c **** 	fkal->A.pData[5] = 0.0f;
+ 1217              		.loc 1 224 2 is_stmt 1 view .LVU406
+ 1218              		.loc 1 224 19 is_stmt 0 view .LVU407
+ 1219 0020 C469     		ldr	r4, [r0, #28]
+ 1220 0022 6361     		str	r3, [r4, #20]	@ float
+ 225:Core/Src/FEKF.c **** 
+ 226:Core/Src/FEKF.c **** 	fkal->A.pData[6] = 0.0f;
+ 1221              		.loc 1 226 2 is_stmt 1 view .LVU408
+ 1222              		.loc 1 226 19 is_stmt 0 view .LVU409
+ 1223 0024 C469     		ldr	r4, [r0, #28]
+ 1224 0026 A361     		str	r3, [r4, #24]	@ float
+ 227:Core/Src/FEKF.c **** 	fkal->A.pData[7] = 1.0f;
+ 1225              		.loc 1 227 2 is_stmt 1 view .LVU410
+ 1226              		.loc 1 227 19 is_stmt 0 view .LVU411
+ 1227 0028 C469     		ldr	r4, [r0, #28]
+ 1228 002a E261     		str	r2, [r4, #28]	@ float
+ 228:Core/Src/FEKF.c **** 	fkal->A.pData[8] = 0.0f;
+ 1229              		.loc 1 228 2 is_stmt 1 view .LVU412
+ 1230              		.loc 1 228 19 is_stmt 0 view .LVU413
+ 1231 002c C469     		ldr	r4, [r0, #28]
+ 1232 002e 2362     		str	r3, [r4, #32]	@ float
+ 229:Core/Src/FEKF.c **** 	fkal->A.pData[9] = 0.0f;
+ 1233              		.loc 1 229 2 is_stmt 1 view .LVU414
+ 1234              		.loc 1 229 19 is_stmt 0 view .LVU415
+ 1235 0030 C469     		ldr	r4, [r0, #28]
+ 1236 0032 6362     		str	r3, [r4, #36]	@ float
+ 230:Core/Src/FEKF.c **** 	fkal->A.pData[10] = 0.0f;
+ 1237              		.loc 1 230 2 is_stmt 1 view .LVU416
+ 1238              		.loc 1 230 20 is_stmt 0 view .LVU417
+ 1239 0034 C469     		ldr	r4, [r0, #28]
+ 1240 0036 A362     		str	r3, [r4, #40]	@ float
+ARM GAS  /tmp/ccAdnLOt.s 			page 27
+
+
+ 231:Core/Src/FEKF.c **** 	fkal->A.pData[11] = 0.0f;
+ 1241              		.loc 1 231 2 is_stmt 1 view .LVU418
+ 1242              		.loc 1 231 20 is_stmt 0 view .LVU419
+ 1243 0038 C469     		ldr	r4, [r0, #28]
+ 1244 003a E362     		str	r3, [r4, #44]	@ float
+ 232:Core/Src/FEKF.c **** 
+ 233:Core/Src/FEKF.c **** 	/* Jacobian of 3. and 4. states (y, yx) (3./4. Row) */
+ 234:Core/Src/FEKF.c **** 	fkal->A.pData[12] = 0.0f;
+ 1245              		.loc 1 234 2 is_stmt 1 view .LVU420
+ 1246              		.loc 1 234 20 is_stmt 0 view .LVU421
+ 1247 003c C469     		ldr	r4, [r0, #28]
+ 1248 003e 2363     		str	r3, [r4, #48]	@ float
+ 235:Core/Src/FEKF.c **** 	fkal->A.pData[13] = 0.0f;
+ 1249              		.loc 1 235 2 is_stmt 1 view .LVU422
+ 1250              		.loc 1 235 20 is_stmt 0 view .LVU423
+ 1251 0040 C469     		ldr	r4, [r0, #28]
+ 1252 0042 6363     		str	r3, [r4, #52]	@ float
+ 236:Core/Src/FEKF.c **** 	fkal->A.pData[14] = 1.0f;
+ 1253              		.loc 1 236 2 is_stmt 1 view .LVU424
+ 1254              		.loc 1 236 20 is_stmt 0 view .LVU425
+ 1255 0044 C469     		ldr	r4, [r0, #28]
+ 1256 0046 A263     		str	r2, [r4, #56]	@ float
+ 237:Core/Src/FEKF.c **** 	fkal->A.pData[15] = dt;
+ 1257              		.loc 1 237 2 is_stmt 1 view .LVU426
+ 1258              		.loc 1 237 20 is_stmt 0 view .LVU427
+ 1259 0048 C469     		ldr	r4, [r0, #28]
+ 1260 004a E163     		str	r1, [r4, #60]	@ float
+ 238:Core/Src/FEKF.c **** 	fkal->A.pData[16] = 0.0f;
+ 1261              		.loc 1 238 2 is_stmt 1 view .LVU428
+ 1262              		.loc 1 238 20 is_stmt 0 view .LVU429
+ 1263 004c C469     		ldr	r4, [r0, #28]
+ 1264 004e 2364     		str	r3, [r4, #64]	@ float
+ 239:Core/Src/FEKF.c **** 	fkal->A.pData[17] = 0.0f;
+ 1265              		.loc 1 239 2 is_stmt 1 view .LVU430
+ 1266              		.loc 1 239 20 is_stmt 0 view .LVU431
+ 1267 0050 C469     		ldr	r4, [r0, #28]
+ 1268 0052 6364     		str	r3, [r4, #68]	@ float
+ 240:Core/Src/FEKF.c **** 
+ 241:Core/Src/FEKF.c **** 	fkal->A.pData[18] = 0.0f;
+ 1269              		.loc 1 241 2 is_stmt 1 view .LVU432
+ 1270              		.loc 1 241 20 is_stmt 0 view .LVU433
+ 1271 0054 C469     		ldr	r4, [r0, #28]
+ 1272 0056 A364     		str	r3, [r4, #72]	@ float
+ 242:Core/Src/FEKF.c **** 	fkal->A.pData[19] = 0.0f;
+ 1273              		.loc 1 242 2 is_stmt 1 view .LVU434
+ 1274              		.loc 1 242 20 is_stmt 0 view .LVU435
+ 1275 0058 C469     		ldr	r4, [r0, #28]
+ 1276 005a E364     		str	r3, [r4, #76]	@ float
+ 243:Core/Src/FEKF.c **** 	fkal->A.pData[20] = 0.0f;
+ 1277              		.loc 1 243 2 is_stmt 1 view .LVU436
+ 1278              		.loc 1 243 20 is_stmt 0 view .LVU437
+ 1279 005c C469     		ldr	r4, [r0, #28]
+ 1280 005e 2365     		str	r3, [r4, #80]	@ float
+ 244:Core/Src/FEKF.c **** 	fkal->A.pData[21] = 1.0f;
+ 1281              		.loc 1 244 2 is_stmt 1 view .LVU438
+ 1282              		.loc 1 244 20 is_stmt 0 view .LVU439
+ 1283 0060 C469     		ldr	r4, [r0, #28]
+ARM GAS  /tmp/ccAdnLOt.s 			page 28
+
+
+ 1284 0062 6265     		str	r2, [r4, #84]	@ float
+ 245:Core/Src/FEKF.c **** 	fkal->A.pData[22] = 0.0f;
+ 1285              		.loc 1 245 2 is_stmt 1 view .LVU440
+ 1286              		.loc 1 245 20 is_stmt 0 view .LVU441
+ 1287 0064 C469     		ldr	r4, [r0, #28]
+ 1288 0066 A365     		str	r3, [r4, #88]	@ float
+ 246:Core/Src/FEKF.c **** 	fkal->A.pData[23] = 0.0f;
+ 1289              		.loc 1 246 2 is_stmt 1 view .LVU442
+ 1290              		.loc 1 246 20 is_stmt 0 view .LVU443
+ 1291 0068 C469     		ldr	r4, [r0, #28]
+ 1292 006a E365     		str	r3, [r4, #92]	@ float
+ 247:Core/Src/FEKF.c **** 
+ 248:Core/Src/FEKF.c **** 	/* Jacobian of 5. and 6. states (y, yx) (5./6. Row) */
+ 249:Core/Src/FEKF.c **** 	fkal->A.pData[24] = 0.0f;
+ 1293              		.loc 1 249 2 is_stmt 1 view .LVU444
+ 1294              		.loc 1 249 20 is_stmt 0 view .LVU445
+ 1295 006c C469     		ldr	r4, [r0, #28]
+ 1296 006e 2366     		str	r3, [r4, #96]	@ float
+ 250:Core/Src/FEKF.c **** 	fkal->A.pData[25] = 0.0f;
+ 1297              		.loc 1 250 2 is_stmt 1 view .LVU446
+ 1298              		.loc 1 250 20 is_stmt 0 view .LVU447
+ 1299 0070 C469     		ldr	r4, [r0, #28]
+ 1300 0072 6366     		str	r3, [r4, #100]	@ float
+ 251:Core/Src/FEKF.c **** 	fkal->A.pData[26] = 0.0f;
+ 1301              		.loc 1 251 2 is_stmt 1 view .LVU448
+ 1302              		.loc 1 251 20 is_stmt 0 view .LVU449
+ 1303 0074 C469     		ldr	r4, [r0, #28]
+ 1304 0076 A366     		str	r3, [r4, #104]	@ float
+ 252:Core/Src/FEKF.c **** 	fkal->A.pData[27] = 0.0f;
+ 1305              		.loc 1 252 2 is_stmt 1 view .LVU450
+ 1306              		.loc 1 252 20 is_stmt 0 view .LVU451
+ 1307 0078 C469     		ldr	r4, [r0, #28]
+ 1308 007a E366     		str	r3, [r4, #108]	@ float
+ 253:Core/Src/FEKF.c **** 	fkal->A.pData[28] = 1.0f;
+ 1309              		.loc 1 253 2 is_stmt 1 view .LVU452
+ 1310              		.loc 1 253 20 is_stmt 0 view .LVU453
+ 1311 007c C469     		ldr	r4, [r0, #28]
+ 1312 007e 2267     		str	r2, [r4, #112]	@ float
+ 254:Core/Src/FEKF.c **** 	fkal->A.pData[29] = dt;
+ 1313              		.loc 1 254 2 is_stmt 1 view .LVU454
+ 1314              		.loc 1 254 20 is_stmt 0 view .LVU455
+ 1315 0080 C469     		ldr	r4, [r0, #28]
+ 1316 0082 6167     		str	r1, [r4, #116]	@ float
+ 255:Core/Src/FEKF.c **** 
+ 256:Core/Src/FEKF.c **** 	fkal->A.pData[30] = 0.0f;
+ 1317              		.loc 1 256 2 is_stmt 1 view .LVU456
+ 1318              		.loc 1 256 9 is_stmt 0 view .LVU457
+ 1319 0084 C169     		ldr	r1, [r0, #28]
+ 1320              	.LVL90:
+ 1321              		.loc 1 256 20 view .LVU458
+ 1322 0086 8B67     		str	r3, [r1, #120]	@ float
+ 1323              	.LVL91:
+ 257:Core/Src/FEKF.c **** 	fkal->A.pData[31] = 0.0f;
+ 1324              		.loc 1 257 2 is_stmt 1 view .LVU459
+ 1325              		.loc 1 257 9 is_stmt 0 view .LVU460
+ 1326 0088 C169     		ldr	r1, [r0, #28]
+ 1327              		.loc 1 257 20 view .LVU461
+ARM GAS  /tmp/ccAdnLOt.s 			page 29
+
+
+ 1328 008a CB67     		str	r3, [r1, #124]	@ float
+ 258:Core/Src/FEKF.c **** 	fkal->A.pData[32] = 0.0f;
+ 1329              		.loc 1 258 2 is_stmt 1 view .LVU462
+ 1330              		.loc 1 258 9 is_stmt 0 view .LVU463
+ 1331 008c C169     		ldr	r1, [r0, #28]
+ 1332              		.loc 1 258 20 view .LVU464
+ 1333 008e C1F88030 		str	r3, [r1, #128]	@ float
+ 259:Core/Src/FEKF.c **** 	fkal->A.pData[33] = 0.0f;
+ 1334              		.loc 1 259 2 is_stmt 1 view .LVU465
+ 1335              		.loc 1 259 9 is_stmt 0 view .LVU466
+ 1336 0092 C169     		ldr	r1, [r0, #28]
+ 1337              		.loc 1 259 20 view .LVU467
+ 1338 0094 C1F88430 		str	r3, [r1, #132]	@ float
+ 260:Core/Src/FEKF.c **** 	fkal->A.pData[34] = 0.0f;
+ 1339              		.loc 1 260 2 is_stmt 1 view .LVU468
+ 1340              		.loc 1 260 9 is_stmt 0 view .LVU469
+ 1341 0098 C169     		ldr	r1, [r0, #28]
+ 1342              		.loc 1 260 20 view .LVU470
+ 1343 009a C1F88830 		str	r3, [r1, #136]	@ float
+ 261:Core/Src/FEKF.c **** 	fkal->A.pData[35] = 1.0f;
+ 1344              		.loc 1 261 2 is_stmt 1 view .LVU471
+ 1345              		.loc 1 261 9 is_stmt 0 view .LVU472
+ 1346 009e C369     		ldr	r3, [r0, #28]
+ 1347              		.loc 1 261 20 view .LVU473
+ 1348 00a0 C3F88C20 		str	r2, [r3, #140]	@ float
+ 262:Core/Src/FEKF.c **** 
+ 263:Core/Src/FEKF.c **** 
+ 264:Core/Src/FEKF.c **** }
+ 1349              		.loc 1 264 1 view .LVU474
+ 1350 00a4 5DF8044B 		ldr	r4, [sp], #4
+ 1351              	.LCFI12:
+ 1352              		.cfi_restore 4
+ 1353              		.cfi_def_cfa_offset 0
+ 1354 00a8 7047     		bx	lr
+ 1355              		.cfi_endproc
+ 1356              	.LFE398:
+ 1358              		.section	.text.FlightEKF_UpdateCovariancePred,"ax",%progbits
+ 1359              		.align	1
+ 1360              		.global	FlightEKF_UpdateCovariancePred
+ 1361              		.syntax unified
+ 1362              		.thumb
+ 1363              		.thumb_func
+ 1364              		.fpu fpv5-d16
+ 1366              	FlightEKF_UpdateCovariancePred:
+ 1367              	.LVL92:
+ 1368              	.LFB399:
+ 265:Core/Src/FEKF.c **** 
+ 266:Core/Src/FEKF.c **** arm_status FlightEKF_UpdateCovariancePred(fekf* fkal)
+ 267:Core/Src/FEKF.c **** {
+ 1369              		.loc 1 267 1 is_stmt 1 view -0
+ 1370              		.cfi_startproc
+ 1371              		@ args = 0, pretend = 0, frame = 0
+ 1372              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1373              		.loc 1 267 1 is_stmt 0 view .LVU476
+ 1374 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 1375              	.LCFI13:
+ 1376              		.cfi_def_cfa_offset 24
+ARM GAS  /tmp/ccAdnLOt.s 			page 30
+
+
+ 1377              		.cfi_offset 4, -24
+ 1378              		.cfi_offset 5, -20
+ 1379              		.cfi_offset 6, -16
+ 1380              		.cfi_offset 7, -12
+ 1381              		.cfi_offset 8, -8
+ 1382              		.cfi_offset 14, -4
+ 1383 0004 0446     		mov	r4, r0
+ 268:Core/Src/FEKF.c **** 	arm_status status;
+ 1384              		.loc 1 268 2 is_stmt 1 view .LVU477
+ 269:Core/Src/FEKF.c **** 	status = ARM_MATH_SUCCESS;
+ 1385              		.loc 1 269 2 view .LVU478
+ 1386              	.LVL93:
+ 270:Core/Src/FEKF.c **** 
+ 271:Core/Src/FEKF.c **** 	/* Calculate R = A*P*At */
+ 272:Core/Src/FEKF.c **** 	status |= arm_mat_trans_f32(&fkal->A, &fkal->At);
+ 1387              		.loc 1 272 2 view .LVU479
+ 1388              		.loc 1 272 30 is_stmt 0 view .LVU480
+ 1389 0006 00F11806 		add	r6, r0, #24
+ 1390              		.loc 1 272 12 view .LVU481
+ 1391 000a 00F14808 		add	r8, r0, #72
+ 1392 000e 4146     		mov	r1, r8
+ 1393 0010 3046     		mov	r0, r6
+ 1394              	.LVL94:
+ 1395              		.loc 1 272 12 view .LVU482
+ 1396 0012 FFF7FEFF 		bl	arm_mat_trans_f32
+ 1397              	.LVL95:
+ 1398 0016 0546     		mov	r5, r0
+ 1399              	.LVL96:
+ 273:Core/Src/FEKF.c **** 	status |= arm_mat_mult_f32(&fkal->P, &fkal->At, &fkal->PAt);
+ 1400              		.loc 1 273 2 is_stmt 1 view .LVU483
+ 1401              		.loc 1 273 12 is_stmt 0 view .LVU484
+ 1402 0018 04F15007 		add	r7, r4, #80
+ 1403 001c 3A46     		mov	r2, r7
+ 1404 001e 4146     		mov	r1, r8
+ 1405 0020 04F11000 		add	r0, r4, #16
+ 1406 0024 FFF7FEFF 		bl	arm_mat_mult_f32
+ 1407              	.LVL97:
+ 1408              		.loc 1 273 9 view .LVU485
+ 1409 0028 0543     		orrs	r5, r5, r0
+ 1410              	.LVL98:
+ 1411              		.loc 1 273 9 view .LVU486
+ 1412 002a 6DB2     		sxtb	r5, r5
+ 1413              	.LVL99:
+ 274:Core/Src/FEKF.c **** 	status |= arm_mat_mult_f32(&fkal->A, &fkal->PAt, &fkal->APAt);
+ 1414              		.loc 1 274 2 is_stmt 1 view .LVU487
+ 1415              		.loc 1 274 12 is_stmt 0 view .LVU488
+ 1416 002c 04F15802 		add	r2, r4, #88
+ 1417 0030 3946     		mov	r1, r7
+ 1418 0032 3046     		mov	r0, r6
+ 1419 0034 FFF7FEFF 		bl	arm_mat_mult_f32
+ 1420              	.LVL100:
+ 1421              		.loc 1 274 9 view .LVU489
+ 1422 0038 0543     		orrs	r5, r5, r0
+ 1423              	.LVL101:
+ 1424              		.loc 1 274 9 view .LVU490
+ 1425 003a 6DB2     		sxtb	r5, r5
+ 1426              	.LVL102:
+ARM GAS  /tmp/ccAdnLOt.s 			page 31
+
+
+ 275:Core/Src/FEKF.c **** 	memcpy(fkal->P.pData, fkal->APAt.pData, sizeof(float)*(fkal->P.numRows*fkal->P.numCols));
+ 1427              		.loc 1 275 2 is_stmt 1 view .LVU491
+ 1428              		.loc 1 275 64 is_stmt 0 view .LVU492
+ 1429 003c 228A     		ldrh	r2, [r4, #16]
+ 1430              		.loc 1 275 80 view .LVU493
+ 1431 003e 638A     		ldrh	r3, [r4, #18]
+ 1432              		.loc 1 275 72 view .LVU494
+ 1433 0040 03FB02F2 		mul	r2, r3, r2
+ 1434              		.loc 1 275 2 view .LVU495
+ 1435 0044 9200     		lsls	r2, r2, #2
+ 1436 0046 E16D     		ldr	r1, [r4, #92]
+ 1437 0048 6069     		ldr	r0, [r4, #20]
+ 1438 004a FFF7FEFF 		bl	memcpy
+ 1439              	.LVL103:
+ 276:Core/Src/FEKF.c **** 	
+ 277:Core/Src/FEKF.c **** 	/* Calculate R = R + Q */
+ 278:Core/Src/FEKF.c **** 	for (int i = 0; i < 6; i++) fkal->P.pData[i*7] += fkal->Q.pData[i*7];
+ 1440              		.loc 1 278 2 is_stmt 1 view .LVU496
+ 1441              	.LBB3:
+ 1442              		.loc 1 278 7 view .LVU497
+ 1443              		.loc 1 278 11 is_stmt 0 view .LVU498
+ 1444 004e 0023     		movs	r3, #0
+ 1445              		.loc 1 278 2 view .LVU499
+ 1446 0050 10E0     		b	.L19
+ 1447              	.LVL104:
+ 1448              	.L20:
+ 1449              		.loc 1 278 30 is_stmt 1 discriminator 3 view .LVU500
+ 1450              		.loc 1 278 37 is_stmt 0 discriminator 3 view .LVU501
+ 1451 0052 6269     		ldr	r2, [r4, #20]
+ 1452              		.loc 1 278 49 discriminator 3 view .LVU502
+ 1453 0054 C3EBC300 		rsb	r0, r3, r3, lsl #3
+ 1454 0058 02EB8002 		add	r2, r2, r0, lsl #2
+ 1455              		.loc 1 278 59 discriminator 3 view .LVU503
+ 1456 005c E16B     		ldr	r1, [r4, #60]
+ 1457              		.loc 1 278 65 discriminator 3 view .LVU504
+ 1458 005e 01EB8001 		add	r1, r1, r0, lsl #2
+ 1459 0062 91ED007A 		vldr.32	s14, [r1]
+ 1460              		.loc 1 278 49 discriminator 3 view .LVU505
+ 1461 0066 D2ED007A 		vldr.32	s15, [r2]
+ 1462 006a 77EE877A 		vadd.f32	s15, s15, s14
+ 1463 006e C2ED007A 		vstr.32	s15, [r2]
+ 1464              		.loc 1 278 25 is_stmt 1 discriminator 3 view .LVU506
+ 1465              		.loc 1 278 26 is_stmt 0 discriminator 3 view .LVU507
+ 1466 0072 0133     		adds	r3, r3, #1
+ 1467              	.LVL105:
+ 1468              	.L19:
+ 1469              		.loc 1 278 18 is_stmt 1 discriminator 1 view .LVU508
+ 1470              		.loc 1 278 2 is_stmt 0 discriminator 1 view .LVU509
+ 1471 0074 052B     		cmp	r3, #5
+ 1472 0076 ECDD     		ble	.L20
+ 1473              	.LBE3:
+ 279:Core/Src/FEKF.c **** 
+ 280:Core/Src/FEKF.c **** 	return status;
+ 1474              		.loc 1 280 2 is_stmt 1 view .LVU510
+ 281:Core/Src/FEKF.c **** }	
+ 1475              		.loc 1 281 1 is_stmt 0 view .LVU511
+ 1476 0078 2846     		mov	r0, r5
+ARM GAS  /tmp/ccAdnLOt.s 			page 32
+
+
+ 1477 007a BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 1478              		.loc 1 281 1 view .LVU512
+ 1479              		.cfi_endproc
+ 1480              	.LFE399:
+ 1482              		.section	.text.FlightEKF_ObsMatrices,"ax",%progbits
+ 1483              		.align	1
+ 1484              		.global	FlightEKF_ObsMatrices
+ 1485              		.syntax unified
+ 1486              		.thumb
+ 1487              		.thumb_func
+ 1488              		.fpu fpv5-d16
+ 1490              	FlightEKF_ObsMatrices:
+ 1491              	.LVL106:
+ 1492              	.LFB400:
+ 282:Core/Src/FEKF.c **** 
+ 283:Core/Src/FEKF.c **** void FlightEKF_ObsMatrices(fekf* fkal)
+ 284:Core/Src/FEKF.c **** {
+ 1493              		.loc 1 284 1 is_stmt 1 view -0
+ 1494              		.cfi_startproc
+ 1495              		@ args = 0, pretend = 0, frame = 0
+ 1496              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1497              		@ link register save eliminated.
+ 285:Core/Src/FEKF.c **** 	fkal->C.pData[4] = fkal->x.pData[4];
+ 1498              		.loc 1 285 2 view .LVU514
+ 1499              		.loc 1 285 28 is_stmt 0 view .LVU515
+ 1500 0000 4268     		ldr	r2, [r0, #4]
+ 1501              		.loc 1 285 9 view .LVU516
+ 1502 0002 436A     		ldr	r3, [r0, #36]
+ 1503              		.loc 1 285 19 view .LVU517
+ 1504 0004 1269     		ldr	r2, [r2, #16]	@ float
+ 1505 0006 1A61     		str	r2, [r3, #16]	@ float
+ 286:Core/Src/FEKF.c **** 
+ 287:Core/Src/FEKF.c **** 	/* Jacobian of 1. and 2. states (x, vx) (1./2. Row) */
+ 288:Core/Src/FEKF.c **** 	fkal->H.pData[0] = 0.0f;
+ 1506              		.loc 1 288 2 is_stmt 1 view .LVU518
+ 1507              		.loc 1 288 9 is_stmt 0 view .LVU519
+ 1508 0008 C26A     		ldr	r2, [r0, #44]
+ 1509              		.loc 1 288 19 view .LVU520
+ 1510 000a 0023     		movs	r3, #0
+ 1511 000c 1360     		str	r3, [r2]	@ float
+ 289:Core/Src/FEKF.c **** 	fkal->H.pData[1] = 0.0f;
+ 1512              		.loc 1 289 2 is_stmt 1 view .LVU521
+ 1513              		.loc 1 289 9 is_stmt 0 view .LVU522
+ 1514 000e C26A     		ldr	r2, [r0, #44]
+ 1515              		.loc 1 289 19 view .LVU523
+ 1516 0010 5360     		str	r3, [r2, #4]	@ float
+ 290:Core/Src/FEKF.c **** 	fkal->H.pData[2] = 0.0f;
+ 1517              		.loc 1 290 2 is_stmt 1 view .LVU524
+ 1518              		.loc 1 290 9 is_stmt 0 view .LVU525
+ 1519 0012 C26A     		ldr	r2, [r0, #44]
+ 1520              		.loc 1 290 19 view .LVU526
+ 1521 0014 9360     		str	r3, [r2, #8]	@ float
+ 291:Core/Src/FEKF.c **** 	fkal->H.pData[3] = 0.0f;
+ 1522              		.loc 1 291 2 is_stmt 1 view .LVU527
+ 1523              		.loc 1 291 9 is_stmt 0 view .LVU528
+ 1524 0016 C26A     		ldr	r2, [r0, #44]
+ 1525              		.loc 1 291 19 view .LVU529
+ARM GAS  /tmp/ccAdnLOt.s 			page 33
+
+
+ 1526 0018 D360     		str	r3, [r2, #12]	@ float
+ 292:Core/Src/FEKF.c **** 	fkal->H.pData[4] = 0.0f;
+ 1527              		.loc 1 292 2 is_stmt 1 view .LVU530
+ 1528              		.loc 1 292 9 is_stmt 0 view .LVU531
+ 1529 001a C26A     		ldr	r2, [r0, #44]
+ 1530              		.loc 1 292 19 view .LVU532
+ 1531 001c 1361     		str	r3, [r2, #16]	@ float
+ 293:Core/Src/FEKF.c **** 	fkal->H.pData[5] = 0.0f;
+ 1532              		.loc 1 293 2 is_stmt 1 view .LVU533
+ 1533              		.loc 1 293 9 is_stmt 0 view .LVU534
+ 1534 001e C26A     		ldr	r2, [r0, #44]
+ 1535              		.loc 1 293 19 view .LVU535
+ 1536 0020 5361     		str	r3, [r2, #20]	@ float
+ 294:Core/Src/FEKF.c **** 
+ 295:Core/Src/FEKF.c **** 	fkal->H.pData[6] = 0.0f;
+ 1537              		.loc 1 295 2 is_stmt 1 view .LVU536
+ 1538              		.loc 1 295 9 is_stmt 0 view .LVU537
+ 1539 0022 C26A     		ldr	r2, [r0, #44]
+ 1540              		.loc 1 295 19 view .LVU538
+ 1541 0024 9361     		str	r3, [r2, #24]	@ float
+ 296:Core/Src/FEKF.c **** 	fkal->H.pData[7] = 0.0f;
+ 1542              		.loc 1 296 2 is_stmt 1 view .LVU539
+ 1543              		.loc 1 296 9 is_stmt 0 view .LVU540
+ 1544 0026 C26A     		ldr	r2, [r0, #44]
+ 1545              		.loc 1 296 19 view .LVU541
+ 1546 0028 D361     		str	r3, [r2, #28]	@ float
+ 297:Core/Src/FEKF.c **** 	fkal->H.pData[8] = 0.0f;
+ 1547              		.loc 1 297 2 is_stmt 1 view .LVU542
+ 1548              		.loc 1 297 9 is_stmt 0 view .LVU543
+ 1549 002a C26A     		ldr	r2, [r0, #44]
+ 1550              		.loc 1 297 19 view .LVU544
+ 1551 002c 1362     		str	r3, [r2, #32]	@ float
+ 298:Core/Src/FEKF.c **** 	fkal->H.pData[9] = 0.0f;
+ 1552              		.loc 1 298 2 is_stmt 1 view .LVU545
+ 1553              		.loc 1 298 9 is_stmt 0 view .LVU546
+ 1554 002e C26A     		ldr	r2, [r0, #44]
+ 1555              		.loc 1 298 19 view .LVU547
+ 1556 0030 5362     		str	r3, [r2, #36]	@ float
+ 299:Core/Src/FEKF.c **** 	fkal->H.pData[10] = 0.0f;
+ 1557              		.loc 1 299 2 is_stmt 1 view .LVU548
+ 1558              		.loc 1 299 9 is_stmt 0 view .LVU549
+ 1559 0032 C26A     		ldr	r2, [r0, #44]
+ 1560              		.loc 1 299 20 view .LVU550
+ 1561 0034 9362     		str	r3, [r2, #40]	@ float
+ 300:Core/Src/FEKF.c **** 	fkal->H.pData[11] = 0.0f;
+ 1562              		.loc 1 300 2 is_stmt 1 view .LVU551
+ 1563              		.loc 1 300 9 is_stmt 0 view .LVU552
+ 1564 0036 C26A     		ldr	r2, [r0, #44]
+ 1565              		.loc 1 300 20 view .LVU553
+ 1566 0038 D362     		str	r3, [r2, #44]	@ float
+ 301:Core/Src/FEKF.c **** 
+ 302:Core/Src/FEKF.c **** 	/* Jacobian of 3. and 4. states (y, yx) (3./4. Row) */
+ 303:Core/Src/FEKF.c **** 	fkal->H.pData[12] = 0.0f;
+ 1567              		.loc 1 303 2 is_stmt 1 view .LVU554
+ 1568              		.loc 1 303 9 is_stmt 0 view .LVU555
+ 1569 003a C26A     		ldr	r2, [r0, #44]
+ 1570              		.loc 1 303 20 view .LVU556
+ARM GAS  /tmp/ccAdnLOt.s 			page 34
+
+
+ 1571 003c 1363     		str	r3, [r2, #48]	@ float
+ 304:Core/Src/FEKF.c **** 	fkal->H.pData[13] = 0.0f;
+ 1572              		.loc 1 304 2 is_stmt 1 view .LVU557
+ 1573              		.loc 1 304 9 is_stmt 0 view .LVU558
+ 1574 003e C26A     		ldr	r2, [r0, #44]
+ 1575              		.loc 1 304 20 view .LVU559
+ 1576 0040 5363     		str	r3, [r2, #52]	@ float
+ 305:Core/Src/FEKF.c **** 	fkal->H.pData[14] = 0.0f;
+ 1577              		.loc 1 305 2 is_stmt 1 view .LVU560
+ 1578              		.loc 1 305 9 is_stmt 0 view .LVU561
+ 1579 0042 C26A     		ldr	r2, [r0, #44]
+ 1580              		.loc 1 305 20 view .LVU562
+ 1581 0044 9363     		str	r3, [r2, #56]	@ float
+ 306:Core/Src/FEKF.c **** 	fkal->H.pData[15] = 0.0f;
+ 1582              		.loc 1 306 2 is_stmt 1 view .LVU563
+ 1583              		.loc 1 306 9 is_stmt 0 view .LVU564
+ 1584 0046 C26A     		ldr	r2, [r0, #44]
+ 1585              		.loc 1 306 20 view .LVU565
+ 1586 0048 D363     		str	r3, [r2, #60]	@ float
+ 307:Core/Src/FEKF.c **** 	fkal->H.pData[16] = 0.0f;
+ 1587              		.loc 1 307 2 is_stmt 1 view .LVU566
+ 1588              		.loc 1 307 9 is_stmt 0 view .LVU567
+ 1589 004a C26A     		ldr	r2, [r0, #44]
+ 1590              		.loc 1 307 20 view .LVU568
+ 1591 004c 1364     		str	r3, [r2, #64]	@ float
+ 308:Core/Src/FEKF.c **** 	fkal->H.pData[17] = 0.0f;
+ 1592              		.loc 1 308 2 is_stmt 1 view .LVU569
+ 1593              		.loc 1 308 9 is_stmt 0 view .LVU570
+ 1594 004e C26A     		ldr	r2, [r0, #44]
+ 1595              		.loc 1 308 20 view .LVU571
+ 1596 0050 5364     		str	r3, [r2, #68]	@ float
+ 309:Core/Src/FEKF.c **** 
+ 310:Core/Src/FEKF.c **** 	fkal->H.pData[18] = 0.0f;
+ 1597              		.loc 1 310 2 is_stmt 1 view .LVU572
+ 1598              		.loc 1 310 9 is_stmt 0 view .LVU573
+ 1599 0052 C26A     		ldr	r2, [r0, #44]
+ 1600              		.loc 1 310 20 view .LVU574
+ 1601 0054 9364     		str	r3, [r2, #72]	@ float
+ 311:Core/Src/FEKF.c **** 	fkal->H.pData[19] = 0.0f;
+ 1602              		.loc 1 311 2 is_stmt 1 view .LVU575
+ 1603              		.loc 1 311 9 is_stmt 0 view .LVU576
+ 1604 0056 C26A     		ldr	r2, [r0, #44]
+ 1605              		.loc 1 311 20 view .LVU577
+ 1606 0058 D364     		str	r3, [r2, #76]	@ float
+ 312:Core/Src/FEKF.c **** 	fkal->H.pData[20] = 0.0f;
+ 1607              		.loc 1 312 2 is_stmt 1 view .LVU578
+ 1608              		.loc 1 312 9 is_stmt 0 view .LVU579
+ 1609 005a C26A     		ldr	r2, [r0, #44]
+ 1610              		.loc 1 312 20 view .LVU580
+ 1611 005c 1365     		str	r3, [r2, #80]	@ float
+ 313:Core/Src/FEKF.c **** 	fkal->H.pData[21] = 0.0f;
+ 1612              		.loc 1 313 2 is_stmt 1 view .LVU581
+ 1613              		.loc 1 313 9 is_stmt 0 view .LVU582
+ 1614 005e C26A     		ldr	r2, [r0, #44]
+ 1615              		.loc 1 313 20 view .LVU583
+ 1616 0060 5365     		str	r3, [r2, #84]	@ float
+ 314:Core/Src/FEKF.c **** 	fkal->H.pData[22] = 0.0f;
+ARM GAS  /tmp/ccAdnLOt.s 			page 35
+
+
+ 1617              		.loc 1 314 2 is_stmt 1 view .LVU584
+ 1618              		.loc 1 314 9 is_stmt 0 view .LVU585
+ 1619 0062 C26A     		ldr	r2, [r0, #44]
+ 1620              		.loc 1 314 20 view .LVU586
+ 1621 0064 9365     		str	r3, [r2, #88]	@ float
+ 315:Core/Src/FEKF.c **** 	fkal->H.pData[23] = 0.0f;
+ 1622              		.loc 1 315 2 is_stmt 1 view .LVU587
+ 1623              		.loc 1 315 9 is_stmt 0 view .LVU588
+ 1624 0066 C26A     		ldr	r2, [r0, #44]
+ 1625              		.loc 1 315 20 view .LVU589
+ 1626 0068 D365     		str	r3, [r2, #92]	@ float
+ 316:Core/Src/FEKF.c **** 
+ 317:Core/Src/FEKF.c **** 	/* Jacobian of 5. and 6. states (y, yx) (5./6. Row) */
+ 318:Core/Src/FEKF.c **** 	fkal->H.pData[24] = 0.0f;
+ 1627              		.loc 1 318 2 is_stmt 1 view .LVU590
+ 1628              		.loc 1 318 9 is_stmt 0 view .LVU591
+ 1629 006a C26A     		ldr	r2, [r0, #44]
+ 1630              		.loc 1 318 20 view .LVU592
+ 1631 006c 1366     		str	r3, [r2, #96]	@ float
+ 319:Core/Src/FEKF.c **** 	fkal->H.pData[25] = 0.0f;
+ 1632              		.loc 1 319 2 is_stmt 1 view .LVU593
+ 1633              		.loc 1 319 9 is_stmt 0 view .LVU594
+ 1634 006e C26A     		ldr	r2, [r0, #44]
+ 1635              		.loc 1 319 20 view .LVU595
+ 1636 0070 5366     		str	r3, [r2, #100]	@ float
+ 320:Core/Src/FEKF.c **** 	fkal->H.pData[26] = 0.0f;
+ 1637              		.loc 1 320 2 is_stmt 1 view .LVU596
+ 1638              		.loc 1 320 9 is_stmt 0 view .LVU597
+ 1639 0072 C26A     		ldr	r2, [r0, #44]
+ 1640              		.loc 1 320 20 view .LVU598
+ 1641 0074 9366     		str	r3, [r2, #104]	@ float
+ 321:Core/Src/FEKF.c **** 	fkal->H.pData[27] = 0.0f;
+ 1642              		.loc 1 321 2 is_stmt 1 view .LVU599
+ 1643              		.loc 1 321 9 is_stmt 0 view .LVU600
+ 1644 0076 C26A     		ldr	r2, [r0, #44]
+ 1645              		.loc 1 321 20 view .LVU601
+ 1646 0078 D366     		str	r3, [r2, #108]	@ float
+ 322:Core/Src/FEKF.c **** 	fkal->H.pData[28] = 1.0f;
+ 1647              		.loc 1 322 2 is_stmt 1 view .LVU602
+ 1648              		.loc 1 322 9 is_stmt 0 view .LVU603
+ 1649 007a C26A     		ldr	r2, [r0, #44]
+ 1650              		.loc 1 322 20 view .LVU604
+ 1651 007c 4FF07E51 		mov	r1, #1065353216
+ 1652 0080 1167     		str	r1, [r2, #112]	@ float
+ 323:Core/Src/FEKF.c **** 	fkal->H.pData[29] = fkal->timeStep;
+ 1653              		.loc 1 323 2 is_stmt 1 view .LVU605
+ 1654              		.loc 1 323 9 is_stmt 0 view .LVU606
+ 1655 0082 C26A     		ldr	r2, [r0, #44]
+ 1656              		.loc 1 323 26 view .LVU607
+ 1657 0084 D0F8F010 		ldr	r1, [r0, #240]	@ float
+ 1658              		.loc 1 323 20 view .LVU608
+ 1659 0088 5167     		str	r1, [r2, #116]	@ float
+ 324:Core/Src/FEKF.c **** 
+ 325:Core/Src/FEKF.c **** 	fkal->H.pData[30] = 0.0f;
+ 1660              		.loc 1 325 2 is_stmt 1 view .LVU609
+ 1661              		.loc 1 325 9 is_stmt 0 view .LVU610
+ 1662 008a C26A     		ldr	r2, [r0, #44]
+ARM GAS  /tmp/ccAdnLOt.s 			page 36
+
+
+ 1663              		.loc 1 325 20 view .LVU611
+ 1664 008c 9367     		str	r3, [r2, #120]	@ float
+ 326:Core/Src/FEKF.c **** 	fkal->H.pData[31] = 0.0f;
+ 1665              		.loc 1 326 2 is_stmt 1 view .LVU612
+ 1666              		.loc 1 326 9 is_stmt 0 view .LVU613
+ 1667 008e C26A     		ldr	r2, [r0, #44]
+ 1668              		.loc 1 326 20 view .LVU614
+ 1669 0090 D367     		str	r3, [r2, #124]	@ float
+ 327:Core/Src/FEKF.c **** 	fkal->H.pData[32] = 0.0f;
+ 1670              		.loc 1 327 2 is_stmt 1 view .LVU615
+ 1671              		.loc 1 327 9 is_stmt 0 view .LVU616
+ 1672 0092 C26A     		ldr	r2, [r0, #44]
+ 1673              		.loc 1 327 20 view .LVU617
+ 1674 0094 C2F88030 		str	r3, [r2, #128]	@ float
+ 328:Core/Src/FEKF.c **** 	fkal->H.pData[33] = 0.0f;
+ 1675              		.loc 1 328 2 is_stmt 1 view .LVU618
+ 1676              		.loc 1 328 9 is_stmt 0 view .LVU619
+ 1677 0098 C26A     		ldr	r2, [r0, #44]
+ 1678              		.loc 1 328 20 view .LVU620
+ 1679 009a C2F88430 		str	r3, [r2, #132]	@ float
+ 329:Core/Src/FEKF.c **** 	fkal->H.pData[34] = 0.0f;
+ 1680              		.loc 1 329 2 is_stmt 1 view .LVU621
+ 1681              		.loc 1 329 9 is_stmt 0 view .LVU622
+ 1682 009e C26A     		ldr	r2, [r0, #44]
+ 1683              		.loc 1 329 20 view .LVU623
+ 1684 00a0 C2F88830 		str	r3, [r2, #136]	@ float
+ 330:Core/Src/FEKF.c **** 	fkal->H.pData[35] = 0.0f;
+ 1685              		.loc 1 330 2 is_stmt 1 view .LVU624
+ 1686              		.loc 1 330 9 is_stmt 0 view .LVU625
+ 1687 00a4 C26A     		ldr	r2, [r0, #44]
+ 1688              		.loc 1 330 20 view .LVU626
+ 1689 00a6 C2F88C30 		str	r3, [r2, #140]	@ float
+ 331:Core/Src/FEKF.c **** }
+ 1690              		.loc 1 331 1 view .LVU627
+ 1691 00aa 7047     		bx	lr
+ 1692              		.cfi_endproc
+ 1693              	.LFE400:
+ 1695              		.section	.text.FlightEKF_KalmanGain,"ax",%progbits
+ 1696              		.align	1
+ 1697              		.global	FlightEKF_KalmanGain
+ 1698              		.syntax unified
+ 1699              		.thumb
+ 1700              		.thumb_func
+ 1701              		.fpu fpv5-d16
+ 1703              	FlightEKF_KalmanGain:
+ 1704              	.LVL107:
+ 1705              	.LFB401:
+ 332:Core/Src/FEKF.c **** 
+ 333:Core/Src/FEKF.c **** arm_status FlightEKF_KalmanGain(fekf* fkal)
+ 334:Core/Src/FEKF.c **** {
+ 1706              		.loc 1 334 1 is_stmt 1 view -0
+ 1707              		.cfi_startproc
+ 1708              		@ args = 0, pretend = 0, frame = 0
+ 1709              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1710              		.loc 1 334 1 is_stmt 0 view .LVU629
+ 1711 0000 2DE9F843 		push	{r3, r4, r5, r6, r7, r8, r9, lr}
+ 1712              	.LCFI14:
+ARM GAS  /tmp/ccAdnLOt.s 			page 37
+
+
+ 1713              		.cfi_def_cfa_offset 32
+ 1714              		.cfi_offset 3, -32
+ 1715              		.cfi_offset 4, -28
+ 1716              		.cfi_offset 5, -24
+ 1717              		.cfi_offset 6, -20
+ 1718              		.cfi_offset 7, -16
+ 1719              		.cfi_offset 8, -12
+ 1720              		.cfi_offset 9, -8
+ 1721              		.cfi_offset 14, -4
+ 1722 0004 0446     		mov	r4, r0
+ 335:Core/Src/FEKF.c **** 	arm_status status;
+ 1723              		.loc 1 335 2 is_stmt 1 view .LVU630
+ 336:Core/Src/FEKF.c **** 	status = ARM_MATH_SUCCESS;
+ 1724              		.loc 1 336 2 view .LVU631
+ 1725              	.LVL108:
+ 337:Core/Src/FEKF.c **** 
+ 338:Core/Src/FEKF.c **** 	/* R = H*P*H' + R */
+ 339:Core/Src/FEKF.c **** 	status |= arm_mat_trans_f32(&fkal->H, &fkal->Ht);
+ 1726              		.loc 1 339 2 view .LVU632
+ 1727              		.loc 1 339 30 is_stmt 0 view .LVU633
+ 1728 0006 00F12808 		add	r8, r0, #40
+ 1729              		.loc 1 339 12 view .LVU634
+ 1730 000a 00F16006 		add	r6, r0, #96
+ 1731 000e 3146     		mov	r1, r6
+ 1732 0010 4046     		mov	r0, r8
+ 1733              	.LVL109:
+ 1734              		.loc 1 339 12 view .LVU635
+ 1735 0012 FFF7FEFF 		bl	arm_mat_trans_f32
+ 1736              	.LVL110:
+ 1737 0016 0546     		mov	r5, r0
+ 1738              	.LVL111:
+ 340:Core/Src/FEKF.c **** 	status |= arm_mat_mult_f32(&fkal->P, &fkal->Ht, &fkal->PHt);
+ 1739              		.loc 1 340 2 is_stmt 1 view .LVU636
+ 1740              		.loc 1 340 29 is_stmt 0 view .LVU637
+ 1741 0018 04F11007 		add	r7, r4, #16
+ 1742              		.loc 1 340 12 view .LVU638
+ 1743 001c 04F16809 		add	r9, r4, #104
+ 1744 0020 4A46     		mov	r2, r9
+ 1745 0022 3146     		mov	r1, r6
+ 1746 0024 3846     		mov	r0, r7
+ 1747 0026 FFF7FEFF 		bl	arm_mat_mult_f32
+ 1748              	.LVL112:
+ 1749              		.loc 1 340 9 view .LVU639
+ 1750 002a 0543     		orrs	r5, r5, r0
+ 1751              	.LVL113:
+ 1752              		.loc 1 340 9 view .LVU640
+ 1753 002c 6DB2     		sxtb	r5, r5
+ 1754              	.LVL114:
+ 341:Core/Src/FEKF.c **** 	status |= arm_mat_mult_f32(&fkal->H, &fkal->PHt, &fkal->HPHt);
+ 1755              		.loc 1 341 2 is_stmt 1 view .LVU641
+ 1756              		.loc 1 341 12 is_stmt 0 view .LVU642
+ 1757 002e 04F17002 		add	r2, r4, #112
+ 1758 0032 4946     		mov	r1, r9
+ 1759 0034 4046     		mov	r0, r8
+ 1760 0036 FFF7FEFF 		bl	arm_mat_mult_f32
+ 1761              	.LVL115:
+ 1762              		.loc 1 341 9 view .LVU643
+ARM GAS  /tmp/ccAdnLOt.s 			page 38
+
+
+ 1763 003a 0543     		orrs	r5, r5, r0
+ 1764              	.LVL116:
+ 1765              		.loc 1 341 9 view .LVU644
+ 1766 003c 6DB2     		sxtb	r5, r5
+ 1767              	.LVL117:
+ 342:Core/Src/FEKF.c **** 
+ 343:Core/Src/FEKF.c **** 	memcpy(fkal->HPHtR.pData, fkal->HPHt.pData, sizeof(float)*(fkal->HPHt.numCols*fkal->HPHt.numRows))
+ 1768              		.loc 1 343 2 is_stmt 1 view .LVU645
+ 1769              		.loc 1 343 71 is_stmt 0 view .LVU646
+ 1770 003e B4F87220 		ldrh	r2, [r4, #114]
+ 1771              		.loc 1 343 90 view .LVU647
+ 1772 0042 B4F87030 		ldrh	r3, [r4, #112]
+ 1773              		.loc 1 343 79 view .LVU648
+ 1774 0046 03FB02F2 		mul	r2, r3, r2
+ 1775              		.loc 1 343 2 view .LVU649
+ 1776 004a 9200     		lsls	r2, r2, #2
+ 1777 004c 616F     		ldr	r1, [r4, #116]
+ 1778 004e E06F     		ldr	r0, [r4, #124]
+ 1779 0050 FFF7FEFF 		bl	memcpy
+ 1780              	.LVL118:
+ 344:Core/Src/FEKF.c **** 
+ 345:Core/Src/FEKF.c **** 
+ 346:Core/Src/FEKF.c ****         for (int i = 0; i < 6; i++) fkal->HPHtR.pData[i*7] += fkal->R.pData[i*7]; 
+ 1781              		.loc 1 346 9 is_stmt 1 view .LVU650
+ 1782              	.LBB4:
+ 1783              		.loc 1 346 14 view .LVU651
+ 1784              		.loc 1 346 18 is_stmt 0 view .LVU652
+ 1785 0054 0023     		movs	r3, #0
+ 1786              		.loc 1 346 9 view .LVU653
+ 1787 0056 10E0     		b	.L24
+ 1788              	.LVL119:
+ 1789              	.L25:
+ 1790              		.loc 1 346 37 is_stmt 1 discriminator 3 view .LVU654
+ 1791              		.loc 1 346 48 is_stmt 0 discriminator 3 view .LVU655
+ 1792 0058 E26F     		ldr	r2, [r4, #124]
+ 1793              		.loc 1 346 60 discriminator 3 view .LVU656
+ 1794 005a C3EBC300 		rsb	r0, r3, r3, lsl #3
+ 1795 005e 02EB8002 		add	r2, r2, r0, lsl #2
+ 1796              		.loc 1 346 70 discriminator 3 view .LVU657
+ 1797 0062 616C     		ldr	r1, [r4, #68]
+ 1798              		.loc 1 346 76 discriminator 3 view .LVU658
+ 1799 0064 01EB8001 		add	r1, r1, r0, lsl #2
+ 1800 0068 91ED007A 		vldr.32	s14, [r1]
+ 1801              		.loc 1 346 60 discriminator 3 view .LVU659
+ 1802 006c D2ED007A 		vldr.32	s15, [r2]
+ 1803 0070 77EE877A 		vadd.f32	s15, s15, s14
+ 1804 0074 C2ED007A 		vstr.32	s15, [r2]
+ 1805              		.loc 1 346 32 is_stmt 1 discriminator 3 view .LVU660
+ 1806              		.loc 1 346 33 is_stmt 0 discriminator 3 view .LVU661
+ 1807 0078 0133     		adds	r3, r3, #1
+ 1808              	.LVL120:
+ 1809              	.L24:
+ 1810              		.loc 1 346 25 is_stmt 1 discriminator 1 view .LVU662
+ 1811              		.loc 1 346 9 is_stmt 0 discriminator 1 view .LVU663
+ 1812 007a 052B     		cmp	r3, #5
+ 1813 007c ECDD     		ble	.L25
+ 1814              	.LBE4:
+ARM GAS  /tmp/ccAdnLOt.s 			page 39
+
+
+ 347:Core/Src/FEKF.c **** /*      sendMat(fkal->HPHtR.pData, 6, 6);sendS("c", "\n\r"); */
+ 348:Core/Src/FEKF.c **** 
+ 349:Core/Src/FEKF.c ****         /* R = (R)^-1 */
+ 350:Core/Src/FEKF.c ****         status |= arm_mat_inverse_f32(&fkal->HPHtR, &fkal->HPHtRI); 
+ 1815              		.loc 1 350 9 is_stmt 1 view .LVU664
+ 1816              		.loc 1 350 19 is_stmt 0 view .LVU665
+ 1817 007e 04F18009 		add	r9, r4, #128
+ 1818 0082 4946     		mov	r1, r9
+ 1819 0084 04F17800 		add	r0, r4, #120
+ 1820 0088 FFF7FEFF 		bl	arm_mat_inverse_f32
+ 1821              	.LVL121:
+ 1822              		.loc 1 350 16 view .LVU666
+ 1823 008c 0543     		orrs	r5, r5, r0
+ 1824              	.LVL122:
+ 1825              		.loc 1 350 16 view .LVU667
+ 1826 008e 6DB2     		sxtb	r5, r5
+ 1827              	.LVL123:
+ 351:Core/Src/FEKF.c **** /*      sendMat(gkal->HPHtRI.pData, 7, 7);sendS("c", "\n\r"); */
+ 352:Core/Src/FEKF.c **** 
+ 353:Core/Src/FEKF.c ****         /* P*H'*R */
+ 354:Core/Src/FEKF.c **** 	status |= arm_mat_mult_f32(&fkal->Ht, &fkal->HPHtRI, &fkal->HPHtRIHt);
+ 1828              		.loc 1 354 2 is_stmt 1 view .LVU668
+ 1829              		.loc 1 354 12 is_stmt 0 view .LVU669
+ 1830 0090 04F18808 		add	r8, r4, #136
+ 1831 0094 4246     		mov	r2, r8
+ 1832 0096 4946     		mov	r1, r9
+ 1833 0098 3046     		mov	r0, r6
+ 1834 009a FFF7FEFF 		bl	arm_mat_mult_f32
+ 1835              	.LVL124:
+ 1836              		.loc 1 354 9 view .LVU670
+ 1837 009e 0543     		orrs	r5, r5, r0
+ 1838              	.LVL125:
+ 1839              		.loc 1 354 9 view .LVU671
+ 1840 00a0 6DB2     		sxtb	r5, r5
+ 1841              	.LVL126:
+ 355:Core/Src/FEKF.c ****         status |= arm_mat_mult_f32(&fkal->P, &fkal->HPHtRIHt, &fkal->K); 
+ 1842              		.loc 1 355 9 is_stmt 1 view .LVU672
+ 1843              		.loc 1 355 19 is_stmt 0 view .LVU673
+ 1844 00a2 04F13002 		add	r2, r4, #48
+ 1845 00a6 4146     		mov	r1, r8
+ 1846 00a8 3846     		mov	r0, r7
+ 1847 00aa FFF7FEFF 		bl	arm_mat_mult_f32
+ 1848              	.LVL127:
+ 1849              		.loc 1 355 16 view .LVU674
+ 1850 00ae 2843     		orrs	r0, r0, r5
+ 1851              	.LVL128:
+ 356:Core/Src/FEKF.c **** /*      sendMat(gkal->K.pData, 7, 7);sendS("c", "\n\r"); */
+ 357:Core/Src/FEKF.c **** 
+ 358:Core/Src/FEKF.c **** 
+ 359:Core/Src/FEKF.c **** 
+ 360:Core/Src/FEKF.c **** 
+ 361:Core/Src/FEKF.c **** 	return status;
+ 1852              		.loc 1 361 2 is_stmt 1 view .LVU675
+ 362:Core/Src/FEKF.c **** }
+ 1853              		.loc 1 362 1 is_stmt 0 view .LVU676
+ 1854 00b0 40B2     		sxtb	r0, r0
+ 1855              		.loc 1 362 1 view .LVU677
+ARM GAS  /tmp/ccAdnLOt.s 			page 40
+
+
+ 1856 00b2 BDE8F883 		pop	{r3, r4, r5, r6, r7, r8, r9, pc}
+ 1857              		.loc 1 362 1 view .LVU678
+ 1858              		.cfi_endproc
+ 1859              	.LFE401:
+ 1861              		.section	.text.FlightEKF_UpdateCovarianceUpd,"ax",%progbits
+ 1862              		.align	1
+ 1863              		.global	FlightEKF_UpdateCovarianceUpd
+ 1864              		.syntax unified
+ 1865              		.thumb
+ 1866              		.thumb_func
+ 1867              		.fpu fpv5-d16
+ 1869              	FlightEKF_UpdateCovarianceUpd:
+ 1870              	.LVL129:
+ 1871              	.LFB402:
+ 363:Core/Src/FEKF.c **** 
+ 364:Core/Src/FEKF.c **** arm_status FlightEKF_UpdateCovarianceUpd(fekf* fkal)
+ 365:Core/Src/FEKF.c **** {
+ 1872              		.loc 1 365 1 is_stmt 1 view -0
+ 1873              		.cfi_startproc
+ 1874              		@ args = 0, pretend = 0, frame = 0
+ 1875              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1876              		.loc 1 365 1 is_stmt 0 view .LVU680
+ 1877 0000 38B5     		push	{r3, r4, r5, lr}
+ 1878              	.LCFI15:
+ 1879              		.cfi_def_cfa_offset 16
+ 1880              		.cfi_offset 3, -16
+ 1881              		.cfi_offset 4, -12
+ 1882              		.cfi_offset 5, -8
+ 1883              		.cfi_offset 14, -4
+ 1884 0002 0446     		mov	r4, r0
+ 366:Core/Src/FEKF.c **** 	arm_status status;
+ 1885              		.loc 1 366 2 is_stmt 1 view .LVU681
+ 367:Core/Src/FEKF.c **** 	status = ARM_MATH_SUCCESS;
+ 1886              		.loc 1 367 2 view .LVU682
+ 1887              	.LVL130:
+ 368:Core/Src/FEKF.c **** 
+ 369:Core/Src/FEKF.c **** 	/* R = I - KH */
+ 370:Core/Src/FEKF.c **** 	status |= arm_mat_mult_f32(&fkal->K, &fkal->H, &fkal->KH);
+ 1888              		.loc 1 370 2 view .LVU683
+ 1889              		.loc 1 370 12 is_stmt 0 view .LVU684
+ 1890 0004 00F19002 		add	r2, r0, #144
+ 1891 0008 00F12801 		add	r1, r0, #40
+ 1892 000c 3030     		adds	r0, r0, #48
+ 1893              	.LVL131:
+ 1894              		.loc 1 370 12 view .LVU685
+ 1895 000e FFF7FEFF 		bl	arm_mat_mult_f32
+ 1896              	.LVL132:
+ 1897 0012 0546     		mov	r5, r0
+ 1898              	.LVL133:
+ 371:Core/Src/FEKF.c **** 	memcpy(fkal->IKH.pData, fkal->KH.pData, sizeof(float)*(fkal->IKH.numCols*fkal->IKH.numRows));
+ 1899              		.loc 1 371 2 is_stmt 1 view .LVU686
+ 1900              		.loc 1 371 66 is_stmt 0 view .LVU687
+ 1901 0014 B4F89A20 		ldrh	r2, [r4, #154]
+ 1902              		.loc 1 371 84 view .LVU688
+ 1903 0018 B4F89830 		ldrh	r3, [r4, #152]
+ 1904              		.loc 1 371 74 view .LVU689
+ 1905 001c 03FB02F2 		mul	r2, r3, r2
+ARM GAS  /tmp/ccAdnLOt.s 			page 41
+
+
+ 1906              		.loc 1 371 2 view .LVU690
+ 1907 0020 9200     		lsls	r2, r2, #2
+ 1908 0022 D4F89410 		ldr	r1, [r4, #148]
+ 1909 0026 D4F89C00 		ldr	r0, [r4, #156]
+ 1910 002a FFF7FEFF 		bl	memcpy
+ 1911              	.LVL134:
+ 372:Core/Src/FEKF.c **** 	for (int i = 0; i < 6; i++) fkal->IKH.pData[i*7] = 1.0f - fkal->IKH.pData[i*7];
+ 1912              		.loc 1 372 2 is_stmt 1 view .LVU691
+ 1913              	.LBB5:
+ 1914              		.loc 1 372 7 view .LVU692
+ 1915              		.loc 1 372 11 is_stmt 0 view .LVU693
+ 1916 002e 0023     		movs	r3, #0
+ 1917              		.loc 1 372 2 view .LVU694
+ 1918 0030 0EE0     		b	.L28
+ 1919              	.LVL135:
+ 1920              	.L29:
+ 1921              		.loc 1 372 30 is_stmt 1 discriminator 3 view .LVU695
+ 1922              		.loc 1 372 69 is_stmt 0 discriminator 3 view .LVU696
+ 1923 0032 D4F89C20 		ldr	r2, [r4, #156]
+ 1924              		.loc 1 372 75 discriminator 3 view .LVU697
+ 1925 0036 C3EBC301 		rsb	r1, r3, r3, lsl #3
+ 1926 003a 02EB8102 		add	r2, r2, r1, lsl #2
+ 1927 003e 92ED007A 		vldr.32	s14, [r2]
+ 1928              		.loc 1 372 58 discriminator 3 view .LVU698
+ 1929 0042 F7EE007A 		vmov.f32	s15, #1.0e+0
+ 1930 0046 77EEC77A 		vsub.f32	s15, s15, s14
+ 1931              		.loc 1 372 51 discriminator 3 view .LVU699
+ 1932 004a C2ED007A 		vstr.32	s15, [r2]
+ 1933              		.loc 1 372 25 is_stmt 1 discriminator 3 view .LVU700
+ 1934              		.loc 1 372 26 is_stmt 0 discriminator 3 view .LVU701
+ 1935 004e 0133     		adds	r3, r3, #1
+ 1936              	.LVL136:
+ 1937              	.L28:
+ 1938              		.loc 1 372 18 is_stmt 1 discriminator 1 view .LVU702
+ 1939              		.loc 1 372 2 is_stmt 0 discriminator 1 view .LVU703
+ 1940 0050 052B     		cmp	r3, #5
+ 1941 0052 EEDD     		ble	.L29
+ 1942              	.LBE5:
+ 373:Core/Src/FEKF.c **** 
+ 374:Core/Src/FEKF.c **** 	/* R = R*P */
+ 375:Core/Src/FEKF.c **** 	arm_mat_mult_f32(&fkal->IKH, &fkal->P, &fkal->Ptemp);
+ 1943              		.loc 1 375 2 is_stmt 1 view .LVU704
+ 1944 0054 04F1C002 		add	r2, r4, #192
+ 1945 0058 04F11001 		add	r1, r4, #16
+ 1946 005c 04F19800 		add	r0, r4, #152
+ 1947 0060 FFF7FEFF 		bl	arm_mat_mult_f32
+ 1948              	.LVL137:
+ 376:Core/Src/FEKF.c **** 	memcpy(fkal->P.pData, fkal->Ptemp.pData, sizeof(float)*(fkal->P.numCols*fkal->P.numRows));
+ 1949              		.loc 1 376 2 view .LVU705
+ 1950              		.loc 1 376 65 is_stmt 0 view .LVU706
+ 1951 0064 628A     		ldrh	r2, [r4, #18]
+ 1952              		.loc 1 376 81 view .LVU707
+ 1953 0066 238A     		ldrh	r3, [r4, #16]
+ 1954              		.loc 1 376 73 view .LVU708
+ 1955 0068 03FB02F2 		mul	r2, r3, r2
+ 1956              		.loc 1 376 2 view .LVU709
+ 1957 006c 9200     		lsls	r2, r2, #2
+ARM GAS  /tmp/ccAdnLOt.s 			page 42
+
+
+ 1958 006e D4F8C410 		ldr	r1, [r4, #196]
+ 1959 0072 6069     		ldr	r0, [r4, #20]
+ 1960 0074 FFF7FEFF 		bl	memcpy
+ 1961              	.LVL138:
+ 377:Core/Src/FEKF.c **** 
+ 378:Core/Src/FEKF.c **** 
+ 379:Core/Src/FEKF.c **** 	return status;
+ 1962              		.loc 1 379 2 is_stmt 1 view .LVU710
+ 380:Core/Src/FEKF.c **** }
+ 1963              		.loc 1 380 1 is_stmt 0 view .LVU711
+ 1964 0078 2846     		mov	r0, r5
+ 1965 007a 38BD     		pop	{r3, r4, r5, pc}
+ 1966              		.loc 1 380 1 view .LVU712
+ 1967              		.cfi_endproc
+ 1968              	.LFE402:
+ 1970              		.section	.text.FlightEKF_updateStates,"ax",%progbits
+ 1971              		.align	1
+ 1972              		.global	FlightEKF_updateStates
+ 1973              		.syntax unified
+ 1974              		.thumb
+ 1975              		.thumb_func
+ 1976              		.fpu fpv5-d16
+ 1978              	FlightEKF_updateStates:
+ 1979              	.LVL139:
+ 1980              	.LFB403:
+ 381:Core/Src/FEKF.c **** 
+ 382:Core/Src/FEKF.c **** arm_status FlightEKF_updateStates(fekf* fkal)
+ 383:Core/Src/FEKF.c **** {
+ 1981              		.loc 1 383 1 is_stmt 1 view -0
+ 1982              		.cfi_startproc
+ 1983              		@ args = 0, pretend = 0, frame = 0
+ 1984              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1985              		.loc 1 383 1 is_stmt 0 view .LVU714
+ 1986 0000 10B5     		push	{r4, lr}
+ 1987              	.LCFI16:
+ 1988              		.cfi_def_cfa_offset 8
+ 1989              		.cfi_offset 4, -8
+ 1990              		.cfi_offset 14, -4
+ 1991 0002 0446     		mov	r4, r0
+ 384:Core/Src/FEKF.c **** 	arm_status status;
+ 1992              		.loc 1 384 2 is_stmt 1 view .LVU715
+ 385:Core/Src/FEKF.c **** 	status = ARM_MATH_SUCCESS;
+ 1993              		.loc 1 385 2 view .LVU716
+ 1994              	.LVL140:
+ 386:Core/Src/FEKF.c **** 
+ 387:Core/Src/FEKF.c **** 	/* y = z - C */
+ 388:Core/Src/FEKF.c **** 	for(int i = 0; i < 7; i++) fkal->y.pData[i] = fkal->z.pData[i] - fkal->C.pData[i];
+ 1995              		.loc 1 388 2 view .LVU717
+ 1996              	.LBB6:
+ 1997              		.loc 1 388 6 view .LVU718
+ 1998              		.loc 1 388 10 is_stmt 0 view .LVU719
+ 1999 0004 0023     		movs	r3, #0
+ 2000              		.loc 1 388 2 view .LVU720
+ 2001 0006 12E0     		b	.L32
+ 2002              	.LVL141:
+ 2003              	.L33:
+ 2004              		.loc 1 388 29 is_stmt 1 discriminator 3 view .LVU721
+ARM GAS  /tmp/ccAdnLOt.s 			page 43
+
+
+ 2005              		.loc 1 388 55 is_stmt 0 discriminator 3 view .LVU722
+ 2006 0008 E268     		ldr	r2, [r4, #12]
+ 2007              		.loc 1 388 61 discriminator 3 view .LVU723
+ 2008 000a 02EB8302 		add	r2, r2, r3, lsl #2
+ 2009 000e D2ED007A 		vldr.32	s15, [r2]
+ 2010              		.loc 1 388 74 discriminator 3 view .LVU724
+ 2011 0012 626A     		ldr	r2, [r4, #36]
+ 2012              		.loc 1 388 80 discriminator 3 view .LVU725
+ 2013 0014 02EB8302 		add	r2, r2, r3, lsl #2
+ 2014 0018 92ED007A 		vldr.32	s14, [r2]
+ 2015              		.loc 1 388 36 discriminator 3 view .LVU726
+ 2016 001c D4F8AC20 		ldr	r2, [r4, #172]
+ 2017              		.loc 1 388 42 discriminator 3 view .LVU727
+ 2018 0020 02EB8302 		add	r2, r2, r3, lsl #2
+ 2019              		.loc 1 388 65 discriminator 3 view .LVU728
+ 2020 0024 77EEC77A 		vsub.f32	s15, s15, s14
+ 2021              		.loc 1 388 46 discriminator 3 view .LVU729
+ 2022 0028 C2ED007A 		vstr.32	s15, [r2]
+ 2023              		.loc 1 388 24 is_stmt 1 discriminator 3 view .LVU730
+ 2024              		.loc 1 388 25 is_stmt 0 discriminator 3 view .LVU731
+ 2025 002c 0133     		adds	r3, r3, #1
+ 2026              	.LVL142:
+ 2027              	.L32:
+ 2028              		.loc 1 388 17 is_stmt 1 discriminator 1 view .LVU732
+ 2029              		.loc 1 388 2 is_stmt 0 discriminator 1 view .LVU733
+ 2030 002e 062B     		cmp	r3, #6
+ 2031 0030 EADD     		ble	.L33
+ 2032              	.LBE6:
+ 389:Core/Src/FEKF.c **** 
+ 390:Core/Src/FEKF.c **** 	/* x_n+1 = x_n + Ky */
+ 391:Core/Src/FEKF.c **** 	status |= arm_mat_mult_f32(&fkal->K, &fkal->y, &fkal->Ky);
+ 2033              		.loc 1 391 2 is_stmt 1 view .LVU734
+ 2034              		.loc 1 391 12 is_stmt 0 view .LVU735
+ 2035 0032 04F1B002 		add	r2, r4, #176
+ 2036 0036 04F1A801 		add	r1, r4, #168
+ 2037 003a 04F13000 		add	r0, r4, #48
+ 2038              	.LVL143:
+ 2039              		.loc 1 391 12 view .LVU736
+ 2040 003e FFF7FEFF 		bl	arm_mat_mult_f32
+ 2041              	.LVL144:
+ 392:Core/Src/FEKF.c **** 	for (int i = 0; i < 7; i++) fkal->x.pData[i] += fkal->Ky.pData[i];
+ 2042              		.loc 1 392 2 is_stmt 1 view .LVU737
+ 2043              	.LBB7:
+ 2044              		.loc 1 392 7 view .LVU738
+ 2045              		.loc 1 392 11 is_stmt 0 view .LVU739
+ 2046 0042 0023     		movs	r3, #0
+ 2047              		.loc 1 392 2 view .LVU740
+ 2048 0044 0FE0     		b	.L34
+ 2049              	.LVL145:
+ 2050              	.L35:
+ 2051              		.loc 1 392 30 is_stmt 1 discriminator 3 view .LVU741
+ 2052              		.loc 1 392 37 is_stmt 0 discriminator 3 view .LVU742
+ 2053 0046 6268     		ldr	r2, [r4, #4]
+ 2054              		.loc 1 392 47 discriminator 3 view .LVU743
+ 2055 0048 02EB8302 		add	r2, r2, r3, lsl #2
+ 2056              		.loc 1 392 58 discriminator 3 view .LVU744
+ 2057 004c D4F8B410 		ldr	r1, [r4, #180]
+ARM GAS  /tmp/ccAdnLOt.s 			page 44
+
+
+ 2058              		.loc 1 392 64 discriminator 3 view .LVU745
+ 2059 0050 01EB8301 		add	r1, r1, r3, lsl #2
+ 2060 0054 91ED007A 		vldr.32	s14, [r1]
+ 2061              		.loc 1 392 47 discriminator 3 view .LVU746
+ 2062 0058 D2ED007A 		vldr.32	s15, [r2]
+ 2063 005c 77EE877A 		vadd.f32	s15, s15, s14
+ 2064 0060 C2ED007A 		vstr.32	s15, [r2]
+ 2065              		.loc 1 392 25 is_stmt 1 discriminator 3 view .LVU747
+ 2066              		.loc 1 392 26 is_stmt 0 discriminator 3 view .LVU748
+ 2067 0064 0133     		adds	r3, r3, #1
+ 2068              	.LVL146:
+ 2069              	.L34:
+ 2070              		.loc 1 392 18 is_stmt 1 discriminator 1 view .LVU749
+ 2071              		.loc 1 392 2 is_stmt 0 discriminator 1 view .LVU750
+ 2072 0066 062B     		cmp	r3, #6
+ 2073 0068 EDDD     		ble	.L35
+ 2074              	.LBE7:
+ 393:Core/Src/FEKF.c **** 
+ 394:Core/Src/FEKF.c **** 
+ 395:Core/Src/FEKF.c **** 	return status;
+ 2075              		.loc 1 395 2 is_stmt 1 view .LVU751
+ 396:Core/Src/FEKF.c **** }
+ 2076              		.loc 1 396 1 is_stmt 0 view .LVU752
+ 2077 006a 10BD     		pop	{r4, pc}
+ 2078              		.loc 1 396 1 view .LVU753
+ 2079              		.cfi_endproc
+ 2080              	.LFE403:
+ 2082              		.section	.text.FlightEKF_PredictStep,"ax",%progbits
+ 2083              		.align	1
+ 2084              		.global	FlightEKF_PredictStep
+ 2085              		.syntax unified
+ 2086              		.thumb
+ 2087              		.thumb_func
+ 2088              		.fpu fpv5-d16
+ 2090              	FlightEKF_PredictStep:
+ 2091              	.LVL147:
+ 2092              	.LFB404:
+ 397:Core/Src/FEKF.c **** 		
+ 398:Core/Src/FEKF.c **** 
+ 399:Core/Src/FEKF.c **** 
+ 400:Core/Src/FEKF.c **** void FlightEKF_PredictStep(fekf* fkal, VehicleAtd* atd)
+ 401:Core/Src/FEKF.c **** {
+ 2093              		.loc 1 401 1 is_stmt 1 view -0
+ 2094              		.cfi_startproc
+ 2095              		@ args = 0, pretend = 0, frame = 0
+ 2096              		@ frame_needed = 0, uses_anonymous_args = 0
+ 2097              		.loc 1 401 1 is_stmt 0 view .LVU755
+ 2098 0000 10B5     		push	{r4, lr}
+ 2099              	.LCFI17:
+ 2100              		.cfi_def_cfa_offset 8
+ 2101              		.cfi_offset 4, -8
+ 2102              		.cfi_offset 14, -4
+ 2103 0002 0446     		mov	r4, r0
+ 402:Core/Src/FEKF.c **** 
+ 403:Core/Src/FEKF.c **** 	FlightEKF_CoriolisFree(fkal, atd);
+ 2104              		.loc 1 403 2 is_stmt 1 view .LVU756
+ 2105 0004 FFF7FEFF 		bl	FlightEKF_CoriolisFree
+ARM GAS  /tmp/ccAdnLOt.s 			page 45
+
+
+ 2106              	.LVL148:
+ 404:Core/Src/FEKF.c **** 	FlightEKF_TransitionFunction(fkal);
+ 2107              		.loc 1 404 2 view .LVU757
+ 2108 0008 2046     		mov	r0, r4
+ 2109 000a FFF7FEFF 		bl	FlightEKF_TransitionFunction
+ 2110              	.LVL149:
+ 405:Core/Src/FEKF.c **** 
+ 406:Core/Src/FEKF.c **** 	
+ 407:Core/Src/FEKF.c **** }
+ 2111              		.loc 1 407 1 is_stmt 0 view .LVU758
+ 2112 000e 10BD     		pop	{r4, pc}
+ 2113              		.loc 1 407 1 view .LVU759
+ 2114              		.cfi_endproc
+ 2115              	.LFE404:
+ 2117              		.section	.text.FlightEKF_UpdateStep,"ax",%progbits
+ 2118              		.align	1
+ 2119              		.global	FlightEKF_UpdateStep
+ 2120              		.syntax unified
+ 2121              		.thumb
+ 2122              		.thumb_func
+ 2123              		.fpu fpv5-d16
+ 2125              	FlightEKF_UpdateStep:
+ 2126              	.LVL150:
+ 2127              	.LFB405:
+ 408:Core/Src/FEKF.c **** 
+ 409:Core/Src/FEKF.c **** void FlightEKF_UpdateStep(fekf* fkal)
+ 410:Core/Src/FEKF.c **** {
+ 2128              		.loc 1 410 1 is_stmt 1 view -0
+ 2129              		.cfi_startproc
+ 2130              		@ args = 0, pretend = 0, frame = 0
+ 2131              		@ frame_needed = 0, uses_anonymous_args = 0
+ 2132              		.loc 1 410 1 is_stmt 0 view .LVU761
+ 2133 0000 10B5     		push	{r4, lr}
+ 2134              	.LCFI18:
+ 2135              		.cfi_def_cfa_offset 8
+ 2136              		.cfi_offset 4, -8
+ 2137              		.cfi_offset 14, -4
+ 2138 0002 0446     		mov	r4, r0
+ 411:Core/Src/FEKF.c **** 	FlightEKF_ObsMatrices(fkal);
+ 2139              		.loc 1 411 2 is_stmt 1 view .LVU762
+ 2140 0004 FFF7FEFF 		bl	FlightEKF_ObsMatrices
+ 2141              	.LVL151:
+ 412:Core/Src/FEKF.c **** 	FlightEKF_KalmanGain(fkal);
+ 2142              		.loc 1 412 2 view .LVU763
+ 2143 0008 2046     		mov	r0, r4
+ 2144 000a FFF7FEFF 		bl	FlightEKF_KalmanGain
+ 2145              	.LVL152:
+ 413:Core/Src/FEKF.c **** 	FlightEKF_UpdateCovarianceUpd(fkal);
+ 2146              		.loc 1 413 2 view .LVU764
+ 2147 000e 2046     		mov	r0, r4
+ 2148 0010 FFF7FEFF 		bl	FlightEKF_UpdateCovarianceUpd
+ 2149              	.LVL153:
+ 414:Core/Src/FEKF.c **** 	FlightEKF_updateStates(fkal);
+ 2150              		.loc 1 414 2 view .LVU765
+ 2151 0014 2046     		mov	r0, r4
+ 2152 0016 FFF7FEFF 		bl	FlightEKF_updateStates
+ 2153              	.LVL154:
+ARM GAS  /tmp/ccAdnLOt.s 			page 46
+
+
+ 415:Core/Src/FEKF.c **** }
+ 2154              		.loc 1 415 1 is_stmt 0 view .LVU766
+ 2155 001a 10BD     		pop	{r4, pc}
+ 2156              		.loc 1 415 1 view .LVU767
+ 2157              		.cfi_endproc
+ 2158              	.LFE405:
+ 2160              		.section	.text.FlightEKF_run,"ax",%progbits
+ 2161              		.align	1
+ 2162              		.global	FlightEKF_run
+ 2163              		.syntax unified
+ 2164              		.thumb
+ 2165              		.thumb_func
+ 2166              		.fpu fpv5-d16
+ 2168              	FlightEKF_run:
+ 2169              	.LVL155:
+ 2170              	.LFB406:
+ 416:Core/Src/FEKF.c **** 
+ 417:Core/Src/FEKF.c **** void FlightEKF_run(fekf* fkal, VehicleAtd* atd)
+ 418:Core/Src/FEKF.c **** {
+ 2171              		.loc 1 418 1 is_stmt 1 view -0
+ 2172              		.cfi_startproc
+ 2173              		@ args = 0, pretend = 0, frame = 0
+ 2174              		@ frame_needed = 0, uses_anonymous_args = 0
+ 419:Core/Src/FEKF.c **** 	if (fkal->updateFlag)
+ 2175              		.loc 1 419 2 view .LVU769
+ 2176              		.loc 1 419 10 is_stmt 0 view .LVU770
+ 2177 0000 90F8EC30 		ldrb	r3, [r0, #236]	@ zero_extendqisi2
+ 2178              		.loc 1 419 5 view .LVU771
+ 2179 0004 03B9     		cbnz	r3, .L56
+ 2180 0006 7047     		bx	lr
+ 2181              	.L56:
+ 418:Core/Src/FEKF.c **** 	if (fkal->updateFlag)
+ 2182              		.loc 1 418 1 view .LVU772
+ 2183 0008 10B5     		push	{r4, lr}
+ 2184              	.LCFI19:
+ 2185              		.cfi_def_cfa_offset 8
+ 2186              		.cfi_offset 4, -8
+ 2187              		.cfi_offset 14, -4
+ 2188 000a 0446     		mov	r4, r0
+ 420:Core/Src/FEKF.c **** 	{
+ 421:Core/Src/FEKF.c **** 		FlightEKF_PredictStep(fkal, atd);
+ 2189              		.loc 1 421 3 is_stmt 1 view .LVU773
+ 2190 000c FFF7FEFF 		bl	FlightEKF_PredictStep
+ 2191              	.LVL156:
+ 422:Core/Src/FEKF.c **** 		FlightEKF_UpdateStep(fkal);
+ 2192              		.loc 1 422 3 view .LVU774
+ 2193 0010 2046     		mov	r0, r4
+ 2194 0012 FFF7FEFF 		bl	FlightEKF_UpdateStep
+ 2195              	.LVL157:
+ 423:Core/Src/FEKF.c **** 		survive = sqrt((fkal->f[0]*fkal->f[0]/1600) + (fkal->f[1]*fkal->f[1]/900) + (fkal->f[2]*fkal->f[2
+ 2196              		.loc 1 423 3 view .LVU775
+ 2197              		.loc 1 423 23 is_stmt 0 view .LVU776
+ 2198 0016 D4F8E830 		ldr	r3, [r4, #232]
+ 2199              		.loc 1 423 26 view .LVU777
+ 2200 001a D3ED007A 		vldr.32	s15, [r3]
+ 2201              		.loc 1 423 29 view .LVU778
+ 2202 001e 67EEA77A 		vmul.f32	s15, s15, s15
+ARM GAS  /tmp/ccAdnLOt.s 			page 47
+
+
+ 2203              		.loc 1 423 40 view .LVU779
+ 2204 0022 9FED247A 		vldr.32	s14, .L57
+ 2205 0026 87EE870A 		vdiv.f32	s0, s15, s14
+ 2206              		.loc 1 423 57 view .LVU780
+ 2207 002a D3ED017A 		vldr.32	s15, [r3, #4]
+ 2208              		.loc 1 423 60 view .LVU781
+ 2209 002e 67EEA77A 		vmul.f32	s15, s15, s15
+ 2210              		.loc 1 423 71 view .LVU782
+ 2211 0032 DFED216A 		vldr.32	s13, .L57+4
+ 2212 0036 87EEA67A 		vdiv.f32	s14, s15, s13
+ 2213              		.loc 1 423 47 view .LVU783
+ 2214 003a 30EE070A 		vadd.f32	s0, s0, s14
+ 2215              		.loc 1 423 87 view .LVU784
+ 2216 003e D3ED027A 		vldr.32	s15, [r3, #8]
+ 2217              		.loc 1 423 90 view .LVU785
+ 2218 0042 67EEA77A 		vmul.f32	s15, s15, s15
+ 2219              		.loc 1 423 101 view .LVU786
+ 2220 0046 DFED1D6A 		vldr.32	s13, .L57+8
+ 2221 004a 87EEA67A 		vdiv.f32	s14, s15, s13
+ 2222              		.loc 1 423 77 view .LVU787
+ 2223 004e 30EE070A 		vadd.f32	s0, s0, s14
+ 2224              		.loc 1 423 13 view .LVU788
+ 2225 0052 B7EEC00A 		vcvt.f64.f32	d0, s0
+ 2226 0056 FFF7FEFF 		bl	sqrt
+ 2227              	.LVL158:
+ 2228 005a B7EEC00B 		vcvt.f32.f64	s0, d0
+ 2229              		.loc 1 423 11 view .LVU789
+ 2230 005e 184B     		ldr	r3, .L57+12
+ 2231 0060 83ED000A 		vstr.32	s0, [r3]
+ 424:Core/Src/FEKF.c **** //		sendMat(fkal->x.pData, 1, 6);newL();
+ 425:Core/Src/FEKF.c **** //		sendS("f", fkal->x.pData[4]);space();sendS("f", fkal->x.pData[5]);newL();
+ 426:Core/Src/FEKF.c **** //		sendMat(&fkal->meas[0], 1, 7);newL();
+ 427:Core/Src/FEKF.c **** 		if (fkal->x.pData[4] > States.APRS[0]) States.APRS[0] = fkal->x.pData[4];
+ 2232              		.loc 1 427 3 is_stmt 1 view .LVU790
+ 2233              		.loc 1 427 14 is_stmt 0 view .LVU791
+ 2234 0064 6368     		ldr	r3, [r4, #4]
+ 2235              		.loc 1 427 20 view .LVU792
+ 2236 0066 D3ED047A 		vldr.32	s15, [r3, #16]
+ 2237              		.loc 1 427 37 view .LVU793
+ 2238 006a 164B     		ldr	r3, .L57+16
+ 2239 006c 93ED087A 		vldr.32	s14, [r3, #32]
+ 2240              		.loc 1 427 6 view .LVU794
+ 2241 0070 F4EEC77A 		vcmpe.f32	s15, s14
+ 2242 0074 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 2243 0078 01DD     		ble	.L43
+ 2244              		.loc 1 427 42 is_stmt 1 discriminator 1 view .LVU795
+ 2245              		.loc 1 427 57 is_stmt 0 discriminator 1 view .LVU796
+ 2246 007a C3ED087A 		vstr.32	s15, [r3, #32]
+ 2247              	.L43:
+ 428:Core/Src/FEKF.c **** 		if (fkal->x.pData[5] > States.APRS[1]) States.APRS[1] = fkal->x.pData[5];
+ 2248              		.loc 1 428 3 is_stmt 1 view .LVU797
+ 2249              		.loc 1 428 14 is_stmt 0 view .LVU798
+ 2250 007e 6368     		ldr	r3, [r4, #4]
+ 2251              		.loc 1 428 20 view .LVU799
+ 2252 0080 D3ED057A 		vldr.32	s15, [r3, #20]
+ 2253              		.loc 1 428 37 view .LVU800
+ 2254 0084 0F4B     		ldr	r3, .L57+16
+ARM GAS  /tmp/ccAdnLOt.s 			page 48
+
+
+ 2255 0086 93ED097A 		vldr.32	s14, [r3, #36]
+ 2256              		.loc 1 428 6 view .LVU801
+ 2257 008a F4EEC77A 		vcmpe.f32	s15, s14
+ 2258 008e F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 2259 0092 01DD     		ble	.L45
+ 2260              		.loc 1 428 42 is_stmt 1 discriminator 1 view .LVU802
+ 2261              		.loc 1 428 57 is_stmt 0 discriminator 1 view .LVU803
+ 2262 0094 C3ED097A 		vstr.32	s15, [r3, #36]
+ 2263              	.L45:
+ 429:Core/Src/FEKF.c **** 		if (survive > States.APRS[6]) States.APRS[6] = survive;
+ 2264              		.loc 1 429 3 is_stmt 1 view .LVU804
+ 2265              		.loc 1 429 28 is_stmt 0 view .LVU805
+ 2266 0098 0A4B     		ldr	r3, .L57+16
+ 2267 009a D3ED0E7A 		vldr.32	s15, [r3, #56]
+ 2268              		.loc 1 429 6 view .LVU806
+ 2269 009e B4EEE70A 		vcmpe.f32	s0, s15
+ 2270 00a2 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 2271 00a6 01DD     		ble	.L47
+ 2272              		.loc 1 429 33 is_stmt 1 discriminator 1 view .LVU807
+ 2273              		.loc 1 429 48 is_stmt 0 discriminator 1 view .LVU808
+ 2274 00a8 83ED0E0A 		vstr.32	s0, [r3, #56]
+ 2275              	.L47:
+ 430:Core/Src/FEKF.c **** 		fkal->updateFlag = 0;
+ 2276              		.loc 1 430 3 is_stmt 1 view .LVU809
+ 2277              		.loc 1 430 20 is_stmt 0 view .LVU810
+ 2278 00ac 0023     		movs	r3, #0
+ 2279 00ae 84F8EC30 		strb	r3, [r4, #236]
+ 431:Core/Src/FEKF.c **** 	}
+ 432:Core/Src/FEKF.c **** }
+ 2280              		.loc 1 432 1 view .LVU811
+ 2281 00b2 10BD     		pop	{r4, pc}
+ 2282              	.LVL159:
+ 2283              	.L58:
+ 2284              		.loc 1 432 1 view .LVU812
+ 2285              		.align	2
+ 2286              	.L57:
+ 2287 00b4 0000C844 		.word	1153957888
+ 2288 00b8 00006144 		.word	1147207680
+ 2289 00bc 0000C842 		.word	1120403456
+ 2290 00c0 00000000 		.word	.LANCHOR9
+ 2291 00c4 00000000 		.word	States
+ 2292              		.cfi_endproc
+ 2293              	.LFE406:
+ 2295              		.global	PHt
+ 2296              		.global	Ht
+ 2297              		.global	APAt
+ 2298              		.global	PAt
+ 2299              		.global	At
+ 2300              		.global	last_upd
+ 2301              		.global	firstIntegration
+ 2302              		.global	survive
+ 2303              		.global	cleanB
+ 2304              		.global	dist
+ 2305              		.section	.bss.APAt,"aw",%nobits
+ 2306              		.align	2
+ 2307              		.set	.LANCHOR3,. + 0
+ 2310              	APAt:
+ARM GAS  /tmp/ccAdnLOt.s 			page 49
+
+
+ 2311 0000 00000000 		.space	144
+ 2311      00000000 
+ 2311      00000000 
+ 2311      00000000 
+ 2311      00000000 
+ 2312              		.section	.bss.At,"aw",%nobits
+ 2313              		.align	2
+ 2314              		.set	.LANCHOR1,. + 0
+ 2317              	At:
+ 2318 0000 00000000 		.space	144
+ 2318      00000000 
+ 2318      00000000 
+ 2318      00000000 
+ 2318      00000000 
+ 2319              		.section	.bss.Ht,"aw",%nobits
+ 2320              		.align	2
+ 2321              		.set	.LANCHOR4,. + 0
+ 2324              	Ht:
+ 2325 0000 00000000 		.space	144
+ 2325      00000000 
+ 2325      00000000 
+ 2325      00000000 
+ 2325      00000000 
+ 2326              		.section	.bss.PAt,"aw",%nobits
+ 2327              		.align	2
+ 2328              		.set	.LANCHOR2,. + 0
+ 2331              	PAt:
+ 2332 0000 00000000 		.space	144
+ 2332      00000000 
+ 2332      00000000 
+ 2332      00000000 
+ 2332      00000000 
+ 2333              		.section	.bss.PHt,"aw",%nobits
+ 2334              		.align	2
+ 2335              		.set	.LANCHOR5,. + 0
+ 2338              	PHt:
+ 2339 0000 00000000 		.space	144
+ 2339      00000000 
+ 2339      00000000 
+ 2339      00000000 
+ 2339      00000000 
+ 2340              		.section	.bss.cleanB,"aw",%nobits
+ 2341              		.align	2
+ 2342              		.set	.LANCHOR0,. + 0
+ 2345              	cleanB:
+ 2346 0000 00000000 		.space	44
+ 2346      00000000 
+ 2346      00000000 
+ 2346      00000000 
+ 2346      00000000 
+ 2347              		.section	.bss.dist,"aw",%nobits
+ 2348              		.align	2
+ 2349              		.set	.LANCHOR8,. + 0
+ 2352              	dist:
+ 2353 0000 00000000 		.space	12
+ 2353      00000000 
+ 2353      00000000 
+ARM GAS  /tmp/ccAdnLOt.s 			page 50
+
+
+ 2354              		.section	.bss.last_upd,"aw",%nobits
+ 2355              		.align	1
+ 2356              		.set	.LANCHOR7,. + 0
+ 2359              	last_upd:
+ 2360 0000 0000     		.space	2
+ 2361              		.section	.bss.survive,"aw",%nobits
+ 2362              		.align	2
+ 2363              		.set	.LANCHOR9,. + 0
+ 2366              	survive:
+ 2367 0000 00000000 		.space	4
+ 2368              		.section	.data.firstIntegration,"aw"
+ 2369              		.set	.LANCHOR6,. + 0
+ 2372              	firstIntegration:
+ 2373 0000 01       		.byte	1
+ 2374              		.text
+ 2375              	.Letext0:
+ 2376              		.file 2 "/usr/include/newlib/machine/_default_types.h"
+ 2377              		.file 3 "/usr/include/newlib/sys/_stdint.h"
+ 2378              		.file 4 "Drivers/CMSIS/DSP/Include/arm_math.h"
+ 2379              		.file 5 "Core/Inc/Sensors.h"
+ 2380              		.file 6 "Core/Inc/EKF_Helpers.h"
+ 2381              		.file 7 "Core/Inc/AttitudeEstimation.h"
+ 2382              		.file 8 "Core/Inc/FEKF.h"
+ 2383              		.file 9 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+ 2384              		.file 10 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 2385              		.file 11 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 2386              		.file 12 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h"
+ 2387              		.file 13 "Core/Inc/StateMachine.h"
+ 2388              		.file 14 "/usr/include/newlib/math.h"
+ 2389              		.file 15 "<built-in>"
+ARM GAS  /tmp/ccAdnLOt.s 			page 51
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 FEKF.c
+     /tmp/ccAdnLOt.s:17     .text.FlightEKF_init:0000000000000000 $t
+     /tmp/ccAdnLOt.s:25     .text.FlightEKF_init:0000000000000000 FlightEKF_init
+     /tmp/ccAdnLOt.s:368    .text.FlightEKF_init:0000000000000238 $d
+     /tmp/ccAdnLOt.s:398    .text.FlightEKF_newMeas:0000000000000000 $t
+     /tmp/ccAdnLOt.s:405    .text.FlightEKF_newMeas:0000000000000000 FlightEKF_newMeas
+     /tmp/ccAdnLOt.s:512    .text.FlightEKF_CoriolisFree:0000000000000000 $t
+     /tmp/ccAdnLOt.s:519    .text.FlightEKF_CoriolisFree:0000000000000000 FlightEKF_CoriolisFree
+     /tmp/ccAdnLOt.s:901    .text.FlightEKF_CoriolisFree:000000000000025c $d
+     /tmp/ccAdnLOt.s:911    .text.FlightEKF_TransitionFunction:0000000000000000 $t
+     /tmp/ccAdnLOt.s:918    .text.FlightEKF_TransitionFunction:0000000000000000 FlightEKF_TransitionFunction
+     /tmp/ccAdnLOt.s:1169   .text.FlightEKF_TransitionJacobian:0000000000000000 $t
+     /tmp/ccAdnLOt.s:1176   .text.FlightEKF_TransitionJacobian:0000000000000000 FlightEKF_TransitionJacobian
+     /tmp/ccAdnLOt.s:1359   .text.FlightEKF_UpdateCovariancePred:0000000000000000 $t
+     /tmp/ccAdnLOt.s:1366   .text.FlightEKF_UpdateCovariancePred:0000000000000000 FlightEKF_UpdateCovariancePred
+     /tmp/ccAdnLOt.s:1483   .text.FlightEKF_ObsMatrices:0000000000000000 $t
+     /tmp/ccAdnLOt.s:1490   .text.FlightEKF_ObsMatrices:0000000000000000 FlightEKF_ObsMatrices
+     /tmp/ccAdnLOt.s:1696   .text.FlightEKF_KalmanGain:0000000000000000 $t
+     /tmp/ccAdnLOt.s:1703   .text.FlightEKF_KalmanGain:0000000000000000 FlightEKF_KalmanGain
+     /tmp/ccAdnLOt.s:1862   .text.FlightEKF_UpdateCovarianceUpd:0000000000000000 $t
+     /tmp/ccAdnLOt.s:1869   .text.FlightEKF_UpdateCovarianceUpd:0000000000000000 FlightEKF_UpdateCovarianceUpd
+     /tmp/ccAdnLOt.s:1971   .text.FlightEKF_updateStates:0000000000000000 $t
+     /tmp/ccAdnLOt.s:1978   .text.FlightEKF_updateStates:0000000000000000 FlightEKF_updateStates
+     /tmp/ccAdnLOt.s:2083   .text.FlightEKF_PredictStep:0000000000000000 $t
+     /tmp/ccAdnLOt.s:2090   .text.FlightEKF_PredictStep:0000000000000000 FlightEKF_PredictStep
+     /tmp/ccAdnLOt.s:2118   .text.FlightEKF_UpdateStep:0000000000000000 $t
+     /tmp/ccAdnLOt.s:2125   .text.FlightEKF_UpdateStep:0000000000000000 FlightEKF_UpdateStep
+     /tmp/ccAdnLOt.s:2161   .text.FlightEKF_run:0000000000000000 $t
+     /tmp/ccAdnLOt.s:2168   .text.FlightEKF_run:0000000000000000 FlightEKF_run
+     /tmp/ccAdnLOt.s:2287   .text.FlightEKF_run:00000000000000b4 $d
+     /tmp/ccAdnLOt.s:2338   .bss.PHt:0000000000000000 PHt
+     /tmp/ccAdnLOt.s:2324   .bss.Ht:0000000000000000 Ht
+     /tmp/ccAdnLOt.s:2310   .bss.APAt:0000000000000000 APAt
+     /tmp/ccAdnLOt.s:2331   .bss.PAt:0000000000000000 PAt
+     /tmp/ccAdnLOt.s:2317   .bss.At:0000000000000000 At
+     /tmp/ccAdnLOt.s:2359   .bss.last_upd:0000000000000000 last_upd
+     /tmp/ccAdnLOt.s:2372   .data.firstIntegration:0000000000000000 firstIntegration
+     /tmp/ccAdnLOt.s:2366   .bss.survive:0000000000000000 survive
+     /tmp/ccAdnLOt.s:2345   .bss.cleanB:0000000000000000 cleanB
+     /tmp/ccAdnLOt.s:2352   .bss.dist:0000000000000000 dist
+     /tmp/ccAdnLOt.s:2306   .bss.APAt:0000000000000000 $d
+     /tmp/ccAdnLOt.s:2313   .bss.At:0000000000000000 $d
+     /tmp/ccAdnLOt.s:2320   .bss.Ht:0000000000000000 $d
+     /tmp/ccAdnLOt.s:2327   .bss.PAt:0000000000000000 $d
+     /tmp/ccAdnLOt.s:2334   .bss.PHt:0000000000000000 $d
+     /tmp/ccAdnLOt.s:2341   .bss.cleanB:0000000000000000 $d
+     /tmp/ccAdnLOt.s:2348   .bss.dist:0000000000000000 $d
+     /tmp/ccAdnLOt.s:2355   .bss.last_upd:0000000000000000 $d
+     /tmp/ccAdnLOt.s:2362   .bss.survive:0000000000000000 $d
+
+UNDEFINED SYMBOLS
+arm_mat_init_f32
+x_init_6
+z_init_6
+PI6x6
+AI6x6
+ARM GAS  /tmp/ccAdnLOt.s 			page 52
+
+
+C_init_6
+HI6x6
+K_init_6x6
+QI6x6
+RI6x6
+HPHt6x6
+HPHtR6x6
+HPHtRI6x6
+HPHtRIHt6x6
+KH6x6
+IKH6x6
+IKHP6x6
+y6
+Ky6
+xtemp6
+Ptemp6x6
+htim2
+arm_mat_trans_f32
+arm_mat_mult_f32
+memcpy
+arm_mat_inverse_f32
+sqrt
+States

@@ -1,0 +1,1180 @@
+ARM GAS  /tmp/cc18P7GF.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.eabi_attribute 28, 1
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 1
+  11              		.eabi_attribute 18, 4
+  12              		.file	"DefFuncs.c"
+  13              		.text
+  14              	.Ltext0:
+  15              		.cfi_sections	.debug_frame
+  16              		.section	.rodata.sendS.str1.4,"aMS",%progbits,1
+  17              		.align	2
+  18              	.LC0:
+  19 0000 256600   		.ascii	"%f\000"
+  20 0003 00       		.align	2
+  21              	.LC1:
+  22 0004 256400   		.ascii	"%d\000"
+  23 0007 00       		.align	2
+  24              	.LC2:
+  25 0008 496E7661 		.ascii	"Invalid data type\012\015\000"
+  25      6C696420 
+  25      64617461 
+  25      20747970 
+  25      650A0D00 
+  26              		.section	.text.sendS,"ax",%progbits
+  27              		.align	1
+  28              		.global	sendS
+  29              		.arch armv7e-m
+  30              		.syntax unified
+  31              		.thumb
+  32              		.thumb_func
+  33              		.fpu fpv5-d16
+  35              	sendS:
+  36              	.LVL0:
+  37              	.LFB353:
+  38              		.file 1 "Core/Src/DefFuncs.c"
+   1:Core/Src/DefFuncs.c **** /**************************************************************************************************
+   2:Core/Src/DefFuncs.c **** /****************************This is the file containing important and repetitive functions********
+   3:Core/Src/DefFuncs.c **** 
+   4:Core/Src/DefFuncs.c **** #include "stdio.h"
+   5:Core/Src/DefFuncs.c **** #include "string.h"
+   6:Core/Src/DefFuncs.c **** #include "stdarg.h"
+   7:Core/Src/DefFuncs.c **** #include "DefFuncs.h"
+   8:Core/Src/DefFuncs.c **** #include "inttypes.h"
+   9:Core/Src/DefFuncs.c **** #include "init.h"
+  10:Core/Src/DefFuncs.c **** 
+  11:Core/Src/DefFuncs.c **** extern UART_HandleTypeDef huart4;
+  12:Core/Src/DefFuncs.c **** extern UART_HandleTypeDef huart1;
+  13:Core/Src/DefFuncs.c **** extern I2C_HandleTypeDef hi2c1;
+  14:Core/Src/DefFuncs.c **** 
+  15:Core/Src/DefFuncs.c **** 
+  16:Core/Src/DefFuncs.c **** void sendS(const char* str, ...)
+ARM GAS  /tmp/cc18P7GF.s 			page 2
+
+
+  17:Core/Src/DefFuncs.c **** {
+  39              		.loc 1 17 1 view -0
+  40              		.cfi_startproc
+  41              		@ args = 4, pretend = 16, frame = 72
+  42              		@ frame_needed = 0, uses_anonymous_args = 1
+  43              		.loc 1 17 1 is_stmt 0 view .LVU1
+  44 0000 0FB4     		push	{r0, r1, r2, r3}
+  45              	.LCFI0:
+  46              		.cfi_def_cfa_offset 16
+  47              		.cfi_offset 0, -16
+  48              		.cfi_offset 1, -12
+  49              		.cfi_offset 2, -8
+  50              		.cfi_offset 3, -4
+  51 0002 10B5     		push	{r4, lr}
+  52              	.LCFI1:
+  53              		.cfi_def_cfa_offset 24
+  54              		.cfi_offset 4, -24
+  55              		.cfi_offset 14, -20
+  56 0004 92B0     		sub	sp, sp, #72
+  57              	.LCFI2:
+  58              		.cfi_def_cfa_offset 96
+  59 0006 14AB     		add	r3, sp, #80
+  60 0008 53F8042B 		ldr	r2, [r3], #4
+  18:Core/Src/DefFuncs.c ****         va_list args;
+  61              		.loc 1 18 9 is_stmt 1 view .LVU2
+  19:Core/Src/DefFuncs.c ****         va_start(args, str);
+  62              		.loc 1 19 9 view .LVU3
+  63 000c 1193     		str	r3, [sp, #68]
+  20:Core/Src/DefFuncs.c ****         if (*str == 'c')
+  64              		.loc 1 20 9 view .LVU4
+  65              		.loc 1 20 13 is_stmt 0 view .LVU5
+  66 000e 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+  67              		.loc 1 20 12 view .LVU6
+  68 0010 632B     		cmp	r3, #99
+  69 0012 1DD0     		beq	.L7
+  21:Core/Src/DefFuncs.c ****         {
+  22:Core/Src/DefFuncs.c ****                 const char* arg = va_arg(args, const char*);
+  23:Core/Src/DefFuncs.c ****                 uint8_t size = strlen((const char*) arg);
+  24:Core/Src/DefFuncs.c ****                 HAL_UART_Transmit(&huart4, (uint8_t *) arg, size, HAL_MAX_DELAY);
+  25:Core/Src/DefFuncs.c ****         } else if ((*str == 'f') | (*str == 'd'))
+  70              		.loc 1 25 16 is_stmt 1 view .LVU7
+  71              		.loc 1 25 19 is_stmt 0 view .LVU8
+  72 0014 642B     		cmp	r3, #100
+  73 0016 18BF     		it	ne
+  74 0018 662B     		cmpne	r3, #102
+  75 001a 28D0     		beq	.L8
+  26:Core/Src/DefFuncs.c ****         {
+  27:Core/Src/DefFuncs.c ****                 float arg = va_arg(args, double);
+  28:Core/Src/DefFuncs.c ****                 const char* TxBuf[16];
+  29:Core/Src/DefFuncs.c ****                 sprintf((char *) TxBuf, "%f", arg);
+  30:Core/Src/DefFuncs.c ****                 uint8_t size = strlen((const char *) TxBuf);
+  31:Core/Src/DefFuncs.c ****                 HAL_UART_Transmit(&huart4, (uint8_t *) TxBuf, size, HAL_MAX_DELAY);
+  32:Core/Src/DefFuncs.c **** 	} else if (*str == 'i')
+  76              		.loc 1 32 9 is_stmt 1 view .LVU9
+  77              		.loc 1 32 12 is_stmt 0 view .LVU10
+  78 001c 692B     		cmp	r3, #105
+  79 001e 44D0     		beq	.L9
+ARM GAS  /tmp/cc18P7GF.s 			page 3
+
+
+  80              	.LBB2:
+  33:Core/Src/DefFuncs.c **** 	{
+  34:Core/Src/DefFuncs.c **** 		int arg = va_arg(args, int);
+  35:Core/Src/DefFuncs.c **** 		const char* TxBuf[16];
+  36:Core/Src/DefFuncs.c **** 		sprintf((char *) TxBuf, "%d", arg);
+  37:Core/Src/DefFuncs.c **** 		uint8_t size = strlen((const char *) TxBuf);
+  38:Core/Src/DefFuncs.c **** 		HAL_UART_Transmit(&huart4, (uint8_t *) TxBuf, size, HAL_MAX_DELAY);
+  39:Core/Src/DefFuncs.c ****         } else
+  40:Core/Src/DefFuncs.c ****         {
+  41:Core/Src/DefFuncs.c ****                 const char* TxBuf[16];
+  81              		.loc 1 41 17 is_stmt 1 view .LVU11
+  42:Core/Src/DefFuncs.c ****                 sprintf((char *) TxBuf, "Invalid data type\n\r");
+  82              		.loc 1 42 17 view .LVU12
+  83 0020 0DF1040C 		add	ip, sp, #4
+  84 0024 2A4C     		ldr	r4, .L10
+  85 0026 0FCC     		ldmia	r4!, {r0, r1, r2, r3}
+  86 0028 ACE80F00 		stmia	ip!, {r0, r1, r2, r3}
+  87 002c 2368     		ldr	r3, [r4]
+  88 002e CCF80030 		str	r3, [ip]
+  43:Core/Src/DefFuncs.c ****                 HAL_UART_Transmit(&huart4, (uint8_t *) TxBuf, strlen((const char*) TxBuf), HAL_MAX_
+  89              		.loc 1 43 17 view .LVU13
+  90              		.loc 1 43 63 is_stmt 0 view .LVU14
+  91 0032 01A8     		add	r0, sp, #4
+  92 0034 FFF7FEFF 		bl	strlen
+  93              	.LVL1:
+  94              		.loc 1 43 17 view .LVU15
+  95 0038 4FF0FF33 		mov	r3, #-1
+  96 003c 82B2     		uxth	r2, r0
+  97 003e 01A9     		add	r1, sp, #4
+  98 0040 2448     		ldr	r0, .L10+4
+  99 0042 FFF7FEFF 		bl	HAL_UART_Transmit
+ 100              	.LVL2:
+ 101              	.LBE2:
+  44:Core/Src/DefFuncs.c ****         }
+  45:Core/Src/DefFuncs.c ****         va_end(args);
+ 102              		.loc 1 45 9 is_stmt 1 view .LVU16
+ 103              	.L1:
+  46:Core/Src/DefFuncs.c **** 
+  47:Core/Src/DefFuncs.c **** }
+ 104              		.loc 1 47 1 is_stmt 0 view .LVU17
+ 105 0046 12B0     		add	sp, sp, #72
+ 106              	.LCFI3:
+ 107              		.cfi_remember_state
+ 108              		.cfi_def_cfa_offset 24
+ 109              		@ sp needed
+ 110 0048 BDE81040 		pop	{r4, lr}
+ 111              	.LCFI4:
+ 112              		.cfi_restore 14
+ 113              		.cfi_restore 4
+ 114              		.cfi_def_cfa_offset 16
+ 115 004c 04B0     		add	sp, sp, #16
+ 116              	.LCFI5:
+ 117              		.cfi_restore 3
+ 118              		.cfi_restore 2
+ 119              		.cfi_restore 1
+ 120              		.cfi_restore 0
+ 121              		.cfi_def_cfa_offset 0
+ARM GAS  /tmp/cc18P7GF.s 			page 4
+
+
+ 122 004e 7047     		bx	lr
+ 123              	.L7:
+ 124              	.LCFI6:
+ 125              		.cfi_restore_state
+ 126              	.LBB3:
+  22:Core/Src/DefFuncs.c ****                 uint8_t size = strlen((const char*) arg);
+ 127              		.loc 1 22 17 is_stmt 1 view .LVU18
+  22:Core/Src/DefFuncs.c ****                 uint8_t size = strlen((const char*) arg);
+ 128              		.loc 1 22 29 is_stmt 0 view .LVU19
+ 129 0050 119B     		ldr	r3, [sp, #68]
+ 130 0052 1A1D     		adds	r2, r3, #4
+ 131 0054 1192     		str	r2, [sp, #68]
+ 132 0056 1C68     		ldr	r4, [r3]
+  23:Core/Src/DefFuncs.c ****                 HAL_UART_Transmit(&huart4, (uint8_t *) arg, size, HAL_MAX_DELAY);
+ 133              		.loc 1 23 17 is_stmt 1 view .LVU20
+  23:Core/Src/DefFuncs.c ****                 HAL_UART_Transmit(&huart4, (uint8_t *) arg, size, HAL_MAX_DELAY);
+ 134              		.loc 1 23 32 is_stmt 0 view .LVU21
+ 135 0058 2046     		mov	r0, r4
+ 136 005a FFF7FEFF 		bl	strlen
+ 137              	.LVL3:
+  24:Core/Src/DefFuncs.c ****         } else if ((*str == 'f') | (*str == 'd'))
+ 138              		.loc 1 24 17 is_stmt 1 view .LVU22
+ 139 005e 4FF0FF33 		mov	r3, #-1
+ 140 0062 C2B2     		uxtb	r2, r0
+ 141 0064 2146     		mov	r1, r4
+ 142 0066 1B48     		ldr	r0, .L10+4
+ 143              	.LVL4:
+  24:Core/Src/DefFuncs.c ****         } else if ((*str == 'f') | (*str == 'd'))
+ 144              		.loc 1 24 17 is_stmt 0 view .LVU23
+ 145 0068 FFF7FEFF 		bl	HAL_UART_Transmit
+ 146              	.LVL5:
+  24:Core/Src/DefFuncs.c ****         } else if ((*str == 'f') | (*str == 'd'))
+ 147              		.loc 1 24 17 view .LVU24
+ 148              	.LBE3:
+ 149 006c EBE7     		b	.L1
+ 150              	.L8:
+ 151              	.LBB4:
+  27:Core/Src/DefFuncs.c ****                 const char* TxBuf[16];
+ 152              		.loc 1 27 17 is_stmt 1 view .LVU25
+  27:Core/Src/DefFuncs.c ****                 const char* TxBuf[16];
+ 153              		.loc 1 27 29 is_stmt 0 view .LVU26
+ 154 006e 119B     		ldr	r3, [sp, #68]
+ 155 0070 0733     		adds	r3, r3, #7
+ 156 0072 23F00703 		bic	r3, r3, #7
+ 157 0076 03F10802 		add	r2, r3, #8
+ 158 007a 1192     		str	r2, [sp, #68]
+ 159 007c 93ED007B 		vldr.64	d7, [r3]
+  27:Core/Src/DefFuncs.c ****                 const char* TxBuf[16];
+ 160              		.loc 1 27 23 view .LVU27
+ 161 0080 B7EEC77B 		vcvt.f32.f64	s14, d7
+ 162              	.LVL6:
+  28:Core/Src/DefFuncs.c ****                 sprintf((char *) TxBuf, "%f", arg);
+ 163              		.loc 1 28 17 is_stmt 1 view .LVU28
+  29:Core/Src/DefFuncs.c ****                 uint8_t size = strlen((const char *) TxBuf);
+ 164              		.loc 1 29 17 view .LVU29
+ 165 0084 B7EEC77A 		vcvt.f64.f32	d7, s14
+ 166              	.LVL7:
+ARM GAS  /tmp/cc18P7GF.s 			page 5
+
+
+  29:Core/Src/DefFuncs.c ****                 uint8_t size = strlen((const char *) TxBuf);
+ 167              		.loc 1 29 17 is_stmt 0 view .LVU30
+ 168 0088 53EC172B 		vmov	r2, r3, d7
+ 169 008c 1249     		ldr	r1, .L10+8
+ 170 008e 01A8     		add	r0, sp, #4
+ 171 0090 FFF7FEFF 		bl	sprintf
+ 172              	.LVL8:
+  30:Core/Src/DefFuncs.c ****                 HAL_UART_Transmit(&huart4, (uint8_t *) TxBuf, size, HAL_MAX_DELAY);
+ 173              		.loc 1 30 17 is_stmt 1 view .LVU31
+  30:Core/Src/DefFuncs.c ****                 HAL_UART_Transmit(&huart4, (uint8_t *) TxBuf, size, HAL_MAX_DELAY);
+ 174              		.loc 1 30 32 is_stmt 0 view .LVU32
+ 175 0094 01A8     		add	r0, sp, #4
+ 176 0096 FFF7FEFF 		bl	strlen
+ 177              	.LVL9:
+  31:Core/Src/DefFuncs.c **** 	} else if (*str == 'i')
+ 178              		.loc 1 31 17 is_stmt 1 view .LVU33
+ 179 009a 4FF0FF33 		mov	r3, #-1
+ 180 009e C2B2     		uxtb	r2, r0
+ 181 00a0 01A9     		add	r1, sp, #4
+ 182 00a2 0C48     		ldr	r0, .L10+4
+ 183              	.LVL10:
+  31:Core/Src/DefFuncs.c **** 	} else if (*str == 'i')
+ 184              		.loc 1 31 17 is_stmt 0 view .LVU34
+ 185 00a4 FFF7FEFF 		bl	HAL_UART_Transmit
+ 186              	.LVL11:
+  31:Core/Src/DefFuncs.c **** 	} else if (*str == 'i')
+ 187              		.loc 1 31 17 view .LVU35
+ 188              	.LBE4:
+ 189 00a8 CDE7     		b	.L1
+ 190              	.L9:
+ 191              	.LBB5:
+  34:Core/Src/DefFuncs.c **** 		const char* TxBuf[16];
+ 192              		.loc 1 34 3 is_stmt 1 view .LVU36
+  34:Core/Src/DefFuncs.c **** 		const char* TxBuf[16];
+ 193              		.loc 1 34 7 is_stmt 0 view .LVU37
+ 194 00aa 119B     		ldr	r3, [sp, #68]
+ 195 00ac 1A1D     		adds	r2, r3, #4
+ 196 00ae 1192     		str	r2, [sp, #68]
+  35:Core/Src/DefFuncs.c **** 		sprintf((char *) TxBuf, "%d", arg);
+ 197              		.loc 1 35 3 is_stmt 1 view .LVU38
+  36:Core/Src/DefFuncs.c **** 		uint8_t size = strlen((const char *) TxBuf);
+ 198              		.loc 1 36 3 view .LVU39
+ 199 00b0 1A68     		ldr	r2, [r3]
+ 200 00b2 0A49     		ldr	r1, .L10+12
+ 201 00b4 01A8     		add	r0, sp, #4
+ 202 00b6 FFF7FEFF 		bl	sprintf
+ 203              	.LVL12:
+  37:Core/Src/DefFuncs.c **** 		HAL_UART_Transmit(&huart4, (uint8_t *) TxBuf, size, HAL_MAX_DELAY);
+ 204              		.loc 1 37 3 view .LVU40
+  37:Core/Src/DefFuncs.c **** 		HAL_UART_Transmit(&huart4, (uint8_t *) TxBuf, size, HAL_MAX_DELAY);
+ 205              		.loc 1 37 18 is_stmt 0 view .LVU41
+ 206 00ba 01A8     		add	r0, sp, #4
+ 207 00bc FFF7FEFF 		bl	strlen
+ 208              	.LVL13:
+  38:Core/Src/DefFuncs.c ****         } else
+ 209              		.loc 1 38 3 is_stmt 1 view .LVU42
+ 210 00c0 4FF0FF33 		mov	r3, #-1
+ARM GAS  /tmp/cc18P7GF.s 			page 6
+
+
+ 211 00c4 C2B2     		uxtb	r2, r0
+ 212 00c6 01A9     		add	r1, sp, #4
+ 213 00c8 0248     		ldr	r0, .L10+4
+ 214              	.LVL14:
+  38:Core/Src/DefFuncs.c ****         } else
+ 215              		.loc 1 38 3 is_stmt 0 view .LVU43
+ 216 00ca FFF7FEFF 		bl	HAL_UART_Transmit
+ 217              	.LVL15:
+  38:Core/Src/DefFuncs.c ****         } else
+ 218              		.loc 1 38 3 view .LVU44
+ 219              	.LBE5:
+ 220 00ce BAE7     		b	.L1
+ 221              	.L11:
+ 222              		.align	2
+ 223              	.L10:
+ 224 00d0 08000000 		.word	.LC2
+ 225 00d4 00000000 		.word	huart4
+ 226 00d8 00000000 		.word	.LC0
+ 227 00dc 04000000 		.word	.LC1
+ 228              		.cfi_endproc
+ 229              	.LFE353:
+ 231              		.section	.rodata.sendMat.str1.4,"aMS",%progbits,1
+ 232              		.align	2
+ 233              	.LC3:
+ 234 0000 5B00     		.ascii	"[\000"
+ 235 0002 0000     		.align	2
+ 236              	.LC4:
+ 237 0004 6300     		.ascii	"c\000"
+ 238 0006 0000     		.align	2
+ 239              	.LC6:
+ 240 0008 20202000 		.ascii	"   \000"
+ 241              		.align	2
+ 242              	.LC7:
+ 243 000c 6600     		.ascii	"f\000"
+ 244 000e 0000     		.align	2
+ 245              	.LC8:
+ 246 0010 5D0A0D00 		.ascii	"]\012\015\000"
+ 247              		.section	.text.sendMat,"ax",%progbits
+ 248              		.align	1
+ 249              		.global	sendMat
+ 250              		.syntax unified
+ 251              		.thumb
+ 252              		.thumb_func
+ 253              		.fpu fpv5-d16
+ 255              	sendMat:
+ 256              	.LVL16:
+ 257              	.LFB354:
+  48:Core/Src/DefFuncs.c **** 
+  49:Core/Src/DefFuncs.c **** void sendMat(float* data, uint8_t r, uint8_t c)
+  50:Core/Src/DefFuncs.c **** {
+ 258              		.loc 1 50 1 is_stmt 1 view -0
+ 259              		.cfi_startproc
+ 260              		@ args = 0, pretend = 0, frame = 0
+ 261              		@ frame_needed = 0, uses_anonymous_args = 0
+ 262              		.loc 1 50 1 is_stmt 0 view .LVU46
+ 263 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 264              	.LCFI7:
+ARM GAS  /tmp/cc18P7GF.s 			page 7
+
+
+ 265              		.cfi_def_cfa_offset 24
+ 266              		.cfi_offset 3, -24
+ 267              		.cfi_offset 4, -20
+ 268              		.cfi_offset 5, -16
+ 269              		.cfi_offset 6, -12
+ 270              		.cfi_offset 7, -8
+ 271              		.cfi_offset 14, -4
+ 272 0002 0746     		mov	r7, r0
+ 273 0004 0E46     		mov	r6, r1
+ 274 0006 1546     		mov	r5, r2
+  51:Core/Src/DefFuncs.c **** 	for (int i = 0; i < (r*c); i++)
+ 275              		.loc 1 51 2 is_stmt 1 view .LVU47
+ 276              	.LBB6:
+ 277              		.loc 1 51 7 view .LVU48
+ 278              	.LVL17:
+ 279              		.loc 1 51 11 is_stmt 0 view .LVU49
+ 280 0008 0024     		movs	r4, #0
+ 281              		.loc 1 51 2 view .LVU50
+ 282 000a 08E0     		b	.L13
+ 283              	.LVL18:
+ 284              	.L14:
+  52:Core/Src/DefFuncs.c **** 	{
+  53:Core/Src/DefFuncs.c **** 		((i % c) == 0)? (sendS("c", "[")): (sendS("c", "\0"));
+ 285              		.loc 1 53 39 discriminator 2 view .LVU51
+ 286 000c 1949     		ldr	r1, .L21
+ 287 000e 1A48     		ldr	r0, .L21+4
+ 288 0010 FFF7FEFF 		bl	sendS
+ 289              	.LVL19:
+ 290 0014 11E0     		b	.L15
+ 291              	.LVL20:
+ 292              	.L16:
+  54:Core/Src/DefFuncs.c **** 
+  55:Core/Src/DefFuncs.c **** 		sendS("c", "   ");
+  56:Core/Src/DefFuncs.c **** 		sendS("f", data[i]);
+  57:Core/Src/DefFuncs.c **** 		
+  58:Core/Src/DefFuncs.c **** 		(((i+1) % c) == 0)? sendS("c", "]\n\r"): (sendS("c", "\0"));
+ 293              		.loc 1 58 45 discriminator 2 view .LVU52
+ 294 0016 1749     		ldr	r1, .L21
+ 295 0018 1748     		ldr	r0, .L21+4
+ 296 001a FFF7FEFF 		bl	sendS
+ 297              	.LVL21:
+ 298              	.L13:
+  51:Core/Src/DefFuncs.c **** 	{
+ 299              		.loc 1 51 18 is_stmt 1 discriminator 1 view .LVU53
+  51:Core/Src/DefFuncs.c **** 	{
+ 300              		.loc 1 51 24 is_stmt 0 discriminator 1 view .LVU54
+ 301 001e 05FB06F3 		mul	r3, r5, r6
+  51:Core/Src/DefFuncs.c **** 	{
+ 302              		.loc 1 51 2 discriminator 1 view .LVU55
+ 303 0022 A342     		cmp	r3, r4
+ 304 0024 24DD     		ble	.L20
+  53:Core/Src/DefFuncs.c **** 
+ 305              		.loc 1 53 3 is_stmt 1 view .LVU56
+  53:Core/Src/DefFuncs.c **** 
+ 306              		.loc 1 53 7 is_stmt 0 view .LVU57
+ 307 0026 94FBF5F3 		sdiv	r3, r4, r5
+ 308 002a 05FB1343 		mls	r3, r5, r3, r4
+ARM GAS  /tmp/cc18P7GF.s 			page 8
+
+
+  53:Core/Src/DefFuncs.c **** 
+ 309              		.loc 1 53 36 view .LVU58
+ 310 002e 002B     		cmp	r3, #0
+ 311 0030 ECD1     		bne	.L14
+  53:Core/Src/DefFuncs.c **** 
+ 312              		.loc 1 53 20 discriminator 1 view .LVU59
+ 313 0032 1249     		ldr	r1, .L21+8
+ 314 0034 1048     		ldr	r0, .L21+4
+ 315 0036 FFF7FEFF 		bl	sendS
+ 316              	.LVL22:
+ 317              	.L15:
+  55:Core/Src/DefFuncs.c **** 		sendS("f", data[i]);
+ 318              		.loc 1 55 3 is_stmt 1 view .LVU60
+ 319 003a 1149     		ldr	r1, .L21+12
+ 320 003c 0E48     		ldr	r0, .L21+4
+ 321 003e FFF7FEFF 		bl	sendS
+ 322              	.LVL23:
+  56:Core/Src/DefFuncs.c **** 		
+ 323              		.loc 1 56 3 view .LVU61
+  56:Core/Src/DefFuncs.c **** 		
+ 324              		.loc 1 56 18 is_stmt 0 view .LVU62
+ 325 0042 07EB8403 		add	r3, r7, r4, lsl #2
+ 326 0046 D3ED007A 		vldr.32	s15, [r3]
+  56:Core/Src/DefFuncs.c **** 		
+ 327              		.loc 1 56 3 view .LVU63
+ 328 004a B7EEE77A 		vcvt.f64.f32	d7, s15
+ 329 004e 53EC172B 		vmov	r2, r3, d7
+ 330 0052 0C48     		ldr	r0, .L21+16
+ 331 0054 FFF7FEFF 		bl	sendS
+ 332              	.LVL24:
+ 333              		.loc 1 58 3 is_stmt 1 view .LVU64
+ 334              		.loc 1 58 7 is_stmt 0 view .LVU65
+ 335 0058 0134     		adds	r4, r4, #1
+ 336              	.LVL25:
+ 337              		.loc 1 58 11 view .LVU66
+ 338 005a 94FBF5F3 		sdiv	r3, r4, r5
+ 339 005e 05FB1343 		mls	r3, r5, r3, r4
+ 340              		.loc 1 58 42 view .LVU67
+ 341 0062 002B     		cmp	r3, #0
+ 342 0064 D7D1     		bne	.L16
+ 343              		.loc 1 58 23 discriminator 1 view .LVU68
+ 344 0066 0849     		ldr	r1, .L21+20
+ 345 0068 0348     		ldr	r0, .L21+4
+ 346 006a FFF7FEFF 		bl	sendS
+ 347              	.LVL26:
+ 348 006e D6E7     		b	.L13
+ 349              	.LVL27:
+ 350              	.L20:
+ 351              		.loc 1 58 23 discriminator 1 view .LVU69
+ 352              	.LBE6:
+  59:Core/Src/DefFuncs.c **** 	}
+  60:Core/Src/DefFuncs.c **** }
+ 353              		.loc 1 60 1 view .LVU70
+ 354 0070 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 355              	.LVL28:
+ 356              	.L22:
+ 357              		.loc 1 60 1 view .LVU71
+ARM GAS  /tmp/cc18P7GF.s 			page 9
+
+
+ 358 0072 00BF     		.align	2
+ 359              	.L21:
+ 360 0074 00000000 		.word	.LANCHOR0
+ 361 0078 04000000 		.word	.LC4
+ 362 007c 00000000 		.word	.LC3
+ 363 0080 08000000 		.word	.LC6
+ 364 0084 0C000000 		.word	.LC7
+ 365 0088 10000000 		.word	.LC8
+ 366              		.cfi_endproc
+ 367              	.LFE354:
+ 369              		.section	.rodata.sendMati.str1.4,"aMS",%progbits,1
+ 370              		.align	2
+ 371              	.LC9:
+ 372 0000 6900     		.ascii	"i\000"
+ 373              		.section	.text.sendMati,"ax",%progbits
+ 374              		.align	1
+ 375              		.global	sendMati
+ 376              		.syntax unified
+ 377              		.thumb
+ 378              		.thumb_func
+ 379              		.fpu fpv5-d16
+ 381              	sendMati:
+ 382              	.LVL29:
+ 383              	.LFB355:
+  61:Core/Src/DefFuncs.c **** 
+  62:Core/Src/DefFuncs.c **** void sendMati(uint8_t* data, uint8_t r, uint8_t c)
+  63:Core/Src/DefFuncs.c **** {
+ 384              		.loc 1 63 1 is_stmt 1 view -0
+ 385              		.cfi_startproc
+ 386              		@ args = 0, pretend = 0, frame = 0
+ 387              		@ frame_needed = 0, uses_anonymous_args = 0
+ 388              		.loc 1 63 1 is_stmt 0 view .LVU73
+ 389 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 390              	.LCFI8:
+ 391              		.cfi_def_cfa_offset 24
+ 392              		.cfi_offset 3, -24
+ 393              		.cfi_offset 4, -20
+ 394              		.cfi_offset 5, -16
+ 395              		.cfi_offset 6, -12
+ 396              		.cfi_offset 7, -8
+ 397              		.cfi_offset 14, -4
+ 398 0002 0746     		mov	r7, r0
+ 399 0004 0E46     		mov	r6, r1
+ 400 0006 1546     		mov	r5, r2
+  64:Core/Src/DefFuncs.c **** 	for (int i = 0; i < (r*c); i++)
+ 401              		.loc 1 64 2 is_stmt 1 view .LVU74
+ 402              	.LBB7:
+ 403              		.loc 1 64 7 view .LVU75
+ 404              	.LVL30:
+ 405              		.loc 1 64 11 is_stmt 0 view .LVU76
+ 406 0008 0024     		movs	r4, #0
+ 407              		.loc 1 64 2 view .LVU77
+ 408 000a 08E0     		b	.L24
+ 409              	.LVL31:
+ 410              	.L25:
+  65:Core/Src/DefFuncs.c **** 	{
+  66:Core/Src/DefFuncs.c **** 		((i % c) == 0)? (sendS("c", "[")): (sendS("c", "\0"));
+ARM GAS  /tmp/cc18P7GF.s 			page 10
+
+
+ 411              		.loc 1 66 39 discriminator 2 view .LVU78
+ 412 000c 1549     		ldr	r1, .L32
+ 413 000e 1648     		ldr	r0, .L32+4
+ 414 0010 FFF7FEFF 		bl	sendS
+ 415              	.LVL32:
+ 416 0014 11E0     		b	.L26
+ 417              	.LVL33:
+ 418              	.L27:
+  67:Core/Src/DefFuncs.c **** 
+  68:Core/Src/DefFuncs.c **** 		sendS("c", "   ");
+  69:Core/Src/DefFuncs.c **** 		sendS("i", data[i]);
+  70:Core/Src/DefFuncs.c **** 		
+  71:Core/Src/DefFuncs.c **** 		(((i+1) % c) == 0)? sendS("c", "]\n\r"): (sendS("c", "\0"));
+ 419              		.loc 1 71 45 discriminator 2 view .LVU79
+ 420 0016 1349     		ldr	r1, .L32
+ 421 0018 1348     		ldr	r0, .L32+4
+ 422 001a FFF7FEFF 		bl	sendS
+ 423              	.LVL34:
+ 424              	.L24:
+  64:Core/Src/DefFuncs.c **** 	{
+ 425              		.loc 1 64 18 is_stmt 1 discriminator 1 view .LVU80
+  64:Core/Src/DefFuncs.c **** 	{
+ 426              		.loc 1 64 24 is_stmt 0 discriminator 1 view .LVU81
+ 427 001e 05FB06F3 		mul	r3, r5, r6
+  64:Core/Src/DefFuncs.c **** 	{
+ 428              		.loc 1 64 2 discriminator 1 view .LVU82
+ 429 0022 A342     		cmp	r3, r4
+ 430 0024 1DDD     		ble	.L31
+  66:Core/Src/DefFuncs.c **** 
+ 431              		.loc 1 66 3 is_stmt 1 view .LVU83
+  66:Core/Src/DefFuncs.c **** 
+ 432              		.loc 1 66 7 is_stmt 0 view .LVU84
+ 433 0026 94FBF5F3 		sdiv	r3, r4, r5
+ 434 002a 05FB1343 		mls	r3, r5, r3, r4
+  66:Core/Src/DefFuncs.c **** 
+ 435              		.loc 1 66 36 view .LVU85
+ 436 002e 002B     		cmp	r3, #0
+ 437 0030 ECD1     		bne	.L25
+  66:Core/Src/DefFuncs.c **** 
+ 438              		.loc 1 66 20 discriminator 1 view .LVU86
+ 439 0032 0E49     		ldr	r1, .L32+8
+ 440 0034 0C48     		ldr	r0, .L32+4
+ 441 0036 FFF7FEFF 		bl	sendS
+ 442              	.LVL35:
+ 443              	.L26:
+  68:Core/Src/DefFuncs.c **** 		sendS("i", data[i]);
+ 444              		.loc 1 68 3 is_stmt 1 view .LVU87
+ 445 003a 0D49     		ldr	r1, .L32+12
+ 446 003c 0A48     		ldr	r0, .L32+4
+ 447 003e FFF7FEFF 		bl	sendS
+ 448              	.LVL36:
+  69:Core/Src/DefFuncs.c **** 		
+ 449              		.loc 1 69 3 view .LVU88
+ 450 0042 395D     		ldrb	r1, [r7, r4]	@ zero_extendqisi2
+ 451 0044 0B48     		ldr	r0, .L32+16
+ 452 0046 FFF7FEFF 		bl	sendS
+ 453              	.LVL37:
+ARM GAS  /tmp/cc18P7GF.s 			page 11
+
+
+ 454              		.loc 1 71 3 view .LVU89
+ 455              		.loc 1 71 7 is_stmt 0 view .LVU90
+ 456 004a 0134     		adds	r4, r4, #1
+ 457              	.LVL38:
+ 458              		.loc 1 71 11 view .LVU91
+ 459 004c 94FBF5F3 		sdiv	r3, r4, r5
+ 460 0050 05FB1343 		mls	r3, r5, r3, r4
+ 461              		.loc 1 71 42 view .LVU92
+ 462 0054 002B     		cmp	r3, #0
+ 463 0056 DED1     		bne	.L27
+ 464              		.loc 1 71 23 discriminator 1 view .LVU93
+ 465 0058 0749     		ldr	r1, .L32+20
+ 466 005a 0348     		ldr	r0, .L32+4
+ 467 005c FFF7FEFF 		bl	sendS
+ 468              	.LVL39:
+ 469 0060 DDE7     		b	.L24
+ 470              	.LVL40:
+ 471              	.L31:
+ 472              		.loc 1 71 23 discriminator 1 view .LVU94
+ 473              	.LBE7:
+  72:Core/Src/DefFuncs.c **** 	}
+  73:Core/Src/DefFuncs.c **** 
+  74:Core/Src/DefFuncs.c **** 
+  75:Core/Src/DefFuncs.c **** }
+ 474              		.loc 1 75 1 view .LVU95
+ 475 0062 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 476              	.LVL41:
+ 477              	.L33:
+ 478              		.loc 1 75 1 view .LVU96
+ 479              		.align	2
+ 480              	.L32:
+ 481 0064 00000000 		.word	.LANCHOR0
+ 482 0068 04000000 		.word	.LC4
+ 483 006c 00000000 		.word	.LC3
+ 484 0070 08000000 		.word	.LC6
+ 485 0074 00000000 		.word	.LC9
+ 486 0078 10000000 		.word	.LC8
+ 487              		.cfi_endproc
+ 488              	.LFE355:
+ 490              		.section	.text.sendMatc,"ax",%progbits
+ 491              		.align	1
+ 492              		.global	sendMatc
+ 493              		.syntax unified
+ 494              		.thumb
+ 495              		.thumb_func
+ 496              		.fpu fpv5-d16
+ 498              	sendMatc:
+ 499              	.LVL42:
+ 500              	.LFB356:
+  76:Core/Src/DefFuncs.c **** 
+  77:Core/Src/DefFuncs.c **** 
+  78:Core/Src/DefFuncs.c **** void sendMatc(char* data, uint8_t r, uint8_t c)
+  79:Core/Src/DefFuncs.c **** {
+ 501              		.loc 1 79 1 is_stmt 1 view -0
+ 502              		.cfi_startproc
+ 503              		@ args = 0, pretend = 0, frame = 0
+ 504              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  /tmp/cc18P7GF.s 			page 12
+
+
+ 505              		.loc 1 79 1 is_stmt 0 view .LVU98
+ 506 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 507              	.LCFI9:
+ 508              		.cfi_def_cfa_offset 24
+ 509              		.cfi_offset 4, -24
+ 510              		.cfi_offset 5, -20
+ 511              		.cfi_offset 6, -16
+ 512              		.cfi_offset 7, -12
+ 513              		.cfi_offset 8, -8
+ 514              		.cfi_offset 14, -4
+ 515 0004 0746     		mov	r7, r0
+ 516 0006 0E46     		mov	r6, r1
+ 517 0008 1546     		mov	r5, r2
+  80:Core/Src/DefFuncs.c **** 	for (int i = 0; i < (r*c); i++)
+ 518              		.loc 1 80 2 is_stmt 1 view .LVU99
+ 519              	.LBB8:
+ 520              		.loc 1 80 7 view .LVU100
+ 521              	.LVL43:
+ 522              		.loc 1 80 11 is_stmt 0 view .LVU101
+ 523 000a 0024     		movs	r4, #0
+ 524              		.loc 1 80 2 view .LVU102
+ 525 000c 08E0     		b	.L35
+ 526              	.LVL44:
+ 527              	.L36:
+  81:Core/Src/DefFuncs.c **** 	{
+  82:Core/Src/DefFuncs.c **** 		((i % c) == 0)? (sendS("c", "[")): (sendS("c", "\0"));
+ 528              		.loc 1 82 39 discriminator 2 view .LVU103
+ 529 000e 1749     		ldr	r1, .L43
+ 530 0010 1748     		ldr	r0, .L43+4
+ 531 0012 FFF7FEFF 		bl	sendS
+ 532              	.LVL45:
+ 533 0016 11E0     		b	.L37
+ 534              	.LVL46:
+ 535              	.L38:
+  83:Core/Src/DefFuncs.c **** 
+  84:Core/Src/DefFuncs.c **** 		sendS("c", "   ");
+  85:Core/Src/DefFuncs.c **** 		sendS("c", data[i]);
+  86:Core/Src/DefFuncs.c **** 		
+  87:Core/Src/DefFuncs.c **** 		(((i+1) % c) == 0)? sendS("c", "]\n\r"): (sendS("c", "\0"));
+ 536              		.loc 1 87 45 discriminator 2 view .LVU104
+ 537 0018 1449     		ldr	r1, .L43
+ 538 001a 1548     		ldr	r0, .L43+4
+ 539 001c FFF7FEFF 		bl	sendS
+ 540              	.LVL47:
+ 541              	.L35:
+  80:Core/Src/DefFuncs.c **** 	{
+ 542              		.loc 1 80 18 is_stmt 1 discriminator 1 view .LVU105
+  80:Core/Src/DefFuncs.c **** 	{
+ 543              		.loc 1 80 24 is_stmt 0 discriminator 1 view .LVU106
+ 544 0020 05FB06F3 		mul	r3, r5, r6
+  80:Core/Src/DefFuncs.c **** 	{
+ 545              		.loc 1 80 2 discriminator 1 view .LVU107
+ 546 0024 A342     		cmp	r3, r4
+ 547 0026 1FDD     		ble	.L42
+  82:Core/Src/DefFuncs.c **** 
+ 548              		.loc 1 82 3 is_stmt 1 view .LVU108
+  82:Core/Src/DefFuncs.c **** 
+ARM GAS  /tmp/cc18P7GF.s 			page 13
+
+
+ 549              		.loc 1 82 7 is_stmt 0 view .LVU109
+ 550 0028 94FBF5F3 		sdiv	r3, r4, r5
+ 551 002c 05FB1343 		mls	r3, r5, r3, r4
+  82:Core/Src/DefFuncs.c **** 
+ 552              		.loc 1 82 36 view .LVU110
+ 553 0030 002B     		cmp	r3, #0
+ 554 0032 ECD1     		bne	.L36
+  82:Core/Src/DefFuncs.c **** 
+ 555              		.loc 1 82 20 discriminator 1 view .LVU111
+ 556 0034 0F49     		ldr	r1, .L43+8
+ 557 0036 0E48     		ldr	r0, .L43+4
+ 558 0038 FFF7FEFF 		bl	sendS
+ 559              	.LVL48:
+ 560              	.L37:
+  84:Core/Src/DefFuncs.c **** 		sendS("c", data[i]);
+ 561              		.loc 1 84 3 is_stmt 1 view .LVU112
+ 562 003c DFF83080 		ldr	r8, .L43+4
+ 563 0040 0D49     		ldr	r1, .L43+12
+ 564 0042 4046     		mov	r0, r8
+ 565 0044 FFF7FEFF 		bl	sendS
+ 566              	.LVL49:
+  85:Core/Src/DefFuncs.c **** 		
+ 567              		.loc 1 85 3 view .LVU113
+ 568 0048 395D     		ldrb	r1, [r7, r4]	@ zero_extendqisi2
+ 569 004a 4046     		mov	r0, r8
+ 570 004c FFF7FEFF 		bl	sendS
+ 571              	.LVL50:
+ 572              		.loc 1 87 3 view .LVU114
+ 573              		.loc 1 87 7 is_stmt 0 view .LVU115
+ 574 0050 0134     		adds	r4, r4, #1
+ 575              	.LVL51:
+ 576              		.loc 1 87 11 view .LVU116
+ 577 0052 94FBF5F3 		sdiv	r3, r4, r5
+ 578 0056 05FB1343 		mls	r3, r5, r3, r4
+ 579              		.loc 1 87 42 view .LVU117
+ 580 005a 002B     		cmp	r3, #0
+ 581 005c DCD1     		bne	.L38
+ 582              		.loc 1 87 23 discriminator 1 view .LVU118
+ 583 005e 0749     		ldr	r1, .L43+16
+ 584 0060 4046     		mov	r0, r8
+ 585 0062 FFF7FEFF 		bl	sendS
+ 586              	.LVL52:
+ 587 0066 DBE7     		b	.L35
+ 588              	.LVL53:
+ 589              	.L42:
+ 590              		.loc 1 87 23 discriminator 1 view .LVU119
+ 591              	.LBE8:
+  88:Core/Src/DefFuncs.c **** 	}
+  89:Core/Src/DefFuncs.c **** 
+  90:Core/Src/DefFuncs.c **** 
+  91:Core/Src/DefFuncs.c **** }
+ 592              		.loc 1 91 1 view .LVU120
+ 593 0068 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 594              	.LVL54:
+ 595              	.L44:
+ 596              		.loc 1 91 1 view .LVU121
+ 597              		.align	2
+ARM GAS  /tmp/cc18P7GF.s 			page 14
+
+
+ 598              	.L43:
+ 599 006c 00000000 		.word	.LANCHOR0
+ 600 0070 04000000 		.word	.LC4
+ 601 0074 00000000 		.word	.LC3
+ 602 0078 08000000 		.word	.LC6
+ 603 007c 10000000 		.word	.LC8
+ 604              		.cfi_endproc
+ 605              	.LFE356:
+ 607              		.section	.text.receiveS_B,"ax",%progbits
+ 608              		.align	1
+ 609              		.global	receiveS_B
+ 610              		.syntax unified
+ 611              		.thumb
+ 612              		.thumb_func
+ 613              		.fpu fpv5-d16
+ 615              	receiveS_B:
+ 616              	.LVL55:
+ 617              	.LFB357:
+  92:Core/Src/DefFuncs.c **** 
+  93:Core/Src/DefFuncs.c **** void receiveS_B(void* data, uint8_t size)
+  94:Core/Src/DefFuncs.c **** {
+ 618              		.loc 1 94 1 is_stmt 1 view -0
+ 619              		.cfi_startproc
+ 620              		@ args = 0, pretend = 0, frame = 0
+ 621              		@ frame_needed = 0, uses_anonymous_args = 0
+ 622              		.loc 1 94 1 is_stmt 0 view .LVU123
+ 623 0000 08B5     		push	{r3, lr}
+ 624              	.LCFI10:
+ 625              		.cfi_def_cfa_offset 8
+ 626              		.cfi_offset 3, -8
+ 627              		.cfi_offset 14, -4
+ 628 0002 0A46     		mov	r2, r1
+  95:Core/Src/DefFuncs.c **** 	HAL_UART_Receive(&huart1, (uint8_t *) data, size, HAL_MAX_DELAY);
+ 629              		.loc 1 95 2 is_stmt 1 view .LVU124
+ 630 0004 4FF0FF33 		mov	r3, #-1
+ 631 0008 0146     		mov	r1, r0
+ 632              	.LVL56:
+ 633              		.loc 1 95 2 is_stmt 0 view .LVU125
+ 634 000a 0248     		ldr	r0, .L47
+ 635              	.LVL57:
+ 636              		.loc 1 95 2 view .LVU126
+ 637 000c FFF7FEFF 		bl	HAL_UART_Receive
+ 638              	.LVL58:
+  96:Core/Src/DefFuncs.c **** }
+ 639              		.loc 1 96 1 view .LVU127
+ 640 0010 08BD     		pop	{r3, pc}
+ 641              	.L48:
+ 642 0012 00BF     		.align	2
+ 643              	.L47:
+ 644 0014 00000000 		.word	huart1
+ 645              		.cfi_endproc
+ 646              	.LFE357:
+ 648              		.section	.text.receiveS_IT,"ax",%progbits
+ 649              		.align	1
+ 650              		.global	receiveS_IT
+ 651              		.syntax unified
+ 652              		.thumb
+ARM GAS  /tmp/cc18P7GF.s 			page 15
+
+
+ 653              		.thumb_func
+ 654              		.fpu fpv5-d16
+ 656              	receiveS_IT:
+ 657              	.LVL59:
+ 658              	.LFB358:
+  97:Core/Src/DefFuncs.c **** 
+  98:Core/Src/DefFuncs.c **** void receiveS_IT(void* data, uint8_t size)
+  99:Core/Src/DefFuncs.c **** {
+ 659              		.loc 1 99 1 is_stmt 1 view -0
+ 660              		.cfi_startproc
+ 661              		@ args = 0, pretend = 0, frame = 0
+ 662              		@ frame_needed = 0, uses_anonymous_args = 0
+ 663              		.loc 1 99 1 is_stmt 0 view .LVU129
+ 664 0000 08B5     		push	{r3, lr}
+ 665              	.LCFI11:
+ 666              		.cfi_def_cfa_offset 8
+ 667              		.cfi_offset 3, -8
+ 668              		.cfi_offset 14, -4
+ 669 0002 0A46     		mov	r2, r1
+ 100:Core/Src/DefFuncs.c **** 	HAL_UART_Receive_IT(&huart1, (uint8_t *) data, size);
+ 670              		.loc 1 100 2 is_stmt 1 view .LVU130
+ 671 0004 0146     		mov	r1, r0
+ 672              	.LVL60:
+ 673              		.loc 1 100 2 is_stmt 0 view .LVU131
+ 674 0006 0248     		ldr	r0, .L51
+ 675              	.LVL61:
+ 676              		.loc 1 100 2 view .LVU132
+ 677 0008 FFF7FEFF 		bl	HAL_UART_Receive_IT
+ 678              	.LVL62:
+ 101:Core/Src/DefFuncs.c **** }
+ 679              		.loc 1 101 1 view .LVU133
+ 680 000c 08BD     		pop	{r3, pc}
+ 681              	.L52:
+ 682 000e 00BF     		.align	2
+ 683              	.L51:
+ 684 0010 00000000 		.word	huart1
+ 685              		.cfi_endproc
+ 686              	.LFE358:
+ 688              		.section	.rodata.space.str1.4,"aMS",%progbits,1
+ 689              		.align	2
+ 690              	.LC10:
+ 691 0000 20202020 		.ascii	"     \000"
+ 691      2000
+ 692              		.section	.text.space,"ax",%progbits
+ 693              		.align	1
+ 694              		.global	space
+ 695              		.syntax unified
+ 696              		.thumb
+ 697              		.thumb_func
+ 698              		.fpu fpv5-d16
+ 700              	space:
+ 701              	.LFB359:
+ 102:Core/Src/DefFuncs.c **** 
+ 103:Core/Src/DefFuncs.c **** 
+ 104:Core/Src/DefFuncs.c **** void space(void)
+ 105:Core/Src/DefFuncs.c **** {
+ 702              		.loc 1 105 1 is_stmt 1 view -0
+ARM GAS  /tmp/cc18P7GF.s 			page 16
+
+
+ 703              		.cfi_startproc
+ 704              		@ args = 0, pretend = 0, frame = 0
+ 705              		@ frame_needed = 0, uses_anonymous_args = 0
+ 706 0000 08B5     		push	{r3, lr}
+ 707              	.LCFI12:
+ 708              		.cfi_def_cfa_offset 8
+ 709              		.cfi_offset 3, -8
+ 710              		.cfi_offset 14, -4
+ 106:Core/Src/DefFuncs.c **** 	sendS("c", "     ");
+ 711              		.loc 1 106 2 view .LVU135
+ 712 0002 0249     		ldr	r1, .L55
+ 713 0004 0248     		ldr	r0, .L55+4
+ 714 0006 FFF7FEFF 		bl	sendS
+ 715              	.LVL63:
+ 107:Core/Src/DefFuncs.c **** }
+ 716              		.loc 1 107 1 is_stmt 0 view .LVU136
+ 717 000a 08BD     		pop	{r3, pc}
+ 718              	.L56:
+ 719              		.align	2
+ 720              	.L55:
+ 721 000c 00000000 		.word	.LC10
+ 722 0010 04000000 		.word	.LC4
+ 723              		.cfi_endproc
+ 724              	.LFE359:
+ 726              		.section	.rodata.newL.str1.4,"aMS",%progbits,1
+ 727              		.align	2
+ 728              	.LC11:
+ 729 0000 0A0D00   		.ascii	"\012\015\000"
+ 730              		.section	.text.newL,"ax",%progbits
+ 731              		.align	1
+ 732              		.global	newL
+ 733              		.syntax unified
+ 734              		.thumb
+ 735              		.thumb_func
+ 736              		.fpu fpv5-d16
+ 738              	newL:
+ 739              	.LFB360:
+ 108:Core/Src/DefFuncs.c **** 
+ 109:Core/Src/DefFuncs.c **** void newL(void)
+ 110:Core/Src/DefFuncs.c **** {
+ 740              		.loc 1 110 1 is_stmt 1 view -0
+ 741              		.cfi_startproc
+ 742              		@ args = 0, pretend = 0, frame = 0
+ 743              		@ frame_needed = 0, uses_anonymous_args = 0
+ 744 0000 08B5     		push	{r3, lr}
+ 745              	.LCFI13:
+ 746              		.cfi_def_cfa_offset 8
+ 747              		.cfi_offset 3, -8
+ 748              		.cfi_offset 14, -4
+ 111:Core/Src/DefFuncs.c **** 	sendS("c", "\n\r");
+ 749              		.loc 1 111 2 view .LVU138
+ 750 0002 0249     		ldr	r1, .L59
+ 751 0004 0248     		ldr	r0, .L59+4
+ 752 0006 FFF7FEFF 		bl	sendS
+ 753              	.LVL64:
+ 112:Core/Src/DefFuncs.c **** }
+ 754              		.loc 1 112 1 is_stmt 0 view .LVU139
+ARM GAS  /tmp/cc18P7GF.s 			page 17
+
+
+ 755 000a 08BD     		pop	{r3, pc}
+ 756              	.L60:
+ 757              		.align	2
+ 758              	.L59:
+ 759 000c 00000000 		.word	.LC11
+ 760 0010 04000000 		.word	.LC4
+ 761              		.cfi_endproc
+ 762              	.LFE360:
+ 764              		.section	.text.APRS_Transmit,"ax",%progbits
+ 765              		.align	1
+ 766              		.global	APRS_Transmit
+ 767              		.syntax unified
+ 768              		.thumb
+ 769              		.thumb_func
+ 770              		.fpu fpv5-d16
+ 772              	APRS_Transmit:
+ 773              	.LVL65:
+ 774              	.LFB361:
+ 113:Core/Src/DefFuncs.c **** 
+ 114:Core/Src/DefFuncs.c **** uint8_t APRS_Transmit(uint8_t* data)
+ 115:Core/Src/DefFuncs.c **** {
+ 775              		.loc 1 115 1 is_stmt 1 view -0
+ 776              		.cfi_startproc
+ 777              		@ args = 0, pretend = 0, frame = 0
+ 778              		@ frame_needed = 0, uses_anonymous_args = 0
+ 779              		.loc 1 115 1 is_stmt 0 view .LVU141
+ 780 0000 00B5     		push	{lr}
+ 781              	.LCFI14:
+ 782              		.cfi_def_cfa_offset 4
+ 783              		.cfi_offset 14, -4
+ 784 0002 83B0     		sub	sp, sp, #12
+ 785              	.LCFI15:
+ 786              		.cfi_def_cfa_offset 16
+ 787 0004 0246     		mov	r2, r0
+ 116:Core/Src/DefFuncs.c **** 	HAL_StatusTypeDef ret =	HAL_I2C_Master_Transmit(&hi2c1, (uint16_t) ((0x09 << 1)), (uint8_t *) data
+ 788              		.loc 1 116 2 is_stmt 1 view .LVU142
+ 789              		.loc 1 116 26 is_stmt 0 view .LVU143
+ 790 0006 4FF0FF33 		mov	r3, #-1
+ 791 000a 0093     		str	r3, [sp]
+ 792 000c 2023     		movs	r3, #32
+ 793 000e 1221     		movs	r1, #18
+ 794 0010 0448     		ldr	r0, .L65
+ 795              	.LVL66:
+ 796              		.loc 1 116 26 view .LVU144
+ 797 0012 FFF7FEFF 		bl	HAL_I2C_Master_Transmit
+ 798              	.LVL67:
+ 117:Core/Src/DefFuncs.c **** 	if (ret == HAL_OK)
+ 799              		.loc 1 117 2 is_stmt 1 view .LVU145
+ 800              		.loc 1 117 5 is_stmt 0 view .LVU146
+ 801 0016 18B9     		cbnz	r0, .L63
+ 118:Core/Src/DefFuncs.c **** 	{
+ 119:Core/Src/DefFuncs.c **** 		return 1;
+ 802              		.loc 1 119 10 view .LVU147
+ 803 0018 0120     		movs	r0, #1
+ 804              	.LVL68:
+ 805              	.L62:
+ 120:Core/Src/DefFuncs.c **** 	} else {
+ARM GAS  /tmp/cc18P7GF.s 			page 18
+
+
+ 121:Core/Src/DefFuncs.c **** 		return 0;
+ 122:Core/Src/DefFuncs.c **** 	};
+ 806              		.loc 1 122 3 is_stmt 1 view .LVU148
+ 123:Core/Src/DefFuncs.c **** }
+ 807              		.loc 1 123 1 is_stmt 0 view .LVU149
+ 808 001a 03B0     		add	sp, sp, #12
+ 809              	.LCFI16:
+ 810              		.cfi_remember_state
+ 811              		.cfi_def_cfa_offset 4
+ 812              		@ sp needed
+ 813 001c 5DF804FB 		ldr	pc, [sp], #4
+ 814              	.LVL69:
+ 815              	.L63:
+ 816              	.LCFI17:
+ 817              		.cfi_restore_state
+ 121:Core/Src/DefFuncs.c **** 	};
+ 818              		.loc 1 121 10 view .LVU150
+ 819 0020 0020     		movs	r0, #0
+ 820              	.LVL70:
+ 121:Core/Src/DefFuncs.c **** 	};
+ 821              		.loc 1 121 10 view .LVU151
+ 822 0022 FAE7     		b	.L62
+ 823              	.L66:
+ 824              		.align	2
+ 825              	.L65:
+ 826 0024 00000000 		.word	hi2c1
+ 827              		.cfi_endproc
+ 828              	.LFE361:
+ 830              		.section	.text.XBee_Transmit,"ax",%progbits
+ 831              		.align	1
+ 832              		.global	XBee_Transmit
+ 833              		.syntax unified
+ 834              		.thumb
+ 835              		.thumb_func
+ 836              		.fpu fpv5-d16
+ 838              	XBee_Transmit:
+ 839              	.LVL71:
+ 840              	.LFB362:
+ 124:Core/Src/DefFuncs.c **** 
+ 125:Core/Src/DefFuncs.c **** uint8_t XBee_Transmit(char* data)
+ 126:Core/Src/DefFuncs.c **** {
+ 841              		.loc 1 126 1 is_stmt 1 view -0
+ 842              		.cfi_startproc
+ 843              		@ args = 0, pretend = 0, frame = 0
+ 844              		@ frame_needed = 0, uses_anonymous_args = 0
+ 845              		.loc 1 126 1 is_stmt 0 view .LVU153
+ 846 0000 38B5     		push	{r3, r4, r5, lr}
+ 847              	.LCFI18:
+ 848              		.cfi_def_cfa_offset 16
+ 849              		.cfi_offset 3, -16
+ 850              		.cfi_offset 4, -12
+ 851              		.cfi_offset 5, -8
+ 852              		.cfi_offset 14, -4
+ 853 0002 0446     		mov	r4, r0
+ 127:Core/Src/DefFuncs.c ****                 uint8_t size = strlen((const char*) data);
+ 854              		.loc 1 127 17 is_stmt 1 view .LVU154
+ 855              		.loc 1 127 32 is_stmt 0 view .LVU155
+ARM GAS  /tmp/cc18P7GF.s 			page 19
+
+
+ 856 0004 FFF7FEFF 		bl	strlen
+ 857              	.LVL72:
+ 858              		.loc 1 127 25 view .LVU156
+ 859 0008 C5B2     		uxtb	r5, r0
+ 860              	.LVL73:
+ 128:Core/Src/DefFuncs.c ****                	HAL_UART_Transmit(&huart1, (uint8_t *) data, size, HAL_MAX_DELAY);
+ 861              		.loc 1 128 17 is_stmt 1 view .LVU157
+ 862 000a 4FF0FF33 		mov	r3, #-1
+ 863 000e 2A46     		mov	r2, r5
+ 864 0010 2146     		mov	r1, r4
+ 865 0012 0248     		ldr	r0, .L69
+ 866 0014 FFF7FEFF 		bl	HAL_UART_Transmit
+ 867              	.LVL74:
+ 129:Core/Src/DefFuncs.c **** 		return size;	
+ 868              		.loc 1 129 3 view .LVU158
+ 130:Core/Src/DefFuncs.c **** }
+ 869              		.loc 1 130 1 is_stmt 0 view .LVU159
+ 870 0018 2846     		mov	r0, r5
+ 871 001a 38BD     		pop	{r3, r4, r5, pc}
+ 872              	.LVL75:
+ 873              	.L70:
+ 874              		.loc 1 130 1 view .LVU160
+ 875              		.align	2
+ 876              	.L69:
+ 877 001c 00000000 		.word	huart1
+ 878              		.cfi_endproc
+ 879              	.LFE362:
+ 881              		.section	.rodata
+ 882              		.align	2
+ 883              		.set	.LANCHOR0,. + 0
+ 884              	.LC5:
+ 885 0000 0000     		.ascii	"\000\000"
+ 886              		.text
+ 887              	.Letext0:
+ 888              		.file 2 "/usr/include/newlib/machine/_default_types.h"
+ 889              		.file 3 "/usr/lib/gcc/arm-none-eabi/10.3.1/include/stdarg.h"
+ 890              		.file 4 "/usr/include/newlib/stdio.h"
+ 891              		.file 5 "/usr/include/newlib/sys/_stdint.h"
+ 892              		.file 6 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+ 893              		.file 7 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 894              		.file 8 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 895              		.file 9 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c.h"
+ 896              		.file 10 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h"
+ 897              		.file 11 "/usr/include/newlib/string.h"
+ 898              		.file 12 "<built-in>"
+ARM GAS  /tmp/cc18P7GF.s 			page 20
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 DefFuncs.c
+     /tmp/cc18P7GF.s:17     .rodata.sendS.str1.4:0000000000000000 $d
+     /tmp/cc18P7GF.s:27     .text.sendS:0000000000000000 $t
+     /tmp/cc18P7GF.s:35     .text.sendS:0000000000000000 sendS
+     /tmp/cc18P7GF.s:224    .text.sendS:00000000000000d0 $d
+     /tmp/cc18P7GF.s:232    .rodata.sendMat.str1.4:0000000000000000 $d
+     /tmp/cc18P7GF.s:248    .text.sendMat:0000000000000000 $t
+     /tmp/cc18P7GF.s:255    .text.sendMat:0000000000000000 sendMat
+     /tmp/cc18P7GF.s:360    .text.sendMat:0000000000000074 $d
+     /tmp/cc18P7GF.s:370    .rodata.sendMati.str1.4:0000000000000000 $d
+     /tmp/cc18P7GF.s:374    .text.sendMati:0000000000000000 $t
+     /tmp/cc18P7GF.s:381    .text.sendMati:0000000000000000 sendMati
+     /tmp/cc18P7GF.s:481    .text.sendMati:0000000000000064 $d
+     /tmp/cc18P7GF.s:491    .text.sendMatc:0000000000000000 $t
+     /tmp/cc18P7GF.s:498    .text.sendMatc:0000000000000000 sendMatc
+     /tmp/cc18P7GF.s:599    .text.sendMatc:000000000000006c $d
+     /tmp/cc18P7GF.s:608    .text.receiveS_B:0000000000000000 $t
+     /tmp/cc18P7GF.s:615    .text.receiveS_B:0000000000000000 receiveS_B
+     /tmp/cc18P7GF.s:644    .text.receiveS_B:0000000000000014 $d
+     /tmp/cc18P7GF.s:649    .text.receiveS_IT:0000000000000000 $t
+     /tmp/cc18P7GF.s:656    .text.receiveS_IT:0000000000000000 receiveS_IT
+     /tmp/cc18P7GF.s:684    .text.receiveS_IT:0000000000000010 $d
+     /tmp/cc18P7GF.s:689    .rodata.space.str1.4:0000000000000000 $d
+     /tmp/cc18P7GF.s:693    .text.space:0000000000000000 $t
+     /tmp/cc18P7GF.s:700    .text.space:0000000000000000 space
+     /tmp/cc18P7GF.s:721    .text.space:000000000000000c $d
+     /tmp/cc18P7GF.s:727    .rodata.newL.str1.4:0000000000000000 $d
+     /tmp/cc18P7GF.s:731    .text.newL:0000000000000000 $t
+     /tmp/cc18P7GF.s:738    .text.newL:0000000000000000 newL
+     /tmp/cc18P7GF.s:759    .text.newL:000000000000000c $d
+     /tmp/cc18P7GF.s:765    .text.APRS_Transmit:0000000000000000 $t
+     /tmp/cc18P7GF.s:772    .text.APRS_Transmit:0000000000000000 APRS_Transmit
+     /tmp/cc18P7GF.s:826    .text.APRS_Transmit:0000000000000024 $d
+     /tmp/cc18P7GF.s:831    .text.XBee_Transmit:0000000000000000 $t
+     /tmp/cc18P7GF.s:838    .text.XBee_Transmit:0000000000000000 XBee_Transmit
+     /tmp/cc18P7GF.s:877    .text.XBee_Transmit:000000000000001c $d
+     /tmp/cc18P7GF.s:882    .rodata:0000000000000000 $d
+
+UNDEFINED SYMBOLS
+strlen
+HAL_UART_Transmit
+sprintf
+huart4
+HAL_UART_Receive
+huart1
+HAL_UART_Receive_IT
+HAL_I2C_Master_Transmit
+hi2c1

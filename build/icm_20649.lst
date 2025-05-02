@@ -1,0 +1,1840 @@
+ARM GAS  /tmp/ccdn4qA4.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.eabi_attribute 28, 1
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 1
+  11              		.eabi_attribute 18, 4
+  12              		.file	"icm_20649.c"
+  13              		.text
+  14              	.Ltext0:
+  15              		.cfi_sections	.debug_frame
+  16              		.section	.rodata.user_bank.str1.4,"aMS",%progbits,1
+  17              		.align	2
+  18              	.LC0:
+  19 0000 494E5641 		.ascii	"INVALID USER BANK\012\015\000"
+  19      4C494420 
+  19      55534552 
+  19      2042414E 
+  19      4B0A0D00 
+  20              		.align	2
+  21              	.LC1:
+  22 0014 6300     		.ascii	"c\000"
+  23              		.section	.text.user_bank,"ax",%progbits
+  24              		.align	1
+  25              		.global	user_bank
+  26              		.arch armv7e-m
+  27              		.syntax unified
+  28              		.thumb
+  29              		.thumb_func
+  30              		.fpu fpv5-d16
+  32              	user_bank:
+  33              	.LVL0:
+  34              	.LFB353:
+  35              		.file 1 "Core/Src/icm_20649.c"
+   1:Core/Src/icm_20649.c **** #include "ICM_20649.h"
+   2:Core/Src/icm_20649.c **** #include "init.h"
+   3:Core/Src/icm_20649.c **** #include "stdio.h"
+   4:Core/Src/icm_20649.c **** #include "string.h"
+   5:Core/Src/icm_20649.c **** #include "DefFuncs.h"
+   6:Core/Src/icm_20649.c **** 
+   7:Core/Src/icm_20649.c **** extern SPI_HandleTypeDef hspi1;
+   8:Core/Src/icm_20649.c **** 
+   9:Core/Src/icm_20649.c **** void user_bank(uint8_t USR_BANK)
+  10:Core/Src/icm_20649.c **** {
+  36              		.loc 1 10 1 view -0
+  37              		.cfi_startproc
+  38              		@ args = 0, pretend = 0, frame = 8
+  39              		@ frame_needed = 0, uses_anonymous_args = 0
+  40              		.loc 1 10 1 is_stmt 0 view .LVU1
+  41 0000 10B5     		push	{r4, lr}
+  42              	.LCFI0:
+  43              		.cfi_def_cfa_offset 8
+  44              		.cfi_offset 4, -8
+ARM GAS  /tmp/ccdn4qA4.s 			page 2
+
+
+  45              		.cfi_offset 14, -4
+  46 0002 82B0     		sub	sp, sp, #8
+  47              	.LCFI1:
+  48              		.cfi_def_cfa_offset 16
+  11:Core/Src/icm_20649.c **** 	uint8_t tempUSR[2];
+  49              		.loc 1 11 2 is_stmt 1 view .LVU2
+  12:Core/Src/icm_20649.c **** 
+  13:Core/Src/icm_20649.c **** 	tempUSR[0] = REG_USR_BANK & 0x7F;
+  50              		.loc 1 13 2 view .LVU3
+  51              		.loc 1 13 13 is_stmt 0 view .LVU4
+  52 0004 7F23     		movs	r3, #127
+  53 0006 8DF80430 		strb	r3, [sp, #4]
+  14:Core/Src/icm_20649.c **** 
+  15:Core/Src/icm_20649.c **** 	switch (USR_BANK) {
+  54              		.loc 1 15 2 is_stmt 1 view .LVU5
+  55 000a 0328     		cmp	r0, #3
+  56 000c 26D8     		bhi	.L2
+  57 000e DFE800F0 		tbb	[pc, r0]
+  58              	.L4:
+  59 0012 02       		.byte	(.L7-.L4)/2
+  60 0013 19       		.byte	(.L6-.L4)/2
+  61 0014 1D       		.byte	(.L5-.L4)/2
+  62 0015 21       		.byte	(.L3-.L4)/2
+  63              		.p2align 1
+  64              	.L7:
+  16:Core/Src/icm_20649.c **** 		case 0:
+  17:Core/Src/icm_20649.c **** 			tempUSR[1] = USR_BANK_0;
+  65              		.loc 1 17 4 view .LVU6
+  66              		.loc 1 17 15 is_stmt 0 view .LVU7
+  67 0016 0023     		movs	r3, #0
+  68 0018 8DF80530 		strb	r3, [sp, #5]
+  18:Core/Src/icm_20649.c **** 			break;
+  69              		.loc 1 18 4 is_stmt 1 view .LVU8
+  70              	.LVL1:
+  71              	.L8:
+  19:Core/Src/icm_20649.c **** 		case 1:
+  20:Core/Src/icm_20649.c **** 			tempUSR[1] = USR_BANK_1;
+  21:Core/Src/icm_20649.c **** 			break;
+  22:Core/Src/icm_20649.c **** 		case 2:
+  23:Core/Src/icm_20649.c **** 			tempUSR[1] = USR_BANK_2;
+  24:Core/Src/icm_20649.c **** 			break;
+  25:Core/Src/icm_20649.c **** 		case 3:
+  26:Core/Src/icm_20649.c **** 			tempUSR[1] = USR_BANK_3;
+  27:Core/Src/icm_20649.c **** 			break;
+  28:Core/Src/icm_20649.c **** 
+  29:Core/Src/icm_20649.c **** 		default:
+  30:Core/Src/icm_20649.c **** 			sendS("c", "INVALID USER BANK\n\r");
+  31:Core/Src/icm_20649.c **** 
+  32:Core/Src/icm_20649.c **** 	}
+  33:Core/Src/icm_20649.c **** 
+  34:Core/Src/icm_20649.c **** 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+  72              		.loc 1 34 2 view .LVU9
+  73 001c 124C     		ldr	r4, .L10
+  74 001e 0022     		movs	r2, #0
+  75 0020 8021     		movs	r1, #128
+  76 0022 2046     		mov	r0, r4
+  77 0024 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ARM GAS  /tmp/ccdn4qA4.s 			page 3
+
+
+  78              	.LVL2:
+  35:Core/Src/icm_20649.c **** 
+  36:Core/Src/icm_20649.c **** 	HAL_SPI_Transmit(&hspi1, (uint8_t*) &tempUSR, 2, HAL_MAX_DELAY);
+  79              		.loc 1 36 2 view .LVU10
+  80 0028 4FF0FF33 		mov	r3, #-1
+  81 002c 0222     		movs	r2, #2
+  82 002e 01A9     		add	r1, sp, #4
+  83 0030 0E48     		ldr	r0, .L10+4
+  84 0032 FFF7FEFF 		bl	HAL_SPI_Transmit
+  85              	.LVL3:
+  37:Core/Src/icm_20649.c **** 
+  38:Core/Src/icm_20649.c **** 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+  86              		.loc 1 38 2 view .LVU11
+  87 0036 0122     		movs	r2, #1
+  88 0038 8021     		movs	r1, #128
+  89 003a 2046     		mov	r0, r4
+  90 003c FFF7FEFF 		bl	HAL_GPIO_WritePin
+  91              	.LVL4:
+  39:Core/Src/icm_20649.c **** 
+  40:Core/Src/icm_20649.c **** }
+  92              		.loc 1 40 1 is_stmt 0 view .LVU12
+  93 0040 02B0     		add	sp, sp, #8
+  94              	.LCFI2:
+  95              		.cfi_remember_state
+  96              		.cfi_def_cfa_offset 8
+  97              		@ sp needed
+  98 0042 10BD     		pop	{r4, pc}
+  99              	.LVL5:
+ 100              	.L6:
+ 101              	.LCFI3:
+ 102              		.cfi_restore_state
+  20:Core/Src/icm_20649.c **** 			break;
+ 103              		.loc 1 20 4 is_stmt 1 view .LVU13
+  20:Core/Src/icm_20649.c **** 			break;
+ 104              		.loc 1 20 15 is_stmt 0 view .LVU14
+ 105 0044 1023     		movs	r3, #16
+ 106 0046 8DF80530 		strb	r3, [sp, #5]
+  21:Core/Src/icm_20649.c **** 		case 2:
+ 107              		.loc 1 21 4 is_stmt 1 view .LVU15
+ 108 004a E7E7     		b	.L8
+ 109              	.L5:
+  23:Core/Src/icm_20649.c **** 			break;
+ 110              		.loc 1 23 4 view .LVU16
+  23:Core/Src/icm_20649.c **** 			break;
+ 111              		.loc 1 23 15 is_stmt 0 view .LVU17
+ 112 004c 2023     		movs	r3, #32
+ 113 004e 8DF80530 		strb	r3, [sp, #5]
+  24:Core/Src/icm_20649.c **** 		case 3:
+ 114              		.loc 1 24 4 is_stmt 1 view .LVU18
+ 115 0052 E3E7     		b	.L8
+ 116              	.L3:
+  26:Core/Src/icm_20649.c **** 			break;
+ 117              		.loc 1 26 4 view .LVU19
+  26:Core/Src/icm_20649.c **** 			break;
+ 118              		.loc 1 26 15 is_stmt 0 view .LVU20
+ 119 0054 3023     		movs	r3, #48
+ 120 0056 8DF80530 		strb	r3, [sp, #5]
+ARM GAS  /tmp/ccdn4qA4.s 			page 4
+
+
+  27:Core/Src/icm_20649.c **** 
+ 121              		.loc 1 27 4 is_stmt 1 view .LVU21
+ 122 005a DFE7     		b	.L8
+ 123              	.L2:
+  30:Core/Src/icm_20649.c **** 
+ 124              		.loc 1 30 4 view .LVU22
+ 125 005c 0449     		ldr	r1, .L10+8
+ 126 005e 0548     		ldr	r0, .L10+12
+ 127              	.LVL6:
+  30:Core/Src/icm_20649.c **** 
+ 128              		.loc 1 30 4 is_stmt 0 view .LVU23
+ 129 0060 FFF7FEFF 		bl	sendS
+ 130              	.LVL7:
+ 131 0064 DAE7     		b	.L8
+ 132              	.L11:
+ 133 0066 00BF     		.align	2
+ 134              	.L10:
+ 135 0068 000C0258 		.word	1476529152
+ 136 006c 00000000 		.word	hspi1
+ 137 0070 00000000 		.word	.LC0
+ 138 0074 14000000 		.word	.LC1
+ 139              		.cfi_endproc
+ 140              	.LFE353:
+ 142              		.section	.rodata.icm20649_init.str1.4,"aMS",%progbits,1
+ 143              		.align	2
+ 144              	.LC2:
+ 145 0000 52657365 		.ascii	"Resetting Sensor\012\015\000"
+ 145      7474696E 
+ 145      67205365 
+ 145      6E736F72 
+ 145      0A0D00
+ 146 0013 00       		.align	2
+ 147              	.LC3:
+ 148 0014 4641494C 		.ascii	"FAILED resetting Sensor\012\015\000"
+ 148      45442072 
+ 148      65736574 
+ 148      74696E67 
+ 148      2053656E 
+ 149 002e 0000     		.align	2
+ 150              	.LC4:
+ 151 0030 57616B69 		.ascii	"Waking up Sensor\012\015\000"
+ 151      6E672075 
+ 151      70205365 
+ 151      6E736F72 
+ 151      0A0D00
+ 152 0043 00       		.align	2
+ 153              	.LC5:
+ 154 0044 4641494C 		.ascii	"FAILED waking up sensor\012\015\000"
+ 154      45442077 
+ 154      616B696E 
+ 154      67207570 
+ 154      2073656E 
+ 155 005e 0000     		.align	2
+ 156              	.LC6:
+ 157 0060 44657669 		.ascii	"Device is Ready\012\015\000"
+ 157      63652069 
+ 157      73205265 
+ARM GAS  /tmp/ccdn4qA4.s 			page 5
+
+
+ 157      6164790A 
+ 157      0D00
+ 158 0072 0000     		.align	2
+ 159              	.LC7:
+ 160 0074 44657669 		.ascii	"Device is NOT Ready\012\015\000"
+ 160      63652069 
+ 160      73204E4F 
+ 160      54205265 
+ 160      6164790A 
+ 161 008a 0000     		.align	2
+ 162              	.LC8:
+ 163 008c 6900     		.ascii	"i\000"
+ 164 008e 0000     		.align	2
+ 165              	.LC9:
+ 166 0090 57726974 		.ascii	"Writing to Control User Register\012\015\000"
+ 166      696E6720 
+ 166      746F2043 
+ 166      6F6E7472 
+ 166      6F6C2055 
+ 167 00b3 00       		.align	2
+ 168              	.LC10:
+ 169 00b4 4641494C 		.ascii	"FAILED writing to Control User Register\012\015\000"
+ 169      45442077 
+ 169      72697469 
+ 169      6E672074 
+ 169      6F20436F 
+ 170 00de 0000     		.align	2
+ 171              	.LC11:
+ 172 00e0 57726974 		.ascii	"Writing to Gyro Sample Rate Register\012\015\000"
+ 172      696E6720 
+ 172      746F2047 
+ 172      79726F20 
+ 172      53616D70 
+ 173 0107 00       		.align	2
+ 174              	.LC12:
+ 175 0108 4641494C 		.ascii	"FAILED writing to Gyro Sample Rate Register\012\015"
+ 175      45442077 
+ 175      72697469 
+ 175      6E672074 
+ 175      6F204779 
+ 176 0135 00       		.ascii	"\000"
+ 177 0136 0000     		.align	2
+ 178              	.LC13:
+ 179 0138 57726974 		.ascii	"Writing to Gyro Configuration I Register\012\015\000"
+ 179      696E6720 
+ 179      746F2047 
+ 179      79726F20 
+ 179      436F6E66 
+ 180 0163 00       		.align	2
+ 181              	.LC14:
+ 182 0164 4641494C 		.ascii	"FAILED writing to Gyro Configuration I Register\012"
+ 182      45442077 
+ 182      72697469 
+ 182      6E672074 
+ 182      6F204779 
+ 183 0194 0D00     		.ascii	"\015\000"
+ 184 0196 0000     		.align	2
+ARM GAS  /tmp/ccdn4qA4.s 			page 6
+
+
+ 185              	.LC15:
+ 186 0198 57726974 		.ascii	"Writing to Gyro Configuration II Register\012\015\000"
+ 186      696E6720 
+ 186      746F2047 
+ 186      79726F20 
+ 186      436F6E66 
+ 187              		.align	2
+ 188              	.LC16:
+ 189 01c4 4641494C 		.ascii	"FAILED writing to Gyro Configuration II Register\012"
+ 189      45442077 
+ 189      72697469 
+ 189      6E672074 
+ 189      6F204779 
+ 190 01f5 0D00     		.ascii	"\015\000"
+ 191 01f7 00       		.align	2
+ 192              	.LC17:
+ 193 01f8 57726974 		.ascii	"Writing to Acc Sample Output Rate I Register\012\015"
+ 193      696E6720 
+ 193      746F2041 
+ 193      63632053 
+ 193      616D706C 
+ 194 0226 00       		.ascii	"\000"
+ 195 0227 00       		.align	2
+ 196              	.LC18:
+ 197 0228 4641494C 		.ascii	"FAILED writing to Sample Output Rate I Register\012"
+ 197      45442077 
+ 197      72697469 
+ 197      6E672074 
+ 197      6F205361 
+ 198 0258 0D00     		.ascii	"\015\000"
+ 199 025a 0000     		.align	2
+ 200              	.LC19:
+ 201 025c 57726974 		.ascii	"Writing to Acc Sample Output Rate II Register\012\015"
+ 201      696E6720 
+ 201      746F2041 
+ 201      63632053 
+ 201      616D706C 
+ 202 028b 00       		.ascii	"\000"
+ 203              		.align	2
+ 204              	.LC20:
+ 205 028c 4641494C 		.ascii	"FAILED writing to Sample Output Rate II Register\012"
+ 205      45442077 
+ 205      72697469 
+ 205      6E672074 
+ 205      6F205361 
+ 206 02bd 0D00     		.ascii	"\015\000"
+ 207 02bf 00       		.align	2
+ 208              	.LC21:
+ 209 02c0 57726974 		.ascii	"Writing to Acc Configuration I Register\012\015\000"
+ 209      696E6720 
+ 209      746F2041 
+ 209      63632043 
+ 209      6F6E6669 
+ 210 02ea 0000     		.align	2
+ 211              	.LC22:
+ 212 02ec 4641494C 		.ascii	"FAILED writing to Acc Configuration I Register\012\015"
+ 212      45442077 
+ARM GAS  /tmp/ccdn4qA4.s 			page 7
+
+
+ 212      72697469 
+ 212      6E672074 
+ 212      6F204163 
+ 213 031c 00       		.ascii	"\000"
+ 214 031d 000000   		.align	2
+ 215              	.LC23:
+ 216 0320 57726974 		.ascii	"Writing to Acc Configuration II Register\012\015\000"
+ 216      696E6720 
+ 216      746F2041 
+ 216      63632043 
+ 216      6F6E6669 
+ 217 034b 00       		.align	2
+ 218              	.LC24:
+ 219 034c 4641494C 		.ascii	"FAILED writing to Acc Configuration II Register\012"
+ 219      45442077 
+ 219      72697469 
+ 219      6E672074 
+ 219      6F204163 
+ 220 037c 0D00     		.ascii	"\015\000"
+ 221 037e 0000     		.align	2
+ 222              	.LC25:
+ 223 0380 57726974 		.ascii	"Writing to Data Output Register\012\015\000"
+ 223      696E6720 
+ 223      746F2044 
+ 223      61746120 
+ 223      4F757470 
+ 224 03a2 0000     		.align	2
+ 225              	.LC26:
+ 226 03a4 4641494C 		.ascii	"FAILED writing to Output Register\012\015\000"
+ 226      45442077 
+ 226      72697469 
+ 226      6E672074 
+ 226      6F204F75 
+ 227              		.align	2
+ 228              	.LC27:
+ 229 03c8 46696E69 		.ascii	"Finished Gyro Configuration!\012\015\000"
+ 229      73686564 
+ 229      20477972 
+ 229      6F20436F 
+ 229      6E666967 
+ 230              		.section	.text.icm20649_init,"ax",%progbits
+ 231              		.align	1
+ 232              		.global	icm20649_init
+ 233              		.syntax unified
+ 234              		.thumb
+ 235              		.thumb_func
+ 236              		.fpu fpv5-d16
+ 238              	icm20649_init:
+ 239              	.LVL8:
+ 240              	.LFB354:
+  41:Core/Src/icm_20649.c **** 
+  42:Core/Src/icm_20649.c **** 
+  43:Core/Src/icm_20649.c **** void icm20649_init(icm* kal)
+  44:Core/Src/icm_20649.c **** {
+ 241              		.loc 1 44 1 is_stmt 1 view -0
+ 242              		.cfi_startproc
+ 243              		@ args = 0, pretend = 0, frame = 16
+ARM GAS  /tmp/ccdn4qA4.s 			page 8
+
+
+ 244              		@ frame_needed = 0, uses_anonymous_args = 0
+ 245              		.loc 1 44 1 is_stmt 0 view .LVU25
+ 246 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 247              	.LCFI4:
+ 248              		.cfi_def_cfa_offset 20
+ 249              		.cfi_offset 4, -20
+ 250              		.cfi_offset 5, -16
+ 251              		.cfi_offset 6, -12
+ 252              		.cfi_offset 7, -8
+ 253              		.cfi_offset 14, -4
+ 254 0002 87B0     		sub	sp, sp, #28
+ 255              	.LCFI5:
+ 256              		.cfi_def_cfa_offset 48
+  45:Core/Src/icm_20649.c ****          uint8_t temp[2];
+ 257              		.loc 1 45 10 is_stmt 1 view .LVU26
+  46:Core/Src/icm_20649.c ****          uint8_t WhoAmI[2];
+ 258              		.loc 1 46 10 view .LVU27
+  47:Core/Src/icm_20649.c ****          uint8_t USER_CTRL[2];
+ 259              		.loc 1 47 10 view .LVU28
+  48:Core/Src/icm_20649.c **** 
+  49:Core/Src/icm_20649.c **** 
+  50:Core/Src/icm_20649.c ****          user_bank(0);
+ 260              		.loc 1 50 10 view .LVU29
+ 261 0004 0020     		movs	r0, #0
+ 262              	.LVL9:
+ 263              		.loc 1 50 10 is_stmt 0 view .LVU30
+ 264 0006 FFF7FEFF 		bl	user_bank
+ 265              	.LVL10:
+  51:Core/Src/icm_20649.c **** 
+  52:Core/Src/icm_20649.c ****          temp[0] = REG_PWR_MGMT & 0x7F;
+ 266              		.loc 1 52 10 is_stmt 1 view .LVU31
+ 267              		.loc 1 52 18 is_stmt 0 view .LVU32
+ 268 000a 0623     		movs	r3, #6
+ 269 000c 8DF81430 		strb	r3, [sp, #20]
+  53:Core/Src/icm_20649.c ****          temp[1] = PWR_MGMT_INIT;
+ 270              		.loc 1 53 10 is_stmt 1 view .LVU33
+ 271              		.loc 1 53 18 is_stmt 0 view .LVU34
+ 272 0010 C123     		movs	r3, #193
+ 273 0012 8DF81530 		strb	r3, [sp, #21]
+  54:Core/Src/icm_20649.c **** 
+  55:Core/Src/icm_20649.c ****           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 274              		.loc 1 55 11 is_stmt 1 view .LVU35
+ 275 0016 DA4D     		ldr	r5, .L39
+ 276 0018 0022     		movs	r2, #0
+ 277 001a 8021     		movs	r1, #128
+ 278 001c 2846     		mov	r0, r5
+ 279 001e FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 280              	.LVL11:
+  56:Core/Src/icm_20649.c **** 
+  57:Core/Src/icm_20649.c ****           HAL_StatusTypeDef ret = HAL_SPI_Transmit(&hspi1, (uint8_t*) temp, 2, HAL_MAX_DELAY);
+ 281              		.loc 1 57 11 view .LVU36
+ 282              		.loc 1 57 35 is_stmt 0 view .LVU37
+ 283 0022 4FF0FF33 		mov	r3, #-1
+ 284 0026 0222     		movs	r2, #2
+ 285 0028 05A9     		add	r1, sp, #20
+ 286 002a D648     		ldr	r0, .L39+4
+ 287 002c FFF7FEFF 		bl	HAL_SPI_Transmit
+ARM GAS  /tmp/ccdn4qA4.s 			page 9
+
+
+ 288              	.LVL12:
+ 289 0030 0446     		mov	r4, r0
+ 290              	.LVL13:
+  58:Core/Src/icm_20649.c **** 
+  59:Core/Src/icm_20649.c ****           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 291              		.loc 1 59 11 is_stmt 1 view .LVU38
+ 292 0032 0122     		movs	r2, #1
+ 293 0034 8021     		movs	r1, #128
+ 294 0036 2846     		mov	r0, r5
+ 295 0038 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 296              	.LVL14:
+  60:Core/Src/icm_20649.c **** 
+  61:Core/Src/icm_20649.c ****           if (ret == HAL_OK)
+ 297              		.loc 1 61 11 view .LVU39
+ 298              		.loc 1 61 14 is_stmt 0 view .LVU40
+ 299 003c 002C     		cmp	r4, #0
+ 300 003e 40F0D081 		bne	.L13
+  62:Core/Src/icm_20649.c ****           {
+  63:Core/Src/icm_20649.c **** 
+  64:Core/Src/icm_20649.c ****                   sendS("c","Resetting Sensor\n\r");
+ 301              		.loc 1 64 19 is_stmt 1 view .LVU41
+ 302 0042 D149     		ldr	r1, .L39+8
+ 303 0044 D148     		ldr	r0, .L39+12
+ 304 0046 FFF7FEFF 		bl	sendS
+ 305              	.LVL15:
+  65:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+ 306              		.loc 1 65 19 view .LVU42
+ 307 004a 4FF47A70 		mov	r0, #1000
+ 308 004e FFF7FEFF 		bl	HAL_Delay
+ 309              	.LVL16:
+ 310              	.L14:
+  66:Core/Src/icm_20649.c **** 
+  67:Core/Src/icm_20649.c ****           } else {
+  68:Core/Src/icm_20649.c **** 
+  69:Core/Src/icm_20649.c ****                   sendS("c", "FAILED resetting Sensor\n\r");
+  70:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+  71:Core/Src/icm_20649.c **** 
+  72:Core/Src/icm_20649.c ****           }
+  73:Core/Src/icm_20649.c **** 
+  74:Core/Src/icm_20649.c ****           temp[0] = REG_PWR_MGMT & 0x7F;
+ 311              		.loc 1 74 11 view .LVU43
+ 312              		.loc 1 74 19 is_stmt 0 view .LVU44
+ 313 0052 0623     		movs	r3, #6
+ 314 0054 8DF81430 		strb	r3, [sp, #20]
+  75:Core/Src/icm_20649.c ****           temp[1] = PWR_MGMT_NORM;
+ 315              		.loc 1 75 11 is_stmt 1 view .LVU45
+ 316              		.loc 1 75 19 is_stmt 0 view .LVU46
+ 317 0058 0126     		movs	r6, #1
+ 318 005a 8DF81560 		strb	r6, [sp, #21]
+  76:Core/Src/icm_20649.c **** 
+  77:Core/Src/icm_20649.c ****           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 319              		.loc 1 77 11 is_stmt 1 view .LVU47
+ 320 005e C84D     		ldr	r5, .L39
+ 321 0060 0022     		movs	r2, #0
+ 322 0062 8021     		movs	r1, #128
+ 323 0064 2846     		mov	r0, r5
+ 324 0066 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ARM GAS  /tmp/ccdn4qA4.s 			page 10
+
+
+ 325              	.LVL17:
+  78:Core/Src/icm_20649.c **** 
+  79:Core/Src/icm_20649.c ****           ret = HAL_SPI_Transmit(&hspi1, (uint8_t*) temp, 2, HAL_MAX_DELAY);
+ 326              		.loc 1 79 11 view .LVU48
+ 327              		.loc 1 79 17 is_stmt 0 view .LVU49
+ 328 006a 4FF0FF33 		mov	r3, #-1
+ 329 006e 0222     		movs	r2, #2
+ 330 0070 05A9     		add	r1, sp, #20
+ 331 0072 C448     		ldr	r0, .L39+4
+ 332 0074 FFF7FEFF 		bl	HAL_SPI_Transmit
+ 333              	.LVL18:
+ 334 0078 0446     		mov	r4, r0
+ 335              	.LVL19:
+  80:Core/Src/icm_20649.c **** 
+  81:Core/Src/icm_20649.c ****           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 336              		.loc 1 81 11 is_stmt 1 view .LVU50
+ 337 007a 3246     		mov	r2, r6
+ 338 007c 8021     		movs	r1, #128
+ 339 007e 2846     		mov	r0, r5
+ 340 0080 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 341              	.LVL20:
+  82:Core/Src/icm_20649.c **** 
+  83:Core/Src/icm_20649.c ****           if (ret == HAL_OK)
+ 342              		.loc 1 83 11 view .LVU51
+ 343              		.loc 1 83 14 is_stmt 0 view .LVU52
+ 344 0084 002C     		cmp	r4, #0
+ 345 0086 40F0B581 		bne	.L15
+  84:Core/Src/icm_20649.c ****           {
+  85:Core/Src/icm_20649.c **** 
+  86:Core/Src/icm_20649.c ****                   sendS("c","Waking up Sensor\n\r");
+ 346              		.loc 1 86 19 is_stmt 1 view .LVU53
+ 347 008a C149     		ldr	r1, .L39+16
+ 348 008c BF48     		ldr	r0, .L39+12
+ 349 008e FFF7FEFF 		bl	sendS
+ 350              	.LVL21:
+  87:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+ 351              		.loc 1 87 19 view .LVU54
+ 352 0092 4FF47A70 		mov	r0, #1000
+ 353 0096 FFF7FEFF 		bl	HAL_Delay
+ 354              	.LVL22:
+ 355              	.L16:
+  88:Core/Src/icm_20649.c **** 
+  89:Core/Src/icm_20649.c ****           } else {
+  90:Core/Src/icm_20649.c **** 
+  91:Core/Src/icm_20649.c ****                   sendS("c", "FAILED waking up sensor\n\r");
+  92:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+  93:Core/Src/icm_20649.c **** 
+  94:Core/Src/icm_20649.c ****           }
+  95:Core/Src/icm_20649.c **** 
+  96:Core/Src/icm_20649.c **** 
+  97:Core/Src/icm_20649.c ****           temp[0] = REG_WHO_AM_I_ICM | 0x80;
+ 356              		.loc 1 97 11 view .LVU55
+ 357              		.loc 1 97 19 is_stmt 0 view .LVU56
+ 358 009a 8024     		movs	r4, #128
+ 359              	.LVL23:
+ 360              		.loc 1 97 19 view .LVU57
+ 361 009c 8DF81440 		strb	r4, [sp, #20]
+ARM GAS  /tmp/ccdn4qA4.s 			page 11
+
+
+  98:Core/Src/icm_20649.c ****           temp[1] = 0x00;
+ 362              		.loc 1 98 11 is_stmt 1 view .LVU58
+ 363              		.loc 1 98 19 is_stmt 0 view .LVU59
+ 364 00a0 0022     		movs	r2, #0
+ 365 00a2 8DF81520 		strb	r2, [sp, #21]
+  99:Core/Src/icm_20649.c **** 
+ 100:Core/Src/icm_20649.c ****           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 366              		.loc 1 100 11 is_stmt 1 view .LVU60
+ 367 00a6 B64D     		ldr	r5, .L39
+ 368 00a8 2146     		mov	r1, r4
+ 369 00aa 2846     		mov	r0, r5
+ 370 00ac FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 371              	.LVL24:
+ 101:Core/Src/icm_20649.c **** 
+ 102:Core/Src/icm_20649.c ****           /* Check if device is ready */
+ 103:Core/Src/icm_20649.c ****           HAL_SPI_TransmitReceive(&hspi1, (uint8_t*) temp, (uint8_t*) WhoAmI, 2, HAL_MAX_DELAY);
+ 372              		.loc 1 103 11 view .LVU61
+ 373 00b0 4FF0FF33 		mov	r3, #-1
+ 374 00b4 0093     		str	r3, [sp]
+ 375 00b6 0223     		movs	r3, #2
+ 376 00b8 04AA     		add	r2, sp, #16
+ 377 00ba 05A9     		add	r1, sp, #20
+ 378 00bc B148     		ldr	r0, .L39+4
+ 379 00be FFF7FEFF 		bl	HAL_SPI_TransmitReceive
+ 380              	.LVL25:
+ 104:Core/Src/icm_20649.c **** 
+ 105:Core/Src/icm_20649.c ****           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 381              		.loc 1 105 11 view .LVU62
+ 382 00c2 0122     		movs	r2, #1
+ 383 00c4 2146     		mov	r1, r4
+ 384 00c6 2846     		mov	r0, r5
+ 385 00c8 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 386              	.LVL26:
+ 106:Core/Src/icm_20649.c **** 
+ 107:Core/Src/icm_20649.c **** 
+ 108:Core/Src/icm_20649.c ****           if (WhoAmI[1] == WHO_AM_I_RETURN_ICM)
+ 387              		.loc 1 108 11 view .LVU63
+ 388              		.loc 1 108 21 is_stmt 0 view .LVU64
+ 389 00cc 9DF81130 		ldrb	r3, [sp, #17]	@ zero_extendqisi2
+ 390              		.loc 1 108 14 view .LVU65
+ 391 00d0 E12B     		cmp	r3, #225
+ 392 00d2 00F09881 		beq	.L38
+ 109:Core/Src/icm_20649.c ****           {
+ 110:Core/Src/icm_20649.c ****                   sendS("c","Device is Ready\n\r");
+ 111:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+ 112:Core/Src/icm_20649.c ****           } else {
+ 113:Core/Src/icm_20649.c ****                   sendS("c", "Device is NOT Ready\n\r");
+ 393              		.loc 1 113 19 is_stmt 1 view .LVU66
+ 394 00d6 AF49     		ldr	r1, .L39+20
+ 395 00d8 AC48     		ldr	r0, .L39+12
+ 396 00da FFF7FEFF 		bl	sendS
+ 397              	.LVL27:
+ 114:Core/Src/icm_20649.c ****                   sendS("i", WhoAmI[1]);newL();
+ 398              		.loc 1 114 19 view .LVU67
+ 399 00de 9DF81110 		ldrb	r1, [sp, #17]	@ zero_extendqisi2
+ 400 00e2 AD48     		ldr	r0, .L39+24
+ 401 00e4 FFF7FEFF 		bl	sendS
+ARM GAS  /tmp/ccdn4qA4.s 			page 12
+
+
+ 402              	.LVL28:
+ 403              		.loc 1 114 41 view .LVU68
+ 404 00e8 FFF7FEFF 		bl	newL
+ 405              	.LVL29:
+ 115:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+ 406              		.loc 1 115 19 view .LVU69
+ 407 00ec 4FF47A70 		mov	r0, #1000
+ 408 00f0 FFF7FEFF 		bl	HAL_Delay
+ 409              	.LVL30:
+ 410              	.L18:
+ 116:Core/Src/icm_20649.c ****           }
+ 117:Core/Src/icm_20649.c **** 
+ 118:Core/Src/icm_20649.c **** 
+ 119:Core/Src/icm_20649.c ****           temp[0] = REG_USER_CTRL | 0x80;
+ 411              		.loc 1 119 11 view .LVU70
+ 412              		.loc 1 119 19 is_stmt 0 view .LVU71
+ 413 00f4 8323     		movs	r3, #131
+ 414 00f6 8DF81430 		strb	r3, [sp, #20]
+ 120:Core/Src/icm_20649.c ****           temp[1] = 0x00;
+ 415              		.loc 1 120 11 is_stmt 1 view .LVU72
+ 416              		.loc 1 120 19 is_stmt 0 view .LVU73
+ 417 00fa 0025     		movs	r5, #0
+ 418 00fc 8DF81550 		strb	r5, [sp, #21]
+ 121:Core/Src/icm_20649.c **** 
+ 122:Core/Src/icm_20649.c **** 
+ 123:Core/Src/icm_20649.c ****           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 419              		.loc 1 123 11 is_stmt 1 view .LVU74
+ 420 0100 9F4C     		ldr	r4, .L39
+ 421 0102 2A46     		mov	r2, r5
+ 422 0104 8021     		movs	r1, #128
+ 423 0106 2046     		mov	r0, r4
+ 424 0108 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 425              	.LVL31:
+ 124:Core/Src/icm_20649.c **** 
+ 125:Core/Src/icm_20649.c ****           ret = HAL_SPI_TransmitReceive(&hspi1, (uint8_t*) temp, (uint8_t *) USER_CTRL, 2, HAL_MAX_
+ 426              		.loc 1 125 11 view .LVU75
+ 427              		.loc 1 125 17 is_stmt 0 view .LVU76
+ 428 010c 9D4E     		ldr	r6, .L39+4
+ 429 010e 4FF0FF37 		mov	r7, #-1
+ 430 0112 0097     		str	r7, [sp]
+ 431 0114 0223     		movs	r3, #2
+ 432 0116 03AA     		add	r2, sp, #12
+ 433 0118 05A9     		add	r1, sp, #20
+ 434 011a 3046     		mov	r0, r6
+ 435 011c FFF7FEFF 		bl	HAL_SPI_TransmitReceive
+ 436              	.LVL32:
+ 126:Core/Src/icm_20649.c **** 
+ 127:Core/Src/icm_20649.c ****           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 437              		.loc 1 127 11 is_stmt 1 view .LVU77
+ 438 0120 0122     		movs	r2, #1
+ 439 0122 8021     		movs	r1, #128
+ 440 0124 2046     		mov	r0, r4
+ 441 0126 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 442              	.LVL33:
+ 128:Core/Src/icm_20649.c **** 
+ 129:Core/Src/icm_20649.c ****           temp[0] = REG_USER_CTRL & 0x7F;
+ 443              		.loc 1 129 11 view .LVU78
+ARM GAS  /tmp/ccdn4qA4.s 			page 13
+
+
+ 444              		.loc 1 129 19 is_stmt 0 view .LVU79
+ 445 012a 0323     		movs	r3, #3
+ 446 012c 8DF81430 		strb	r3, [sp, #20]
+ 130:Core/Src/icm_20649.c ****           temp[1] = USER_CTRL[1];
+ 447              		.loc 1 130 11 is_stmt 1 view .LVU80
+ 448              		.loc 1 130 30 is_stmt 0 view .LVU81
+ 449 0130 9DF80D30 		ldrb	r3, [sp, #13]	@ zero_extendqisi2
+ 450              		.loc 1 130 19 view .LVU82
+ 451 0134 8DF81530 		strb	r3, [sp, #21]
+ 131:Core/Src/icm_20649.c ****           temp[1] |= 0x10;
+ 452              		.loc 1 131 11 is_stmt 1 view .LVU83
+ 453              		.loc 1 131 19 is_stmt 0 view .LVU84
+ 454 0138 43F01003 		orr	r3, r3, #16
+ 455 013c 8DF81530 		strb	r3, [sp, #21]
+ 132:Core/Src/icm_20649.c **** 
+ 133:Core/Src/icm_20649.c ****           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 456              		.loc 1 133 11 is_stmt 1 view .LVU85
+ 457 0140 2A46     		mov	r2, r5
+ 458 0142 8021     		movs	r1, #128
+ 459 0144 2046     		mov	r0, r4
+ 460 0146 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 461              	.LVL34:
+ 134:Core/Src/icm_20649.c **** 
+ 135:Core/Src/icm_20649.c ****           ret = HAL_SPI_Transmit(&hspi1, (uint8_t*) temp, 2, HAL_MAX_DELAY);
+ 462              		.loc 1 135 11 view .LVU86
+ 463              		.loc 1 135 17 is_stmt 0 view .LVU87
+ 464 014a 3B46     		mov	r3, r7
+ 465 014c 0222     		movs	r2, #2
+ 466 014e 05A9     		add	r1, sp, #20
+ 467 0150 3046     		mov	r0, r6
+ 468 0152 FFF7FEFF 		bl	HAL_SPI_Transmit
+ 469              	.LVL35:
+ 470 0156 0546     		mov	r5, r0
+ 471              	.LVL36:
+ 136:Core/Src/icm_20649.c **** 
+ 137:Core/Src/icm_20649.c ****           HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 472              		.loc 1 137 11 is_stmt 1 view .LVU88
+ 473 0158 0122     		movs	r2, #1
+ 474 015a 8021     		movs	r1, #128
+ 475 015c 2046     		mov	r0, r4
+ 476 015e FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 477              	.LVL37:
+ 138:Core/Src/icm_20649.c **** 
+ 139:Core/Src/icm_20649.c **** 
+ 140:Core/Src/icm_20649.c **** 
+ 141:Core/Src/icm_20649.c ****           if (ret == HAL_OK)
+ 478              		.loc 1 141 11 view .LVU89
+ 479              		.loc 1 141 14 is_stmt 0 view .LVU90
+ 480 0162 002D     		cmp	r5, #0
+ 481 0164 40F05881 		bne	.L19
+ 142:Core/Src/icm_20649.c ****           {
+ 143:Core/Src/icm_20649.c **** 
+ 144:Core/Src/icm_20649.c ****                   sendS("c","Writing to Control User Register\n\r");
+ 482              		.loc 1 144 19 is_stmt 1 view .LVU91
+ 483 0168 8C49     		ldr	r1, .L39+28
+ 484 016a 8848     		ldr	r0, .L39+12
+ 485 016c FFF7FEFF 		bl	sendS
+ARM GAS  /tmp/ccdn4qA4.s 			page 14
+
+
+ 486              	.LVL38:
+ 145:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+ 487              		.loc 1 145 19 view .LVU92
+ 488 0170 4FF47A70 		mov	r0, #1000
+ 489 0174 FFF7FEFF 		bl	HAL_Delay
+ 490              	.LVL39:
+ 491              	.L20:
+ 146:Core/Src/icm_20649.c **** 
+ 147:Core/Src/icm_20649.c ****           } else {
+ 148:Core/Src/icm_20649.c **** 
+ 149:Core/Src/icm_20649.c ****                   sendS("c", "FAILED writing to Control User Register\n\r");
+ 150:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+ 151:Core/Src/icm_20649.c **** 
+ 152:Core/Src/icm_20649.c ****           }
+ 153:Core/Src/icm_20649.c ****           user_bank(2);
+ 492              		.loc 1 153 11 view .LVU93
+ 493 0178 0220     		movs	r0, #2
+ 494 017a FFF7FEFF 		bl	user_bank
+ 495              	.LVL40:
+ 154:Core/Src/icm_20649.c **** 
+ 155:Core/Src/icm_20649.c **** 
+ 156:Core/Src/icm_20649.c ****            temp[0] = REG_GYR_SMPLRT & 0x7F;
+ 496              		.loc 1 156 12 view .LVU94
+ 497              		.loc 1 156 20 is_stmt 0 view .LVU95
+ 498 017e 0022     		movs	r2, #0
+ 499 0180 8DF81420 		strb	r2, [sp, #20]
+ 157:Core/Src/icm_20649.c ****            temp[1] = GYR_SMPLRT_DIV;
+ 500              		.loc 1 157 12 is_stmt 1 view .LVU96
+ 501              		.loc 1 157 20 is_stmt 0 view .LVU97
+ 502 0184 0823     		movs	r3, #8
+ 503 0186 8DF81530 		strb	r3, [sp, #21]
+ 158:Core/Src/icm_20649.c **** 
+ 159:Core/Src/icm_20649.c ****            HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 504              		.loc 1 159 12 is_stmt 1 view .LVU98
+ 505 018a 7D4D     		ldr	r5, .L39
+ 506              	.LVL41:
+ 507              		.loc 1 159 12 is_stmt 0 view .LVU99
+ 508 018c 8021     		movs	r1, #128
+ 509 018e 2846     		mov	r0, r5
+ 510 0190 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 511              	.LVL42:
+ 160:Core/Src/icm_20649.c **** 
+ 161:Core/Src/icm_20649.c ****            ret = HAL_SPI_Transmit(&hspi1, (uint8_t*) temp, 2, HAL_MAX_DELAY);
+ 512              		.loc 1 161 12 is_stmt 1 view .LVU100
+ 513              		.loc 1 161 18 is_stmt 0 view .LVU101
+ 514 0194 4FF0FF33 		mov	r3, #-1
+ 515 0198 0222     		movs	r2, #2
+ 516 019a 05A9     		add	r1, sp, #20
+ 517 019c 7948     		ldr	r0, .L39+4
+ 518 019e FFF7FEFF 		bl	HAL_SPI_Transmit
+ 519              	.LVL43:
+ 520 01a2 0446     		mov	r4, r0
+ 521              	.LVL44:
+ 162:Core/Src/icm_20649.c **** 
+ 163:Core/Src/icm_20649.c ****            HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 522              		.loc 1 163 12 is_stmt 1 view .LVU102
+ 523 01a4 0122     		movs	r2, #1
+ARM GAS  /tmp/ccdn4qA4.s 			page 15
+
+
+ 524 01a6 8021     		movs	r1, #128
+ 525 01a8 2846     		mov	r0, r5
+ 526 01aa FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 527              	.LVL45:
+ 164:Core/Src/icm_20649.c **** 
+ 165:Core/Src/icm_20649.c ****            if (ret == HAL_OK)
+ 528              		.loc 1 165 12 view .LVU103
+ 529              		.loc 1 165 15 is_stmt 0 view .LVU104
+ 530 01ae 002C     		cmp	r4, #0
+ 531 01b0 40F03B81 		bne	.L21
+ 166:Core/Src/icm_20649.c ****            {
+ 167:Core/Src/icm_20649.c **** 
+ 168:Core/Src/icm_20649.c ****                    sendS("c","Writing to Gyro Sample Rate Register\n\r");
+ 532              		.loc 1 168 20 is_stmt 1 view .LVU105
+ 533 01b4 7A49     		ldr	r1, .L39+32
+ 534 01b6 7548     		ldr	r0, .L39+12
+ 535 01b8 FFF7FEFF 		bl	sendS
+ 536              	.LVL46:
+ 169:Core/Src/icm_20649.c ****                    HAL_Delay(1000);
+ 537              		.loc 1 169 20 view .LVU106
+ 538 01bc 4FF47A70 		mov	r0, #1000
+ 539 01c0 FFF7FEFF 		bl	HAL_Delay
+ 540              	.LVL47:
+ 541              	.L22:
+ 170:Core/Src/icm_20649.c **** 
+ 171:Core/Src/icm_20649.c ****            } else {
+ 172:Core/Src/icm_20649.c **** 
+ 173:Core/Src/icm_20649.c ****                    sendS("c", "FAILED writing to Gyro Sample Rate Register\n\r");
+ 174:Core/Src/icm_20649.c ****                    HAL_Delay(1000);
+ 175:Core/Src/icm_20649.c **** 
+ 176:Core/Src/icm_20649.c ****            }
+ 177:Core/Src/icm_20649.c **** 
+ 178:Core/Src/icm_20649.c **** 
+ 179:Core/Src/icm_20649.c ****            temp[0] = REG_GYR_CONFIG_I & 0x7F;
+ 542              		.loc 1 179 12 view .LVU107
+ 543              		.loc 1 179 20 is_stmt 0 view .LVU108
+ 544 01c4 0126     		movs	r6, #1
+ 545 01c6 8DF81460 		strb	r6, [sp, #20]
+ 180:Core/Src/icm_20649.c ****            temp[1] = GYR_CONFIG_I;
+ 546              		.loc 1 180 12 is_stmt 1 view .LVU109
+ 547              		.loc 1 180 20 is_stmt 0 view .LVU110
+ 548 01ca 1F23     		movs	r3, #31
+ 549 01cc 8DF81530 		strb	r3, [sp, #21]
+ 181:Core/Src/icm_20649.c **** 
+ 182:Core/Src/icm_20649.c ****            HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 550              		.loc 1 182 12 is_stmt 1 view .LVU111
+ 551 01d0 6B4D     		ldr	r5, .L39
+ 552 01d2 0022     		movs	r2, #0
+ 553 01d4 8021     		movs	r1, #128
+ 554 01d6 2846     		mov	r0, r5
+ 555 01d8 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 556              	.LVL48:
+ 183:Core/Src/icm_20649.c **** 
+ 184:Core/Src/icm_20649.c ****            ret = HAL_SPI_Transmit(&hspi1, (uint8_t*) temp, 2, HAL_MAX_DELAY);
+ 557              		.loc 1 184 12 view .LVU112
+ 558              		.loc 1 184 18 is_stmt 0 view .LVU113
+ 559 01dc 4FF0FF33 		mov	r3, #-1
+ARM GAS  /tmp/ccdn4qA4.s 			page 16
+
+
+ 560 01e0 0222     		movs	r2, #2
+ 561 01e2 05A9     		add	r1, sp, #20
+ 562 01e4 6748     		ldr	r0, .L39+4
+ 563 01e6 FFF7FEFF 		bl	HAL_SPI_Transmit
+ 564              	.LVL49:
+ 565 01ea 0446     		mov	r4, r0
+ 566              	.LVL50:
+ 185:Core/Src/icm_20649.c **** 
+ 186:Core/Src/icm_20649.c ****            HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 567              		.loc 1 186 12 is_stmt 1 view .LVU114
+ 568 01ec 3246     		mov	r2, r6
+ 569 01ee 8021     		movs	r1, #128
+ 570 01f0 2846     		mov	r0, r5
+ 571 01f2 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 572              	.LVL51:
+ 187:Core/Src/icm_20649.c **** 
+ 188:Core/Src/icm_20649.c ****            if (ret == HAL_OK)
+ 573              		.loc 1 188 12 view .LVU115
+ 574              		.loc 1 188 15 is_stmt 0 view .LVU116
+ 575 01f6 002C     		cmp	r4, #0
+ 576 01f8 40F02081 		bne	.L23
+ 189:Core/Src/icm_20649.c ****            {
+ 190:Core/Src/icm_20649.c **** 
+ 191:Core/Src/icm_20649.c ****                    sendS("c","Writing to Gyro Configuration I Register\n\r");
+ 577              		.loc 1 191 20 is_stmt 1 view .LVU117
+ 578 01fc 6949     		ldr	r1, .L39+36
+ 579 01fe 6348     		ldr	r0, .L39+12
+ 580 0200 FFF7FEFF 		bl	sendS
+ 581              	.LVL52:
+ 192:Core/Src/icm_20649.c ****                    HAL_Delay(1000);
+ 582              		.loc 1 192 20 view .LVU118
+ 583 0204 4FF47A70 		mov	r0, #1000
+ 584 0208 FFF7FEFF 		bl	HAL_Delay
+ 585              	.LVL53:
+ 586              	.L24:
+ 193:Core/Src/icm_20649.c **** 
+ 194:Core/Src/icm_20649.c ****            } else {
+ 195:Core/Src/icm_20649.c **** 
+ 196:Core/Src/icm_20649.c ****                    sendS("c", "FAILED writing to Gyro Configuration I Register\n\r");
+ 197:Core/Src/icm_20649.c ****                    HAL_Delay(1000);
+ 198:Core/Src/icm_20649.c ****            }
+ 199:Core/Src/icm_20649.c **** 
+ 200:Core/Src/icm_20649.c **** 
+ 201:Core/Src/icm_20649.c ****             temp[0] = REG_GYR_CONFIG_II & 0x7F;
+ 587              		.loc 1 201 13 view .LVU119
+ 588              		.loc 1 201 21 is_stmt 0 view .LVU120
+ 589 020c 0224     		movs	r4, #2
+ 590              	.LVL54:
+ 591              		.loc 1 201 21 view .LVU121
+ 592 020e 8DF81440 		strb	r4, [sp, #20]
+ 202:Core/Src/icm_20649.c ****             temp[1] = GYR_CONFIG_II;
+ 593              		.loc 1 202 13 is_stmt 1 view .LVU122
+ 594              		.loc 1 202 21 is_stmt 0 view .LVU123
+ 595 0212 0022     		movs	r2, #0
+ 596 0214 8DF81520 		strb	r2, [sp, #21]
+ 203:Core/Src/icm_20649.c **** 
+ 204:Core/Src/icm_20649.c ****             HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ARM GAS  /tmp/ccdn4qA4.s 			page 17
+
+
+ 597              		.loc 1 204 13 is_stmt 1 view .LVU124
+ 598 0218 594D     		ldr	r5, .L39
+ 599 021a 8021     		movs	r1, #128
+ 600 021c 2846     		mov	r0, r5
+ 601 021e FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 602              	.LVL55:
+ 205:Core/Src/icm_20649.c **** 
+ 206:Core/Src/icm_20649.c ****             ret = HAL_SPI_Transmit(&hspi1, (uint8_t*) temp, 2, HAL_MAX_DELAY);
+ 603              		.loc 1 206 13 view .LVU125
+ 604              		.loc 1 206 19 is_stmt 0 view .LVU126
+ 605 0222 4FF0FF33 		mov	r3, #-1
+ 606 0226 2246     		mov	r2, r4
+ 607 0228 05A9     		add	r1, sp, #20
+ 608 022a 5648     		ldr	r0, .L39+4
+ 609 022c FFF7FEFF 		bl	HAL_SPI_Transmit
+ 610              	.LVL56:
+ 611 0230 0446     		mov	r4, r0
+ 612              	.LVL57:
+ 207:Core/Src/icm_20649.c **** 
+ 208:Core/Src/icm_20649.c ****             HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 613              		.loc 1 208 13 is_stmt 1 view .LVU127
+ 614 0232 0122     		movs	r2, #1
+ 615 0234 8021     		movs	r1, #128
+ 616 0236 2846     		mov	r0, r5
+ 617 0238 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 618              	.LVL58:
+ 209:Core/Src/icm_20649.c **** 
+ 210:Core/Src/icm_20649.c ****             if (ret == HAL_OK)
+ 619              		.loc 1 210 13 view .LVU128
+ 620              		.loc 1 210 16 is_stmt 0 view .LVU129
+ 621 023c 002C     		cmp	r4, #0
+ 622 023e 40F00681 		bne	.L25
+ 211:Core/Src/icm_20649.c ****             {
+ 212:Core/Src/icm_20649.c **** 
+ 213:Core/Src/icm_20649.c ****                     sendS("c","Writing to Gyro Configuration II Register\n\r");
+ 623              		.loc 1 213 21 is_stmt 1 view .LVU130
+ 624 0242 5949     		ldr	r1, .L39+40
+ 625 0244 5148     		ldr	r0, .L39+12
+ 626 0246 FFF7FEFF 		bl	sendS
+ 627              	.LVL59:
+ 214:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ 628              		.loc 1 214 21 view .LVU131
+ 629 024a 4FF47A70 		mov	r0, #1000
+ 630 024e FFF7FEFF 		bl	HAL_Delay
+ 631              	.LVL60:
+ 632              	.L26:
+ 215:Core/Src/icm_20649.c **** 
+ 216:Core/Src/icm_20649.c ****             } else {
+ 217:Core/Src/icm_20649.c **** 
+ 218:Core/Src/icm_20649.c ****                     sendS("c", "FAILED writing to Gyro Configuration II Register\n\r");
+ 219:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ 220:Core/Src/icm_20649.c **** 
+ 221:Core/Src/icm_20649.c ****             }
+ 222:Core/Src/icm_20649.c **** 
+ 223:Core/Src/icm_20649.c **** 
+ 224:Core/Src/icm_20649.c ****             temp[0] = REG_ACC_SMPLRT_I & 0x7F;
+ 633              		.loc 1 224 13 view .LVU132
+ARM GAS  /tmp/ccdn4qA4.s 			page 18
+
+
+ 634              		.loc 1 224 21 is_stmt 0 view .LVU133
+ 635 0252 1023     		movs	r3, #16
+ 636 0254 8DF81430 		strb	r3, [sp, #20]
+ 225:Core/Src/icm_20649.c ****             temp[1] = ACC_SMPLRT_DIV_I;
+ 637              		.loc 1 225 13 is_stmt 1 view .LVU134
+ 638              		.loc 1 225 21 is_stmt 0 view .LVU135
+ 639 0258 0022     		movs	r2, #0
+ 640 025a 8DF81520 		strb	r2, [sp, #21]
+ 226:Core/Src/icm_20649.c **** 
+ 227:Core/Src/icm_20649.c ****             HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 641              		.loc 1 227 13 is_stmt 1 view .LVU136
+ 642 025e 484D     		ldr	r5, .L39
+ 643 0260 8021     		movs	r1, #128
+ 644 0262 2846     		mov	r0, r5
+ 645 0264 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 646              	.LVL61:
+ 228:Core/Src/icm_20649.c **** 
+ 229:Core/Src/icm_20649.c ****         //    ret = HAL_SPI_Transmit(&hspi1, (uint8_t*) temp, 2, HAL_MAX_DELAY);
+ 230:Core/Src/icm_20649.c **** 
+ 231:Core/Src/icm_20649.c ****             HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 647              		.loc 1 231 13 view .LVU137
+ 648 0268 0122     		movs	r2, #1
+ 649 026a 8021     		movs	r1, #128
+ 650 026c 2846     		mov	r0, r5
+ 651 026e FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 652              	.LVL62:
+ 232:Core/Src/icm_20649.c **** 
+ 233:Core/Src/icm_20649.c ****             if (ret == HAL_OK)
+ 653              		.loc 1 233 13 view .LVU138
+ 654              		.loc 1 233 16 is_stmt 0 view .LVU139
+ 655 0272 002C     		cmp	r4, #0
+ 656 0274 40F0F480 		bne	.L27
+ 234:Core/Src/icm_20649.c ****             {
+ 235:Core/Src/icm_20649.c **** 
+ 236:Core/Src/icm_20649.c ****                     sendS("c","Writing to Acc Sample Output Rate I Register\n\r");
+ 657              		.loc 1 236 21 is_stmt 1 view .LVU140
+ 658 0278 4C49     		ldr	r1, .L39+44
+ 659 027a 4448     		ldr	r0, .L39+12
+ 660 027c FFF7FEFF 		bl	sendS
+ 661              	.LVL63:
+ 237:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ 662              		.loc 1 237 21 view .LVU141
+ 663 0280 4FF47A70 		mov	r0, #1000
+ 664 0284 FFF7FEFF 		bl	HAL_Delay
+ 665              	.LVL64:
+ 666              	.L28:
+ 238:Core/Src/icm_20649.c **** 
+ 239:Core/Src/icm_20649.c ****             } else {
+ 240:Core/Src/icm_20649.c **** 
+ 241:Core/Src/icm_20649.c ****                     sendS("c", "FAILED writing to Sample Output Rate I Register\n\r");
+ 242:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ 243:Core/Src/icm_20649.c **** 
+ 244:Core/Src/icm_20649.c ****             }
+ 245:Core/Src/icm_20649.c **** 
+ 246:Core/Src/icm_20649.c **** 
+ 247:Core/Src/icm_20649.c ****             temp[0] = REG_ACC_SMPLRT_II & 0x7F;
+ 667              		.loc 1 247 13 view .LVU142
+ARM GAS  /tmp/ccdn4qA4.s 			page 19
+
+
+ 668              		.loc 1 247 21 is_stmt 0 view .LVU143
+ 669 0288 1123     		movs	r3, #17
+ 670 028a 8DF81430 		strb	r3, [sp, #20]
+ 248:Core/Src/icm_20649.c ****             temp[1] = ACC_SMPLRT_DIV_II;
+ 671              		.loc 1 248 13 is_stmt 1 view .LVU144
+ 672              		.loc 1 248 21 is_stmt 0 view .LVU145
+ 673 028e 0022     		movs	r2, #0
+ 674 0290 8DF81520 		strb	r2, [sp, #21]
+ 249:Core/Src/icm_20649.c **** 
+ 250:Core/Src/icm_20649.c ****             HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 675              		.loc 1 250 13 is_stmt 1 view .LVU146
+ 676 0294 3A4D     		ldr	r5, .L39
+ 677 0296 8021     		movs	r1, #128
+ 678 0298 2846     		mov	r0, r5
+ 679 029a FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 680              	.LVL65:
+ 251:Core/Src/icm_20649.c **** 
+ 252:Core/Src/icm_20649.c ****     //        ret = HAL_SPI_Transmit(&hspi1, (uint8_t*) temp, 2, HAL_MAX_DELAY);
+ 253:Core/Src/icm_20649.c **** 
+ 254:Core/Src/icm_20649.c ****             HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 681              		.loc 1 254 13 view .LVU147
+ 682 029e 0122     		movs	r2, #1
+ 683 02a0 8021     		movs	r1, #128
+ 684 02a2 2846     		mov	r0, r5
+ 685 02a4 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 686              	.LVL66:
+ 255:Core/Src/icm_20649.c **** 
+ 256:Core/Src/icm_20649.c ****             if (ret == HAL_OK)
+ 687              		.loc 1 256 13 view .LVU148
+ 688              		.loc 1 256 16 is_stmt 0 view .LVU149
+ 689 02a8 002C     		cmp	r4, #0
+ 690 02aa 40F0E280 		bne	.L29
+ 257:Core/Src/icm_20649.c ****             {
+ 258:Core/Src/icm_20649.c **** 
+ 259:Core/Src/icm_20649.c ****                     sendS("c","Writing to Acc Sample Output Rate II Register\n\r");
+ 691              		.loc 1 259 21 is_stmt 1 view .LVU150
+ 692 02ae 4049     		ldr	r1, .L39+48
+ 693 02b0 3648     		ldr	r0, .L39+12
+ 694 02b2 FFF7FEFF 		bl	sendS
+ 695              	.LVL67:
+ 260:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ 696              		.loc 1 260 21 view .LVU151
+ 697 02b6 4FF47A70 		mov	r0, #1000
+ 698 02ba FFF7FEFF 		bl	HAL_Delay
+ 699              	.LVL68:
+ 700              	.L30:
+ 261:Core/Src/icm_20649.c **** 
+ 262:Core/Src/icm_20649.c ****             } else {
+ 263:Core/Src/icm_20649.c **** 
+ 264:Core/Src/icm_20649.c ****                     sendS("c", "FAILED writing to Sample Output Rate II Register\n\r");
+ 265:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ 266:Core/Src/icm_20649.c ****             }
+ 267:Core/Src/icm_20649.c **** 
+ 268:Core/Src/icm_20649.c **** 
+ 269:Core/Src/icm_20649.c ****              temp[0] = REG_ACC_CONFIG_I & 0x7F;
+ 701              		.loc 1 269 14 view .LVU152
+ 702              		.loc 1 269 22 is_stmt 0 view .LVU153
+ARM GAS  /tmp/ccdn4qA4.s 			page 20
+
+
+ 703 02be 1423     		movs	r3, #20
+ 704 02c0 8DF81430 		strb	r3, [sp, #20]
+ 270:Core/Src/icm_20649.c ****              temp[1] = ACC_CONFIG_I;
+ 705              		.loc 1 270 14 is_stmt 1 view .LVU154
+ 706              		.loc 1 270 22 is_stmt 0 view .LVU155
+ 707 02c4 1F23     		movs	r3, #31
+ 708 02c6 8DF81530 		strb	r3, [sp, #21]
+ 271:Core/Src/icm_20649.c **** 
+ 272:Core/Src/icm_20649.c ****              HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 709              		.loc 1 272 14 is_stmt 1 view .LVU156
+ 710 02ca 2D4D     		ldr	r5, .L39
+ 711 02cc 0022     		movs	r2, #0
+ 712 02ce 8021     		movs	r1, #128
+ 713 02d0 2846     		mov	r0, r5
+ 714 02d2 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 715              	.LVL69:
+ 273:Core/Src/icm_20649.c **** 
+ 274:Core/Src/icm_20649.c ****              ret = HAL_SPI_Transmit(&hspi1, (uint8_t*) temp, 2, HAL_MAX_DELAY);
+ 716              		.loc 1 274 14 view .LVU157
+ 717              		.loc 1 274 20 is_stmt 0 view .LVU158
+ 718 02d6 4FF0FF33 		mov	r3, #-1
+ 719 02da 0222     		movs	r2, #2
+ 720 02dc 05A9     		add	r1, sp, #20
+ 721 02de 2948     		ldr	r0, .L39+4
+ 722 02e0 FFF7FEFF 		bl	HAL_SPI_Transmit
+ 723              	.LVL70:
+ 724 02e4 0446     		mov	r4, r0
+ 725              	.LVL71:
+ 275:Core/Src/icm_20649.c **** 
+ 276:Core/Src/icm_20649.c ****              HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 726              		.loc 1 276 14 is_stmt 1 view .LVU159
+ 727 02e6 0122     		movs	r2, #1
+ 728 02e8 8021     		movs	r1, #128
+ 729 02ea 2846     		mov	r0, r5
+ 730 02ec FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 731              	.LVL72:
+ 277:Core/Src/icm_20649.c **** 
+ 278:Core/Src/icm_20649.c ****              if (ret == HAL_OK)
+ 732              		.loc 1 278 14 view .LVU160
+ 733              		.loc 1 278 17 is_stmt 0 view .LVU161
+ 734 02f0 002C     		cmp	r4, #0
+ 735 02f2 40F0C780 		bne	.L31
+ 279:Core/Src/icm_20649.c ****              {
+ 280:Core/Src/icm_20649.c **** 
+ 281:Core/Src/icm_20649.c ****                      sendS("c","Writing to Acc Configuration I Register\n\r");
+ 736              		.loc 1 281 22 is_stmt 1 view .LVU162
+ 737 02f6 2F49     		ldr	r1, .L39+52
+ 738 02f8 2448     		ldr	r0, .L39+12
+ 739 02fa FFF7FEFF 		bl	sendS
+ 740              	.LVL73:
+ 282:Core/Src/icm_20649.c ****                      HAL_Delay(1000);
+ 741              		.loc 1 282 22 view .LVU163
+ 742 02fe 4FF47A70 		mov	r0, #1000
+ 743 0302 FFF7FEFF 		bl	HAL_Delay
+ 744              	.LVL74:
+ 745              	.L32:
+ 283:Core/Src/icm_20649.c **** 
+ARM GAS  /tmp/ccdn4qA4.s 			page 21
+
+
+ 284:Core/Src/icm_20649.c ****              } else {
+ 285:Core/Src/icm_20649.c **** 
+ 286:Core/Src/icm_20649.c ****                      sendS("c", "FAILED writing to Acc Configuration I Register\n\r");
+ 287:Core/Src/icm_20649.c ****                      HAL_Delay(1000);
+ 288:Core/Src/icm_20649.c **** 
+ 289:Core/Src/icm_20649.c ****              }
+ 290:Core/Src/icm_20649.c **** 
+ 291:Core/Src/icm_20649.c **** 
+ 292:Core/Src/icm_20649.c ****              temp[0] = REG_ACC_CONFIG_II & 0x7F;
+ 746              		.loc 1 292 14 view .LVU164
+ 747              		.loc 1 292 22 is_stmt 0 view .LVU165
+ 748 0306 1523     		movs	r3, #21
+ 749 0308 8DF81430 		strb	r3, [sp, #20]
+ 293:Core/Src/icm_20649.c ****              temp[1] = ACC_CONFIG_II;
+ 750              		.loc 1 293 14 is_stmt 1 view .LVU166
+ 751              		.loc 1 293 22 is_stmt 0 view .LVU167
+ 752 030c 0022     		movs	r2, #0
+ 753 030e 8DF81520 		strb	r2, [sp, #21]
+ 294:Core/Src/icm_20649.c **** 
+ 295:Core/Src/icm_20649.c ****              HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 754              		.loc 1 295 14 is_stmt 1 view .LVU168
+ 755 0312 1B4D     		ldr	r5, .L39
+ 756 0314 8021     		movs	r1, #128
+ 757 0316 2846     		mov	r0, r5
+ 758 0318 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 759              	.LVL75:
+ 296:Core/Src/icm_20649.c **** 
+ 297:Core/Src/icm_20649.c ****              ret = HAL_SPI_Transmit(&hspi1, (uint8_t*) temp, 2, HAL_MAX_DELAY);
+ 760              		.loc 1 297 14 view .LVU169
+ 761              		.loc 1 297 20 is_stmt 0 view .LVU170
+ 762 031c 4FF0FF33 		mov	r3, #-1
+ 763 0320 0222     		movs	r2, #2
+ 764 0322 05A9     		add	r1, sp, #20
+ 765 0324 1748     		ldr	r0, .L39+4
+ 766 0326 FFF7FEFF 		bl	HAL_SPI_Transmit
+ 767              	.LVL76:
+ 768 032a 0446     		mov	r4, r0
+ 769              	.LVL77:
+ 298:Core/Src/icm_20649.c **** 
+ 299:Core/Src/icm_20649.c ****              HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 770              		.loc 1 299 14 is_stmt 1 view .LVU171
+ 771 032c 0122     		movs	r2, #1
+ 772 032e 8021     		movs	r1, #128
+ 773 0330 2846     		mov	r0, r5
+ 774 0332 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 775              	.LVL78:
+ 300:Core/Src/icm_20649.c **** 
+ 301:Core/Src/icm_20649.c ****              if (ret == HAL_OK)
+ 776              		.loc 1 301 14 view .LVU172
+ 777              		.loc 1 301 17 is_stmt 0 view .LVU173
+ 778 0336 002C     		cmp	r4, #0
+ 779 0338 40F0AD80 		bne	.L33
+ 302:Core/Src/icm_20649.c ****              {
+ 303:Core/Src/icm_20649.c **** 
+ 304:Core/Src/icm_20649.c ****                      sendS("c","Writing to Acc Configuration II Register\n\r");
+ 780              		.loc 1 304 22 is_stmt 1 view .LVU174
+ 781 033c 1E49     		ldr	r1, .L39+56
+ARM GAS  /tmp/ccdn4qA4.s 			page 22
+
+
+ 782 033e 1348     		ldr	r0, .L39+12
+ 783 0340 FFF7FEFF 		bl	sendS
+ 784              	.LVL79:
+ 305:Core/Src/icm_20649.c ****                      HAL_Delay(1000);
+ 785              		.loc 1 305 22 view .LVU175
+ 786 0344 4FF47A70 		mov	r0, #1000
+ 787 0348 FFF7FEFF 		bl	HAL_Delay
+ 788              	.LVL80:
+ 789              	.L34:
+ 306:Core/Src/icm_20649.c **** 
+ 307:Core/Src/icm_20649.c ****              } else {
+ 308:Core/Src/icm_20649.c **** 
+ 309:Core/Src/icm_20649.c ****                      sendS("c", "FAILED writing to Acc Configuration II Register\n\r");
+ 310:Core/Src/icm_20649.c ****                      HAL_Delay(1000);
+ 311:Core/Src/icm_20649.c **** 
+ 312:Core/Src/icm_20649.c ****              }
+ 313:Core/Src/icm_20649.c **** 
+ 314:Core/Src/icm_20649.c **** 
+ 315:Core/Src/icm_20649.c ****             temp[0] = REG_ODR_ALIGN & 0x7F;
+ 790              		.loc 1 315 13 view .LVU176
+ 791              		.loc 1 315 21 is_stmt 0 view .LVU177
+ 792 034c 0923     		movs	r3, #9
+ 793 034e 8DF81430 		strb	r3, [sp, #20]
+ 316:Core/Src/icm_20649.c ****             temp[1] = ODR_ALIGN_EN;
+ 794              		.loc 1 316 13 is_stmt 1 view .LVU178
+ 795              		.loc 1 316 21 is_stmt 0 view .LVU179
+ 796 0352 0126     		movs	r6, #1
+ 797 0354 8DF81560 		strb	r6, [sp, #21]
+ 317:Core/Src/icm_20649.c **** 
+ 318:Core/Src/icm_20649.c ****             HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_RESET);
+ 798              		.loc 1 318 13 is_stmt 1 view .LVU180
+ 799 0358 094D     		ldr	r5, .L39
+ 800 035a 0022     		movs	r2, #0
+ 801 035c 8021     		movs	r1, #128
+ 802 035e 2846     		mov	r0, r5
+ 803 0360 FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 804              	.LVL81:
+ 319:Core/Src/icm_20649.c **** 
+ 320:Core/Src/icm_20649.c ****             ret = HAL_SPI_Transmit(&hspi1, (uint8_t*) temp, 2, HAL_MAX_DELAY);
+ 805              		.loc 1 320 13 view .LVU181
+ 806              		.loc 1 320 19 is_stmt 0 view .LVU182
+ 807 0364 4FF0FF33 		mov	r3, #-1
+ 808 0368 0222     		movs	r2, #2
+ 809 036a 05A9     		add	r1, sp, #20
+ 810 036c 0548     		ldr	r0, .L39+4
+ 811 036e FFF7FEFF 		bl	HAL_SPI_Transmit
+ 812              	.LVL82:
+ 813 0372 0446     		mov	r4, r0
+ 814              	.LVL83:
+ 321:Core/Src/icm_20649.c **** 
+ 322:Core/Src/icm_20649.c ****             HAL_GPIO_WritePin(GPIOD, GPIO_PIN_7, GPIO_PIN_SET);
+ 815              		.loc 1 322 13 is_stmt 1 view .LVU183
+ 816 0374 3246     		mov	r2, r6
+ 817 0376 8021     		movs	r1, #128
+ 818 0378 2846     		mov	r0, r5
+ 819 037a FFF7FEFF 		bl	HAL_GPIO_WritePin
+ 820              	.LVL84:
+ARM GAS  /tmp/ccdn4qA4.s 			page 23
+
+
+ 821 037e 1DE0     		b	.L40
+ 822              	.L41:
+ 823              		.align	2
+ 824              	.L39:
+ 825 0380 000C0258 		.word	1476529152
+ 826 0384 00000000 		.word	hspi1
+ 827 0388 00000000 		.word	.LC2
+ 828 038c 14000000 		.word	.LC1
+ 829 0390 30000000 		.word	.LC4
+ 830 0394 74000000 		.word	.LC7
+ 831 0398 8C000000 		.word	.LC8
+ 832 039c 90000000 		.word	.LC9
+ 833 03a0 E0000000 		.word	.LC11
+ 834 03a4 38010000 		.word	.LC13
+ 835 03a8 98010000 		.word	.LC15
+ 836 03ac F8010000 		.word	.LC17
+ 837 03b0 5C020000 		.word	.LC19
+ 838 03b4 C0020000 		.word	.LC21
+ 839 03b8 20030000 		.word	.LC23
+ 840              	.L40:
+ 323:Core/Src/icm_20649.c **** 
+ 324:Core/Src/icm_20649.c ****             if (ret == HAL_OK)
+ 841              		.loc 1 324 13 view .LVU184
+ 842              		.loc 1 324 16 is_stmt 0 view .LVU185
+ 843 03bc 002C     		cmp	r4, #0
+ 844 03be 73D1     		bne	.L35
+ 325:Core/Src/icm_20649.c ****             {
+ 326:Core/Src/icm_20649.c **** 
+ 327:Core/Src/icm_20649.c ****                     sendS("c","Writing to Data Output Register\n\r");
+ 845              		.loc 1 327 21 is_stmt 1 view .LVU186
+ 846 03c0 3E49     		ldr	r1, .L42
+ 847 03c2 3F48     		ldr	r0, .L42+4
+ 848 03c4 FFF7FEFF 		bl	sendS
+ 849              	.LVL85:
+ 328:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ 850              		.loc 1 328 21 view .LVU187
+ 851 03c8 4FF47A70 		mov	r0, #1000
+ 852 03cc FFF7FEFF 		bl	HAL_Delay
+ 853              	.LVL86:
+ 854              	.L36:
+ 329:Core/Src/icm_20649.c **** 
+ 330:Core/Src/icm_20649.c ****             } else {
+ 331:Core/Src/icm_20649.c **** 
+ 332:Core/Src/icm_20649.c ****                     sendS("c", "FAILED writing to Output Register\n\r");
+ 333:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ 334:Core/Src/icm_20649.c **** 
+ 335:Core/Src/icm_20649.c ****             }
+ 336:Core/Src/icm_20649.c **** 
+ 337:Core/Src/icm_20649.c **** 
+ 338:Core/Src/icm_20649.c **** 
+ 339:Core/Src/icm_20649.c **** 
+ 340:Core/Src/icm_20649.c ****               user_bank(0);
+ 855              		.loc 1 340 15 view .LVU188
+ 856 03d0 0020     		movs	r0, #0
+ 857 03d2 FFF7FEFF 		bl	user_bank
+ 858              	.LVL87:
+ 341:Core/Src/icm_20649.c **** 
+ARM GAS  /tmp/ccdn4qA4.s 			page 24
+
+
+ 342:Core/Src/icm_20649.c ****               sendS("c", "Finished Gyro Configuration!\n\r");
+ 859              		.loc 1 342 15 view .LVU189
+ 860 03d6 3B49     		ldr	r1, .L42+8
+ 861 03d8 3948     		ldr	r0, .L42+4
+ 862 03da FFF7FEFF 		bl	sendS
+ 863              	.LVL88:
+ 343:Core/Src/icm_20649.c **** 
+ 344:Core/Src/icm_20649.c **** }
+ 864              		.loc 1 344 1 is_stmt 0 view .LVU190
+ 865 03de 07B0     		add	sp, sp, #28
+ 866              	.LCFI6:
+ 867              		.cfi_remember_state
+ 868              		.cfi_def_cfa_offset 20
+ 869              		@ sp needed
+ 870 03e0 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 871              	.LVL89:
+ 872              	.L13:
+ 873              	.LCFI7:
+ 874              		.cfi_restore_state
+  69:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+ 875              		.loc 1 69 19 is_stmt 1 view .LVU191
+ 876 03e2 3949     		ldr	r1, .L42+12
+ 877 03e4 3648     		ldr	r0, .L42+4
+ 878 03e6 FFF7FEFF 		bl	sendS
+ 879              	.LVL90:
+  70:Core/Src/icm_20649.c **** 
+ 880              		.loc 1 70 19 view .LVU192
+ 881 03ea 4FF47A70 		mov	r0, #1000
+ 882 03ee FFF7FEFF 		bl	HAL_Delay
+ 883              	.LVL91:
+ 884 03f2 2EE6     		b	.L14
+ 885              	.L15:
+  91:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+ 886              		.loc 1 91 19 view .LVU193
+ 887 03f4 3549     		ldr	r1, .L42+16
+ 888 03f6 3248     		ldr	r0, .L42+4
+ 889 03f8 FFF7FEFF 		bl	sendS
+ 890              	.LVL92:
+  92:Core/Src/icm_20649.c **** 
+ 891              		.loc 1 92 19 view .LVU194
+ 892 03fc 4FF47A70 		mov	r0, #1000
+ 893 0400 FFF7FEFF 		bl	HAL_Delay
+ 894              	.LVL93:
+ 895 0404 49E6     		b	.L16
+ 896              	.LVL94:
+ 897              	.L38:
+ 110:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+ 898              		.loc 1 110 19 view .LVU195
+ 899 0406 3249     		ldr	r1, .L42+20
+ 900 0408 2D48     		ldr	r0, .L42+4
+ 901 040a FFF7FEFF 		bl	sendS
+ 902              	.LVL95:
+ 111:Core/Src/icm_20649.c ****           } else {
+ 903              		.loc 1 111 19 view .LVU196
+ 904 040e 4FF47A70 		mov	r0, #1000
+ 905 0412 FFF7FEFF 		bl	HAL_Delay
+ 906              	.LVL96:
+ARM GAS  /tmp/ccdn4qA4.s 			page 25
+
+
+ 907 0416 6DE6     		b	.L18
+ 908              	.LVL97:
+ 909              	.L19:
+ 149:Core/Src/icm_20649.c ****                   HAL_Delay(1000);
+ 910              		.loc 1 149 19 view .LVU197
+ 911 0418 2E49     		ldr	r1, .L42+24
+ 912 041a 2948     		ldr	r0, .L42+4
+ 913 041c FFF7FEFF 		bl	sendS
+ 914              	.LVL98:
+ 150:Core/Src/icm_20649.c **** 
+ 915              		.loc 1 150 19 view .LVU198
+ 916 0420 4FF47A70 		mov	r0, #1000
+ 917 0424 FFF7FEFF 		bl	HAL_Delay
+ 918              	.LVL99:
+ 919 0428 A6E6     		b	.L20
+ 920              	.LVL100:
+ 921              	.L21:
+ 173:Core/Src/icm_20649.c ****                    HAL_Delay(1000);
+ 922              		.loc 1 173 20 view .LVU199
+ 923 042a 2B49     		ldr	r1, .L42+28
+ 924 042c 2448     		ldr	r0, .L42+4
+ 925 042e FFF7FEFF 		bl	sendS
+ 926              	.LVL101:
+ 174:Core/Src/icm_20649.c **** 
+ 927              		.loc 1 174 20 view .LVU200
+ 928 0432 4FF47A70 		mov	r0, #1000
+ 929 0436 FFF7FEFF 		bl	HAL_Delay
+ 930              	.LVL102:
+ 931 043a C3E6     		b	.L22
+ 932              	.L23:
+ 196:Core/Src/icm_20649.c ****                    HAL_Delay(1000);
+ 933              		.loc 1 196 20 view .LVU201
+ 934 043c 2749     		ldr	r1, .L42+32
+ 935 043e 2048     		ldr	r0, .L42+4
+ 936 0440 FFF7FEFF 		bl	sendS
+ 937              	.LVL103:
+ 197:Core/Src/icm_20649.c ****            }
+ 938              		.loc 1 197 20 view .LVU202
+ 939 0444 4FF47A70 		mov	r0, #1000
+ 940 0448 FFF7FEFF 		bl	HAL_Delay
+ 941              	.LVL104:
+ 942 044c DEE6     		b	.L24
+ 943              	.L25:
+ 218:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ 944              		.loc 1 218 21 view .LVU203
+ 945 044e 2449     		ldr	r1, .L42+36
+ 946 0450 1B48     		ldr	r0, .L42+4
+ 947 0452 FFF7FEFF 		bl	sendS
+ 948              	.LVL105:
+ 219:Core/Src/icm_20649.c **** 
+ 949              		.loc 1 219 21 view .LVU204
+ 950 0456 4FF47A70 		mov	r0, #1000
+ 951 045a FFF7FEFF 		bl	HAL_Delay
+ 952              	.LVL106:
+ 953 045e F8E6     		b	.L26
+ 954              	.L27:
+ 241:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ARM GAS  /tmp/ccdn4qA4.s 			page 26
+
+
+ 955              		.loc 1 241 21 view .LVU205
+ 956 0460 2049     		ldr	r1, .L42+40
+ 957 0462 1748     		ldr	r0, .L42+4
+ 958 0464 FFF7FEFF 		bl	sendS
+ 959              	.LVL107:
+ 242:Core/Src/icm_20649.c **** 
+ 960              		.loc 1 242 21 view .LVU206
+ 961 0468 4FF47A70 		mov	r0, #1000
+ 962 046c FFF7FEFF 		bl	HAL_Delay
+ 963              	.LVL108:
+ 964 0470 0AE7     		b	.L28
+ 965              	.L29:
+ 264:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ 966              		.loc 1 264 21 view .LVU207
+ 967 0472 1D49     		ldr	r1, .L42+44
+ 968 0474 1248     		ldr	r0, .L42+4
+ 969 0476 FFF7FEFF 		bl	sendS
+ 970              	.LVL109:
+ 265:Core/Src/icm_20649.c ****             }
+ 971              		.loc 1 265 21 view .LVU208
+ 972 047a 4FF47A70 		mov	r0, #1000
+ 973 047e FFF7FEFF 		bl	HAL_Delay
+ 974              	.LVL110:
+ 975 0482 1CE7     		b	.L30
+ 976              	.L31:
+ 286:Core/Src/icm_20649.c ****                      HAL_Delay(1000);
+ 977              		.loc 1 286 22 view .LVU209
+ 978 0484 1949     		ldr	r1, .L42+48
+ 979 0486 0E48     		ldr	r0, .L42+4
+ 980 0488 FFF7FEFF 		bl	sendS
+ 981              	.LVL111:
+ 287:Core/Src/icm_20649.c **** 
+ 982              		.loc 1 287 22 view .LVU210
+ 983 048c 4FF47A70 		mov	r0, #1000
+ 984 0490 FFF7FEFF 		bl	HAL_Delay
+ 985              	.LVL112:
+ 986 0494 37E7     		b	.L32
+ 987              	.L33:
+ 309:Core/Src/icm_20649.c ****                      HAL_Delay(1000);
+ 988              		.loc 1 309 22 view .LVU211
+ 989 0496 1649     		ldr	r1, .L42+52
+ 990 0498 0948     		ldr	r0, .L42+4
+ 991 049a FFF7FEFF 		bl	sendS
+ 992              	.LVL113:
+ 310:Core/Src/icm_20649.c **** 
+ 993              		.loc 1 310 22 view .LVU212
+ 994 049e 4FF47A70 		mov	r0, #1000
+ 995 04a2 FFF7FEFF 		bl	HAL_Delay
+ 996              	.LVL114:
+ 997 04a6 51E7     		b	.L34
+ 998              	.L35:
+ 332:Core/Src/icm_20649.c ****                     HAL_Delay(1000);
+ 999              		.loc 1 332 21 view .LVU213
+ 1000 04a8 1249     		ldr	r1, .L42+56
+ 1001 04aa 0548     		ldr	r0, .L42+4
+ 1002 04ac FFF7FEFF 		bl	sendS
+ 1003              	.LVL115:
+ARM GAS  /tmp/ccdn4qA4.s 			page 27
+
+
+ 333:Core/Src/icm_20649.c **** 
+ 1004              		.loc 1 333 21 view .LVU214
+ 1005 04b0 4FF47A70 		mov	r0, #1000
+ 1006 04b4 FFF7FEFF 		bl	HAL_Delay
+ 1007              	.LVL116:
+ 1008 04b8 8AE7     		b	.L36
+ 1009              	.L43:
+ 1010 04ba 00BF     		.align	2
+ 1011              	.L42:
+ 1012 04bc 80030000 		.word	.LC25
+ 1013 04c0 14000000 		.word	.LC1
+ 1014 04c4 C8030000 		.word	.LC27
+ 1015 04c8 14000000 		.word	.LC3
+ 1016 04cc 44000000 		.word	.LC5
+ 1017 04d0 60000000 		.word	.LC6
+ 1018 04d4 B4000000 		.word	.LC10
+ 1019 04d8 08010000 		.word	.LC12
+ 1020 04dc 64010000 		.word	.LC14
+ 1021 04e0 C4010000 		.word	.LC16
+ 1022 04e4 28020000 		.word	.LC18
+ 1023 04e8 8C020000 		.word	.LC20
+ 1024 04ec EC020000 		.word	.LC22
+ 1025 04f0 4C030000 		.word	.LC24
+ 1026 04f4 A4030000 		.word	.LC26
+ 1027              		.cfi_endproc
+ 1028              	.LFE354:
+ 1030              		.section	.text.icm20649_DataRead,"ax",%progbits
+ 1031              		.align	1
+ 1032              		.global	icm20649_DataRead
+ 1033              		.syntax unified
+ 1034              		.thumb
+ 1035              		.thumb_func
+ 1036              		.fpu fpv5-d16
+ 1038              	icm20649_DataRead:
+ 1039              	.LVL117:
+ 1040              	.LFB355:
+ 345:Core/Src/icm_20649.c **** 
+ 346:Core/Src/icm_20649.c **** 
+ 347:Core/Src/icm_20649.c **** void icm20649_DataRead(icm* kal, uint8_t* data)
+ 348:Core/Src/icm_20649.c **** {
+ 1041              		.loc 1 348 1 view -0
+ 1042              		.cfi_startproc
+ 1043              		@ args = 0, pretend = 0, frame = 0
+ 1044              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1045              		@ link register save eliminated.
+ 349:Core/Src/icm_20649.c **** 	int16_t x_gyr;
+ 1046              		.loc 1 349 2 view .LVU216
+ 350:Core/Src/icm_20649.c **** 	int16_t y_gyr;
+ 1047              		.loc 1 350 2 view .LVU217
+ 351:Core/Src/icm_20649.c **** 	int16_t z_gyr;
+ 1048              		.loc 1 351 2 view .LVU218
+ 352:Core/Src/icm_20649.c **** 
+ 353:Core/Src/icm_20649.c ****         int16_t x_acc;
+ 1049              		.loc 1 353 9 view .LVU219
+ 354:Core/Src/icm_20649.c ****         int16_t y_acc;
+ 1050              		.loc 1 354 9 view .LVU220
+ 355:Core/Src/icm_20649.c ****         int16_t z_acc;
+ARM GAS  /tmp/ccdn4qA4.s 			page 28
+
+
+ 1051              		.loc 1 355 9 view .LVU221
+ 356:Core/Src/icm_20649.c **** 
+ 357:Core/Src/icm_20649.c **** 	x_gyr = (data[9] << 8) | data[10];
+ 1052              		.loc 1 357 2 view .LVU222
+ 1053              		.loc 1 357 15 is_stmt 0 view .LVU223
+ 1054 0000 4B7A     		ldrb	r3, [r1, #9]	@ zero_extendqisi2
+ 1055              		.loc 1 357 19 view .LVU224
+ 1056 0002 1B02     		lsls	r3, r3, #8
+ 1057              		.loc 1 357 25 view .LVU225
+ 1058 0004 1BB2     		sxth	r3, r3
+ 1059              		.loc 1 357 31 view .LVU226
+ 1060 0006 8A7A     		ldrb	r2, [r1, #10]	@ zero_extendqisi2
+ 1061              		.loc 1 357 8 view .LVU227
+ 1062 0008 1343     		orrs	r3, r3, r2
+ 1063 000a 05EE103A 		vmov	s10, r3	@ int
+ 1064              	.LVL118:
+ 358:Core/Src/icm_20649.c **** 	y_gyr = (data[7] << 8) | data[8];
+ 1065              		.loc 1 358 2 is_stmt 1 view .LVU228
+ 1066              		.loc 1 358 15 is_stmt 0 view .LVU229
+ 1067 000e CB79     		ldrb	r3, [r1, #7]	@ zero_extendqisi2
+ 1068              		.loc 1 358 19 view .LVU230
+ 1069 0010 1B02     		lsls	r3, r3, #8
+ 1070              		.loc 1 358 25 view .LVU231
+ 1071 0012 1BB2     		sxth	r3, r3
+ 1072              		.loc 1 358 31 view .LVU232
+ 1073 0014 0A7A     		ldrb	r2, [r1, #8]	@ zero_extendqisi2
+ 1074              		.loc 1 358 8 view .LVU233
+ 1075 0016 1343     		orrs	r3, r3, r2
+ 1076 0018 05EE903A 		vmov	s11, r3	@ int
+ 1077              	.LVL119:
+ 359:Core/Src/icm_20649.c **** 	z_gyr = (data[11] << 8) | data[12];
+ 1078              		.loc 1 359 2 is_stmt 1 view .LVU234
+ 1079              		.loc 1 359 15 is_stmt 0 view .LVU235
+ 1080 001c CB7A     		ldrb	r3, [r1, #11]	@ zero_extendqisi2
+ 1081              		.loc 1 359 20 view .LVU236
+ 1082 001e 1B02     		lsls	r3, r3, #8
+ 1083              		.loc 1 359 26 view .LVU237
+ 1084 0020 1BB2     		sxth	r3, r3
+ 1085              		.loc 1 359 32 view .LVU238
+ 1086 0022 0A7B     		ldrb	r2, [r1, #12]	@ zero_extendqisi2
+ 1087              		.loc 1 359 8 view .LVU239
+ 1088 0024 1343     		orrs	r3, r3, r2
+ 1089 0026 06EE103A 		vmov	s12, r3	@ int
+ 1090              	.LVL120:
+ 360:Core/Src/icm_20649.c **** 
+ 361:Core/Src/icm_20649.c ****         x_acc = (data[3] << 8) | data[4];
+ 1091              		.loc 1 361 9 is_stmt 1 view .LVU240
+ 1092              		.loc 1 361 22 is_stmt 0 view .LVU241
+ 1093 002a CB78     		ldrb	r3, [r1, #3]	@ zero_extendqisi2
+ 1094              		.loc 1 361 26 view .LVU242
+ 1095 002c 1B02     		lsls	r3, r3, #8
+ 1096              		.loc 1 361 32 view .LVU243
+ 1097 002e 1BB2     		sxth	r3, r3
+ 1098              		.loc 1 361 38 view .LVU244
+ 1099 0030 0A79     		ldrb	r2, [r1, #4]	@ zero_extendqisi2
+ 1100              		.loc 1 361 15 view .LVU245
+ 1101 0032 1343     		orrs	r3, r3, r2
+ARM GAS  /tmp/ccdn4qA4.s 			page 29
+
+
+ 1102 0034 06EE903A 		vmov	s13, r3	@ int
+ 1103              	.LVL121:
+ 362:Core/Src/icm_20649.c ****         y_acc = (data[1] << 8) | data[2];
+ 1104              		.loc 1 362 9 is_stmt 1 view .LVU246
+ 1105              		.loc 1 362 22 is_stmt 0 view .LVU247
+ 1106 0038 4B78     		ldrb	r3, [r1, #1]	@ zero_extendqisi2
+ 1107              		.loc 1 362 26 view .LVU248
+ 1108 003a 1B02     		lsls	r3, r3, #8
+ 1109              		.loc 1 362 32 view .LVU249
+ 1110 003c 1BB2     		sxth	r3, r3
+ 1111              		.loc 1 362 38 view .LVU250
+ 1112 003e 8A78     		ldrb	r2, [r1, #2]	@ zero_extendqisi2
+ 1113              		.loc 1 362 15 view .LVU251
+ 1114 0040 1343     		orrs	r3, r3, r2
+ 1115 0042 07EE103A 		vmov	s14, r3	@ int
+ 1116              	.LVL122:
+ 363:Core/Src/icm_20649.c ****         z_acc = (data[5] << 8) | data[6];
+ 1117              		.loc 1 363 9 is_stmt 1 view .LVU252
+ 1118              		.loc 1 363 22 is_stmt 0 view .LVU253
+ 1119 0046 4B79     		ldrb	r3, [r1, #5]	@ zero_extendqisi2
+ 1120              		.loc 1 363 26 view .LVU254
+ 1121 0048 1B02     		lsls	r3, r3, #8
+ 1122              		.loc 1 363 32 view .LVU255
+ 1123 004a 1BB2     		sxth	r3, r3
+ 1124              		.loc 1 363 38 view .LVU256
+ 1125 004c 8A79     		ldrb	r2, [r1, #6]	@ zero_extendqisi2
+ 1126              		.loc 1 363 15 view .LVU257
+ 1127 004e 1343     		orrs	r3, r3, r2
+ 1128 0050 07EE903A 		vmov	s15, r3	@ int
+ 1129              	.LVL123:
+ 364:Core/Src/icm_20649.c **** 
+ 365:Core/Src/icm_20649.c ****         /* Remove the 9.81 if you want polished data with 1.0 max acceleration */
+ 366:Core/Src/icm_20649.c ****         kal->GyroM[0] = 1.0f*x_gyr/(65.5f);
+ 1130              		.loc 1 366 9 is_stmt 1 view .LVU258
+ 1131              		.loc 1 366 29 is_stmt 0 view .LVU259
+ 1132 0054 B8EEC55A 		vcvt.f32.s32	s10, s10
+ 1133              	.LVL124:
+ 1134              		.loc 1 366 35 view .LVU260
+ 1135 0058 DFED174A 		vldr.32	s9, .L45
+ 1136 005c 85EE244A 		vdiv.f32	s8, s10, s9
+ 1137              		.loc 1 366 23 view .LVU261
+ 1138 0060 80ED004A 		vstr.32	s8, [r0]
+ 1139              	.LVL125:
+ 367:Core/Src/icm_20649.c ****         kal->GyroM[1] = 1.0f*y_gyr/(65.5f);
+ 1140              		.loc 1 367 9 is_stmt 1 view .LVU262
+ 1141              		.loc 1 367 29 is_stmt 0 view .LVU263
+ 1142 0064 F8EEE55A 		vcvt.f32.s32	s11, s11
+ 1143              	.LVL126:
+ 1144              		.loc 1 367 35 view .LVU264
+ 1145 0068 85EEA45A 		vdiv.f32	s10, s11, s9
+ 1146              		.loc 1 367 23 view .LVU265
+ 1147 006c 80ED015A 		vstr.32	s10, [r0, #4]
+ 368:Core/Src/icm_20649.c ****         kal->GyroM[2] = 1.0f*z_gyr/(65.5f);
+ 1148              		.loc 1 368 9 is_stmt 1 view .LVU266
+ 1149              		.loc 1 368 29 is_stmt 0 view .LVU267
+ 1150 0070 B8EEC66A 		vcvt.f32.s32	s12, s12
+ 1151              	.LVL127:
+ARM GAS  /tmp/ccdn4qA4.s 			page 30
+
+
+ 1152              		.loc 1 368 35 view .LVU268
+ 1153 0074 C6EE245A 		vdiv.f32	s11, s12, s9
+ 1154              		.loc 1 368 23 view .LVU269
+ 1155 0078 C0ED025A 		vstr.32	s11, [r0, #8]
+ 369:Core/Src/icm_20649.c **** 
+ 370:Core/Src/icm_20649.c ****         kal->AccM[0] = -9.81f*x_acc/(1024.0f);
+ 1156              		.loc 1 370 9 is_stmt 1 view .LVU270
+ 1157              		.loc 1 370 30 is_stmt 0 view .LVU271
+ 1158 007c F8EEE66A 		vcvt.f32.s32	s13, s13
+ 1159              	.LVL128:
+ 1160              		.loc 1 370 30 view .LVU272
+ 1161 0080 DFED0E5A 		vldr.32	s11, .L45+4
+ 1162 0084 66EEA56A 		vmul.f32	s13, s13, s11
+ 1163              		.loc 1 370 36 view .LVU273
+ 1164 0088 9FED0D6A 		vldr.32	s12, .L45+8
+ 1165 008c 66EE866A 		vmul.f32	s13, s13, s12
+ 1166              		.loc 1 370 22 view .LVU274
+ 1167 0090 C0ED036A 		vstr.32	s13, [r0, #12]
+ 371:Core/Src/icm_20649.c ****         kal->AccM[1] = -9.81f*y_acc/(1024.0f);
+ 1168              		.loc 1 371 9 is_stmt 1 view .LVU275
+ 1169              		.loc 1 371 30 is_stmt 0 view .LVU276
+ 1170 0094 B8EEC77A 		vcvt.f32.s32	s14, s14
+ 1171              	.LVL129:
+ 1172              		.loc 1 371 30 view .LVU277
+ 1173 0098 27EE257A 		vmul.f32	s14, s14, s11
+ 1174              		.loc 1 371 36 view .LVU278
+ 1175 009c 27EE067A 		vmul.f32	s14, s14, s12
+ 1176              		.loc 1 371 22 view .LVU279
+ 1177 00a0 80ED047A 		vstr.32	s14, [r0, #16]
+ 372:Core/Src/icm_20649.c ****         kal->AccM[2] = -9.81f*z_acc/(1024.0f);
+ 1178              		.loc 1 372 9 is_stmt 1 view .LVU280
+ 1179              		.loc 1 372 30 is_stmt 0 view .LVU281
+ 1180 00a4 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 1181              	.LVL130:
+ 1182              		.loc 1 372 30 view .LVU282
+ 1183 00a8 67EEA57A 		vmul.f32	s15, s15, s11
+ 1184              		.loc 1 372 36 view .LVU283
+ 1185 00ac 67EE867A 		vmul.f32	s15, s15, s12
+ 1186              		.loc 1 372 22 view .LVU284
+ 1187 00b0 C0ED057A 		vstr.32	s15, [r0, #20]
+ 373:Core/Src/icm_20649.c **** 
+ 374:Core/Src/icm_20649.c **** 
+ 375:Core/Src/icm_20649.c **** }
+ 1188              		.loc 1 375 1 view .LVU285
+ 1189 00b4 7047     		bx	lr
+ 1190              	.L46:
+ 1191 00b6 00BF     		.align	2
+ 1192              	.L45:
+ 1193 00b8 00008342 		.word	1115881472
+ 1194 00bc C3F51CC1 		.word	-1055066685
+ 1195 00c0 0000803A 		.word	981467136
+ 1196              		.cfi_endproc
+ 1197              	.LFE355:
+ 1199              		.text
+ 1200              	.Letext0:
+ 1201              		.file 2 "/usr/include/newlib/machine/_default_types.h"
+ 1202              		.file 3 "/usr/include/newlib/sys/_stdint.h"
+ARM GAS  /tmp/ccdn4qA4.s 			page 31
+
+
+ 1203              		.file 4 "Core/Inc/ICM_20649.h"
+ 1204              		.file 5 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+ 1205              		.file 6 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 1206              		.file 7 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h"
+ 1207              		.file 8 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 1208              		.file 9 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_spi.h"
+ 1209              		.file 10 "Core/Inc/DefFuncs.h"
+ 1210              		.file 11 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
+ARM GAS  /tmp/ccdn4qA4.s 			page 32
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 icm_20649.c
+     /tmp/ccdn4qA4.s:17     .rodata.user_bank.str1.4:0000000000000000 $d
+     /tmp/ccdn4qA4.s:24     .text.user_bank:0000000000000000 $t
+     /tmp/ccdn4qA4.s:32     .text.user_bank:0000000000000000 user_bank
+     /tmp/ccdn4qA4.s:59     .text.user_bank:0000000000000012 $d
+     /tmp/ccdn4qA4.s:63     .text.user_bank:0000000000000016 $t
+     /tmp/ccdn4qA4.s:135    .text.user_bank:0000000000000068 $d
+     /tmp/ccdn4qA4.s:143    .rodata.icm20649_init.str1.4:0000000000000000 $d
+     /tmp/ccdn4qA4.s:231    .text.icm20649_init:0000000000000000 $t
+     /tmp/ccdn4qA4.s:238    .text.icm20649_init:0000000000000000 icm20649_init
+     /tmp/ccdn4qA4.s:825    .text.icm20649_init:0000000000000380 $d
+     /tmp/ccdn4qA4.s:843    .text.icm20649_init:00000000000003bc $t
+     /tmp/ccdn4qA4.s:1012   .text.icm20649_init:00000000000004bc $d
+     /tmp/ccdn4qA4.s:1031   .text.icm20649_DataRead:0000000000000000 $t
+     /tmp/ccdn4qA4.s:1038   .text.icm20649_DataRead:0000000000000000 icm20649_DataRead
+     /tmp/ccdn4qA4.s:1193   .text.icm20649_DataRead:00000000000000b8 $d
+
+UNDEFINED SYMBOLS
+HAL_GPIO_WritePin
+HAL_SPI_Transmit
+sendS
+hspi1
+HAL_Delay
+HAL_SPI_TransmitReceive
+newL

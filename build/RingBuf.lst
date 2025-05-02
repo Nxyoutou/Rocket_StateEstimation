@@ -1,0 +1,961 @@
+ARM GAS  /tmp/ccxznR2O.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.eabi_attribute 28, 1
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 1
+  11              		.eabi_attribute 18, 4
+  12              		.file	"RingBuf.c"
+  13              		.text
+  14              	.Ltext0:
+  15              		.cfi_sections	.debug_frame
+  16              		.section	.rodata.ring_init.str1.4,"aMS",%progbits,1
+  17              		.align	2
+  18              	.LC0:
+  19 0000 436F6E66 		.ascii	"Configuring Ring Buffer\012\015\000"
+  19      69677572 
+  19      696E6720 
+  19      52696E67 
+  19      20427566 
+  20 001a 0000     		.align	2
+  21              	.LC1:
+  22 001c 6300     		.ascii	"c\000"
+  23 001e 0000     		.align	2
+  24              	.LC2:
+  25 0020 46696E69 		.ascii	"Finished configuring Ring Buffer\012\015\000"
+  25      73686564 
+  25      20636F6E 
+  25      66696775 
+  25      72696E67 
+  26              		.section	.text.ring_init,"ax",%progbits
+  27              		.align	1
+  28              		.global	ring_init
+  29              		.arch armv7e-m
+  30              		.syntax unified
+  31              		.thumb
+  32              		.thumb_func
+  33              		.fpu fpv5-d16
+  35              	ring_init:
+  36              	.LVL0:
+  37              	.LFB353:
+  38              		.file 1 "Core/Src/RingBuf.c"
+   1:Core/Src/RingBuf.c **** /*********************************************Functions enabling the usage of ring buffers*********
+   2:Core/Src/RingBuf.c **** 
+   3:Core/Src/RingBuf.c **** #include "init.h"
+   4:Core/Src/RingBuf.c **** #include "stdio.h"
+   5:Core/Src/RingBuf.c **** #include "string.h"
+   6:Core/Src/RingBuf.c **** #include "RingBuf.h"
+   7:Core/Src/RingBuf.c **** #include "DefFuncs.h"
+   8:Core/Src/RingBuf.c **** #include "math.h"
+   9:Core/Src/RingBuf.c **** 
+  10:Core/Src/RingBuf.c **** #define SMALLER(a, b) ((a) <= (b) ? (a) : (b))
+  11:Core/Src/RingBuf.c **** 
+  12:Core/Src/RingBuf.c **** uint8_t ring_init(ring* buf, void* data_buf, uint32_t size)
+ARM GAS  /tmp/ccxznR2O.s 			page 2
+
+
+  13:Core/Src/RingBuf.c **** {
+  39              		.loc 1 13 1 view -0
+  40              		.cfi_startproc
+  41              		@ args = 0, pretend = 0, frame = 0
+  42              		@ frame_needed = 0, uses_anonymous_args = 0
+  43              		.loc 1 13 1 is_stmt 0 view .LVU1
+  44 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+  45              	.LCFI0:
+  46              		.cfi_def_cfa_offset 24
+  47              		.cfi_offset 3, -24
+  48              		.cfi_offset 4, -20
+  49              		.cfi_offset 5, -16
+  50              		.cfi_offset 6, -12
+  51              		.cfi_offset 7, -8
+  52              		.cfi_offset 14, -4
+  53 0002 0446     		mov	r4, r0
+  54 0004 0D46     		mov	r5, r1
+  55 0006 1646     		mov	r6, r2
+  14:Core/Src/RingBuf.c **** 	sendS("c", "Configuring Ring Buffer\n\r");
+  56              		.loc 1 14 2 is_stmt 1 view .LVU2
+  57 0008 0B4F     		ldr	r7, .L3
+  58 000a 0C49     		ldr	r1, .L3+4
+  59              	.LVL1:
+  60              		.loc 1 14 2 is_stmt 0 view .LVU3
+  61 000c 3846     		mov	r0, r7
+  62              	.LVL2:
+  63              		.loc 1 14 2 view .LVU4
+  64 000e FFF7FEFF 		bl	sendS
+  65              	.LVL3:
+  15:Core/Src/RingBuf.c **** 	buf->size = size;
+  66              		.loc 1 15 2 is_stmt 1 view .LVU5
+  67              		.loc 1 15 12 is_stmt 0 view .LVU6
+  68 0012 2660     		str	r6, [r4]
+  16:Core/Src/RingBuf.c **** 	buf->Buf = (uint8_t *) data_buf;
+  69              		.loc 1 16 2 is_stmt 1 view .LVU7
+  70              		.loc 1 16 11 is_stmt 0 view .LVU8
+  71 0014 6560     		str	r5, [r4, #4]
+  17:Core/Src/RingBuf.c **** 	buf->head = 1;
+  72              		.loc 1 17 2 is_stmt 1 view .LVU9
+  73              		.loc 1 17 12 is_stmt 0 view .LVU10
+  74 0016 0125     		movs	r5, #1
+  75              	.LVL4:
+  76              		.loc 1 17 12 view .LVU11
+  77 0018 E560     		str	r5, [r4, #12]
+  18:Core/Src/RingBuf.c **** 	buf->tail = 0;
+  78              		.loc 1 18 2 is_stmt 1 view .LVU12
+  79              		.loc 1 18 12 is_stmt 0 view .LVU13
+  80 001a 0023     		movs	r3, #0
+  81 001c A360     		str	r3, [r4, #8]
+  19:Core/Src/RingBuf.c **** 	buf->currentLoss = 0;
+  82              		.loc 1 19 2 is_stmt 1 view .LVU14
+  83              		.loc 1 19 19 is_stmt 0 view .LVU15
+  84 001e 0022     		movs	r2, #0
+  85 0020 2261     		str	r2, [r4, #16]	@ float
+  20:Core/Src/RingBuf.c **** 	buf->totalLoss = 0;
+  86              		.loc 1 20 2 is_stmt 1 view .LVU16
+  87              		.loc 1 20 17 is_stmt 0 view .LVU17
+ARM GAS  /tmp/ccxznR2O.s 			page 3
+
+
+  88 0022 A261     		str	r2, [r4, #24]	@ float
+  21:Core/Src/RingBuf.c **** 	buf->totalTransfer = 0;
+  89              		.loc 1 21 2 is_stmt 1 view .LVU18
+  90              		.loc 1 21 21 is_stmt 0 view .LVU19
+  91 0024 E361     		str	r3, [r4, #28]
+  22:Core/Src/RingBuf.c **** 	buf->failed = 0;
+  92              		.loc 1 22 2 is_stmt 1 view .LVU20
+  93              		.loc 1 22 14 is_stmt 0 view .LVU21
+  94 0026 6361     		str	r3, [r4, #20]
+  23:Core/Src/RingBuf.c **** 	buf->First = 1;
+  95              		.loc 1 23 2 is_stmt 1 view .LVU22
+  96              		.loc 1 23 13 is_stmt 0 view .LVU23
+  97 0028 84F82250 		strb	r5, [r4, #34]
+  24:Core/Src/RingBuf.c **** 	sendS("c", "Finished configuring Ring Buffer\n\r");
+  98              		.loc 1 24 2 is_stmt 1 view .LVU24
+  99 002c 0449     		ldr	r1, .L3+8
+ 100 002e 3846     		mov	r0, r7
+ 101 0030 FFF7FEFF 		bl	sendS
+ 102              	.LVL5:
+  25:Core/Src/RingBuf.c **** 	return 1;
+ 103              		.loc 1 25 2 view .LVU25
+  26:Core/Src/RingBuf.c **** }
+ 104              		.loc 1 26 1 is_stmt 0 view .LVU26
+ 105 0034 2846     		mov	r0, r5
+ 106 0036 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 107              	.LVL6:
+ 108              	.L4:
+ 109              		.loc 1 26 1 view .LVU27
+ 110              		.align	2
+ 111              	.L3:
+ 112 0038 1C000000 		.word	.LC1
+ 113 003c 00000000 		.word	.LC0
+ 114 0040 20000000 		.word	.LC2
+ 115              		.cfi_endproc
+ 116              	.LFE353:
+ 118              		.section	.text.ring_DataFullSize,"ax",%progbits
+ 119              		.align	1
+ 120              		.global	ring_DataFullSize
+ 121              		.syntax unified
+ 122              		.thumb
+ 123              		.thumb_func
+ 124              		.fpu fpv5-d16
+ 126              	ring_DataFullSize:
+ 127              	.LVL7:
+ 128              	.LFB354:
+  27:Core/Src/RingBuf.c **** 
+  28:Core/Src/RingBuf.c **** uint32_t ring_DataFullSize(ring* buf)
+  29:Core/Src/RingBuf.c **** {
+ 129              		.loc 1 29 1 is_stmt 1 view -0
+ 130              		.cfi_startproc
+ 131              		@ args = 0, pretend = 0, frame = 0
+ 132              		@ frame_needed = 0, uses_anonymous_args = 0
+ 133              		@ link register save eliminated.
+  30:Core/Src/RingBuf.c **** 	uint32_t size;
+ 134              		.loc 1 30 2 view .LVU29
+  31:Core/Src/RingBuf.c **** 
+  32:Core/Src/RingBuf.c **** 	if ((buf->head - 1) > buf->tail)
+ARM GAS  /tmp/ccxznR2O.s 			page 4
+
+
+ 135              		.loc 1 32 2 view .LVU30
+ 136              		.loc 1 32 10 is_stmt 0 view .LVU31
+ 137 0000 C368     		ldr	r3, [r0, #12]
+ 138              		.loc 1 32 17 view .LVU32
+ 139 0002 591E     		subs	r1, r3, #1
+ 140              		.loc 1 32 27 view .LVU33
+ 141 0004 8268     		ldr	r2, [r0, #8]
+ 142              		.loc 1 32 5 view .LVU34
+ 143 0006 9142     		cmp	r1, r2
+ 144 0008 02D9     		bls	.L6
+  33:Core/Src/RingBuf.c **** 	{
+  34:Core/Src/RingBuf.c **** 		size = buf->head - 1 - buf->tail;
+ 145              		.loc 1 34 3 is_stmt 1 view .LVU35
+ 146              		.loc 1 34 24 is_stmt 0 view .LVU36
+ 147 000a 9B1A     		subs	r3, r3, r2
+ 148              		.loc 1 34 8 view .LVU37
+ 149 000c 581E     		subs	r0, r3, #1
+ 150              	.LVL8:
+ 151              		.loc 1 34 8 view .LVU38
+ 152 000e 7047     		bx	lr
+ 153              	.LVL9:
+ 154              	.L6:
+  35:Core/Src/RingBuf.c **** 	} else if ((buf->head - 1) < buf->tail) 
+ 155              		.loc 1 35 9 is_stmt 1 view .LVU39
+ 156              		.loc 1 35 12 is_stmt 0 view .LVU40
+ 157 0010 9142     		cmp	r1, r2
+ 158 0012 04D2     		bcs	.L8
+  36:Core/Src/RingBuf.c **** 	{
+  37:Core/Src/RingBuf.c **** 		size = buf->size - 1 - buf->tail + buf->head;
+ 159              		.loc 1 37 3 is_stmt 1 view .LVU41
+ 160              		.loc 1 37 13 is_stmt 0 view .LVU42
+ 161 0014 0068     		ldr	r0, [r0]
+ 162              	.LVL10:
+ 163              		.loc 1 37 24 view .LVU43
+ 164 0016 801A     		subs	r0, r0, r2
+ 165              		.loc 1 37 36 view .LVU44
+ 166 0018 0344     		add	r3, r3, r0
+ 167              		.loc 1 37 8 view .LVU45
+ 168 001a 581E     		subs	r0, r3, #1
+ 169              	.LVL11:
+ 170              		.loc 1 37 8 view .LVU46
+ 171 001c 7047     		bx	lr
+ 172              	.LVL12:
+ 173              	.L8:
+  38:Core/Src/RingBuf.c **** 	} else if (((buf->head - 1) == buf->tail) && (buf->overlap > 0))
+ 174              		.loc 1 38 9 is_stmt 1 view .LVU47
+ 175              		.loc 1 38 12 is_stmt 0 view .LVU48
+ 176 001e 9142     		cmp	r1, r2
+ 177 0020 01D0     		beq	.L11
+  39:Core/Src/RingBuf.c **** 	{
+  40:Core/Src/RingBuf.c **** 		size = buf->size;
+  41:Core/Src/RingBuf.c **** 	} else
+  42:Core/Src/RingBuf.c **** 	{
+  43:Core/Src/RingBuf.c **** 		size = 0;
+ 178              		.loc 1 43 8 view .LVU49
+ 179 0022 0020     		movs	r0, #0
+ 180              	.LVL13:
+ARM GAS  /tmp/ccxznR2O.s 			page 5
+
+
+ 181              		.loc 1 43 8 view .LVU50
+ 182 0024 7047     		bx	lr
+ 183              	.LVL14:
+ 184              	.L11:
+  38:Core/Src/RingBuf.c **** 	} else if (((buf->head - 1) == buf->tail) && (buf->overlap > 0))
+ 185              		.loc 1 38 51 discriminator 1 view .LVU51
+ 186 0026 038C     		ldrh	r3, [r0, #32]
+  38:Core/Src/RingBuf.c **** 	} else if (((buf->head - 1) == buf->tail) && (buf->overlap > 0))
+ 187              		.loc 1 38 44 discriminator 1 view .LVU52
+ 188 0028 0BB1     		cbz	r3, .L10
+  40:Core/Src/RingBuf.c **** 	} else
+ 189              		.loc 1 40 3 is_stmt 1 view .LVU53
+  40:Core/Src/RingBuf.c **** 	} else
+ 190              		.loc 1 40 8 is_stmt 0 view .LVU54
+ 191 002a 0068     		ldr	r0, [r0]
+ 192              	.LVL15:
+  40:Core/Src/RingBuf.c **** 	} else
+ 193              		.loc 1 40 8 view .LVU55
+ 194 002c 7047     		bx	lr
+ 195              	.LVL16:
+ 196              	.L10:
+ 197              		.loc 1 43 8 view .LVU56
+ 198 002e 0020     		movs	r0, #0
+ 199              	.LVL17:
+  44:Core/Src/RingBuf.c **** 	}
+  45:Core/Src/RingBuf.c **** 	return size;
+ 200              		.loc 1 45 2 is_stmt 1 view .LVU57
+  46:Core/Src/RingBuf.c **** }
+ 201              		.loc 1 46 1 is_stmt 0 view .LVU58
+ 202 0030 7047     		bx	lr
+ 203              		.cfi_endproc
+ 204              	.LFE354:
+ 206              		.section	.text.ring_DataEmptySize,"ax",%progbits
+ 207              		.align	1
+ 208              		.global	ring_DataEmptySize
+ 209              		.syntax unified
+ 210              		.thumb
+ 211              		.thumb_func
+ 212              		.fpu fpv5-d16
+ 214              	ring_DataEmptySize:
+ 215              	.LVL18:
+ 216              	.LFB355:
+  47:Core/Src/RingBuf.c **** 
+  48:Core/Src/RingBuf.c **** uint32_t ring_DataEmptySize(ring* buf)
+  49:Core/Src/RingBuf.c **** {
+ 217              		.loc 1 49 1 is_stmt 1 view -0
+ 218              		.cfi_startproc
+ 219              		@ args = 0, pretend = 0, frame = 0
+ 220              		@ frame_needed = 0, uses_anonymous_args = 0
+ 221              		.loc 1 49 1 is_stmt 0 view .LVU60
+ 222 0000 10B5     		push	{r4, lr}
+ 223              	.LCFI1:
+ 224              		.cfi_def_cfa_offset 8
+ 225              		.cfi_offset 4, -8
+ 226              		.cfi_offset 14, -4
+ 227 0002 0446     		mov	r4, r0
+  50:Core/Src/RingBuf.c **** 	uint32_t size = ring_DataFullSize(buf);
+ARM GAS  /tmp/ccxznR2O.s 			page 6
+
+
+ 228              		.loc 1 50 2 is_stmt 1 view .LVU61
+ 229              		.loc 1 50 18 is_stmt 0 view .LVU62
+ 230 0004 FFF7FEFF 		bl	ring_DataFullSize
+ 231              	.LVL19:
+  51:Core/Src/RingBuf.c **** 	return buf->size - size;
+ 232              		.loc 1 51 2 is_stmt 1 view .LVU63
+ 233              		.loc 1 51 12 is_stmt 0 view .LVU64
+ 234 0008 2368     		ldr	r3, [r4]
+  52:Core/Src/RingBuf.c **** }
+ 235              		.loc 1 52 1 view .LVU65
+ 236 000a 181A     		subs	r0, r3, r0
+ 237              	.LVL20:
+ 238              		.loc 1 52 1 view .LVU66
+ 239 000c 10BD     		pop	{r4, pc}
+ 240              		.loc 1 52 1 view .LVU67
+ 241              		.cfi_endproc
+ 242              	.LFE355:
+ 244              		.section	.text.ring_IsDataAvailable,"ax",%progbits
+ 245              		.align	1
+ 246              		.global	ring_IsDataAvailable
+ 247              		.syntax unified
+ 248              		.thumb
+ 249              		.thumb_func
+ 250              		.fpu fpv5-d16
+ 252              	ring_IsDataAvailable:
+ 253              	.LVL21:
+ 254              	.LFB356:
+  53:Core/Src/RingBuf.c **** 
+  54:Core/Src/RingBuf.c **** 
+  55:Core/Src/RingBuf.c **** uint8_t ring_IsDataAvailable(ring* buf)
+  56:Core/Src/RingBuf.c **** {
+ 255              		.loc 1 56 1 is_stmt 1 view -0
+ 256              		.cfi_startproc
+ 257              		@ args = 0, pretend = 0, frame = 0
+ 258              		@ frame_needed = 0, uses_anonymous_args = 0
+ 259              		.loc 1 56 1 is_stmt 0 view .LVU69
+ 260 0000 08B5     		push	{r3, lr}
+ 261              	.LCFI2:
+ 262              		.cfi_def_cfa_offset 8
+ 263              		.cfi_offset 3, -8
+ 264              		.cfi_offset 14, -4
+  57:Core/Src/RingBuf.c **** 	uint32_t size = ring_DataFullSize(buf);
+ 265              		.loc 1 57 2 is_stmt 1 view .LVU70
+ 266              		.loc 1 57 18 is_stmt 0 view .LVU71
+ 267 0002 FFF7FEFF 		bl	ring_DataFullSize
+ 268              	.LVL22:
+  58:Core/Src/RingBuf.c **** 	if (size == 0)
+ 269              		.loc 1 58 2 is_stmt 1 view .LVU72
+ 270              		.loc 1 58 5 is_stmt 0 view .LVU73
+ 271 0006 00B1     		cbz	r0, .L15
+  59:Core/Src/RingBuf.c **** 	{
+  60:Core/Src/RingBuf.c **** 		return 0;
+  61:Core/Src/RingBuf.c **** 	} else {
+  62:Core/Src/RingBuf.c **** 		return 1;
+ 272              		.loc 1 62 10 view .LVU74
+ 273 0008 0120     		movs	r0, #1
+ 274              	.LVL23:
+ARM GAS  /tmp/ccxznR2O.s 			page 7
+
+
+ 275              	.L15:
+  63:Core/Src/RingBuf.c **** 	}
+  64:Core/Src/RingBuf.c **** }
+ 276              		.loc 1 64 1 view .LVU75
+ 277 000a 08BD     		pop	{r3, pc}
+ 278              		.cfi_endproc
+ 279              	.LFE356:
+ 281              		.section	.text.ring_WriteData,"ax",%progbits
+ 282              		.align	1
+ 283              		.global	ring_WriteData
+ 284              		.syntax unified
+ 285              		.thumb
+ 286              		.thumb_func
+ 287              		.fpu fpv5-d16
+ 289              	ring_WriteData:
+ 290              	.LVL24:
+ 291              	.LFB357:
+  65:Core/Src/RingBuf.c **** 
+  66:Core/Src/RingBuf.c **** 	
+  67:Core/Src/RingBuf.c **** uint32_t ring_WriteData(ring* buf, void* data_buf, uint32_t len, uint8_t overwrite)
+  68:Core/Src/RingBuf.c **** {
+ 292              		.loc 1 68 1 is_stmt 1 view -0
+ 293              		.cfi_startproc
+ 294              		@ args = 0, pretend = 0, frame = 0
+ 295              		@ frame_needed = 0, uses_anonymous_args = 0
+ 296              		.loc 1 68 1 is_stmt 0 view .LVU77
+ 297 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 298              	.LCFI3:
+ 299              		.cfi_def_cfa_offset 24
+ 300              		.cfi_offset 3, -24
+ 301              		.cfi_offset 4, -20
+ 302              		.cfi_offset 5, -16
+ 303              		.cfi_offset 6, -12
+ 304              		.cfi_offset 7, -8
+ 305              		.cfi_offset 14, -4
+ 306 0002 0446     		mov	r4, r0
+ 307 0004 0F46     		mov	r7, r1
+ 308 0006 1546     		mov	r5, r2
+ 309 0008 1E46     		mov	r6, r3
+  69:Core/Src/RingBuf.c **** 
+  70:Core/Src/RingBuf.c **** 	uint32_t toTransfer;
+ 310              		.loc 1 70 2 is_stmt 1 view .LVU78
+  71:Core/Src/RingBuf.c **** 	uint8_t* data = (uint8_t *) data_buf;
+ 311              		.loc 1 71 2 view .LVU79
+ 312              	.LVL25:
+  72:Core/Src/RingBuf.c **** 
+  73:Core/Src/RingBuf.c **** 	uint32_t free = ring_DataEmptySize(buf);
+ 313              		.loc 1 73 2 view .LVU80
+ 314              		.loc 1 73 18 is_stmt 0 view .LVU81
+ 315 000a FFF7FEFF 		bl	ring_DataEmptySize
+ 316              	.LVL26:
+  74:Core/Src/RingBuf.c **** 
+  75:Core/Src/RingBuf.c **** 	if (free < len)
+ 317              		.loc 1 75 2 is_stmt 1 view .LVU82
+ 318              		.loc 1 75 5 is_stmt 0 view .LVU83
+ 319 000e A842     		cmp	r0, r5
+ 320 0010 1AD2     		bcs	.L19
+ARM GAS  /tmp/ccxznR2O.s 			page 8
+
+
+  76:Core/Src/RingBuf.c **** 	{
+  77:Core/Src/RingBuf.c **** 		if (!overwrite)
+ 321              		.loc 1 77 3 is_stmt 1 view .LVU84
+ 322              		.loc 1 77 6 is_stmt 0 view .LVU85
+ 323 0012 002E     		cmp	r6, #0
+ 324 0014 3BD0     		beq	.L22
+  78:Core/Src/RingBuf.c **** 		{
+  79:Core/Src/RingBuf.c **** 			return 0;
+  80:Core/Src/RingBuf.c **** 		}
+  81:Core/Src/RingBuf.c **** 
+  82:Core/Src/RingBuf.c **** 		buf->failed += (len - free);
+ 325              		.loc 1 82 3 is_stmt 1 view .LVU86
+ 326              		.loc 1 82 23 is_stmt 0 view .LVU87
+ 327 0016 281A     		subs	r0, r5, r0
+ 328              	.LVL27:
+ 329              		.loc 1 82 15 view .LVU88
+ 330 0018 6369     		ldr	r3, [r4, #20]
+ 331 001a 0344     		add	r3, r3, r0
+ 332 001c 6361     		str	r3, [r4, #20]
+  83:Core/Src/RingBuf.c **** 		buf->currentLoss = (len - free)/len;
+ 333              		.loc 1 83 3 is_stmt 1 view .LVU89
+ 334              		.loc 1 83 34 is_stmt 0 view .LVU90
+ 335 001e B0FBF5F0 		udiv	r0, r0, r5
+ 336              		.loc 1 83 20 view .LVU91
+ 337 0022 07EE900A 		vmov	s15, r0	@ int
+ 338 0026 F8EE677A 		vcvt.f32.u32	s15, s15
+ 339 002a C4ED047A 		vstr.32	s15, [r4, #16]
+  84:Core/Src/RingBuf.c **** 		buf->totalLoss = buf->failed/(buf->totalTransfer + len);
+ 340              		.loc 1 84 3 is_stmt 1 view .LVU92
+ 341              		.loc 1 84 36 is_stmt 0 view .LVU93
+ 342 002e E269     		ldr	r2, [r4, #28]
+ 343              		.loc 1 84 52 view .LVU94
+ 344 0030 2A44     		add	r2, r2, r5
+ 345              		.loc 1 84 31 view .LVU95
+ 346 0032 B3FBF2F3 		udiv	r3, r3, r2
+ 347              		.loc 1 84 18 view .LVU96
+ 348 0036 07EE903A 		vmov	s15, r3	@ int
+ 349 003a F8EE677A 		vcvt.f32.u32	s15, s15
+ 350 003e C4ED067A 		vstr.32	s15, [r4, #24]
+  85:Core/Src/RingBuf.c **** 		buf->overlap += 1;
+ 351              		.loc 1 85 3 is_stmt 1 view .LVU97
+ 352              		.loc 1 85 16 is_stmt 0 view .LVU98
+ 353 0042 238C     		ldrh	r3, [r4, #32]
+ 354 0044 0133     		adds	r3, r3, #1
+ 355 0046 2384     		strh	r3, [r4, #32]	@ movhi
+ 356              	.L19:
+  86:Core/Src/RingBuf.c **** 	}
+  87:Core/Src/RingBuf.c **** 
+  88:Core/Src/RingBuf.c **** 	buf->totalTransfer += len;
+ 357              		.loc 1 88 2 is_stmt 1 view .LVU99
+ 358              		.loc 1 88 21 is_stmt 0 view .LVU100
+ 359 0048 E369     		ldr	r3, [r4, #28]
+ 360 004a 2B44     		add	r3, r3, r5
+ 361 004c E361     		str	r3, [r4, #28]
+  89:Core/Src/RingBuf.c **** 
+  90:Core/Src/RingBuf.c **** 	uint32_t rest = buf->size - buf->head;
+ 362              		.loc 1 90 2 is_stmt 1 view .LVU101
+ARM GAS  /tmp/ccxznR2O.s 			page 9
+
+
+ 363              		.loc 1 90 21 is_stmt 0 view .LVU102
+ 364 004e 2668     		ldr	r6, [r4]
+ 365              		.loc 1 90 33 view .LVU103
+ 366 0050 E368     		ldr	r3, [r4, #12]
+ 367              		.loc 1 90 11 view .LVU104
+ 368 0052 F61A     		subs	r6, r6, r3
+ 369              	.LVL28:
+  91:Core/Src/RingBuf.c **** 
+  92:Core/Src/RingBuf.c **** 	toTransfer = SMALLER(rest, len);
+ 370              		.loc 1 92 2 is_stmt 1 view .LVU105
+ 371              		.loc 1 92 13 is_stmt 0 view .LVU106
+ 372 0054 AE42     		cmp	r6, r5
+ 373 0056 28BF     		it	cs
+ 374 0058 2E46     		movcs	r6, r5
+ 375              	.LVL29:
+  93:Core/Src/RingBuf.c **** 	memcpy(&buf->Buf[buf->head], data, toTransfer);
+ 376              		.loc 1 93 2 is_stmt 1 view .LVU107
+ 377              		.loc 1 93 13 is_stmt 0 view .LVU108
+ 378 005a 6068     		ldr	r0, [r4, #4]
+ 379              		.loc 1 93 2 view .LVU109
+ 380 005c 3246     		mov	r2, r6
+ 381 005e 3946     		mov	r1, r7
+ 382 0060 1844     		add	r0, r0, r3
+ 383 0062 FFF7FEFF 		bl	memcpy
+ 384              	.LVL30:
+  94:Core/Src/RingBuf.c **** 	buf->head += toTransfer;
+ 385              		.loc 1 94 2 is_stmt 1 view .LVU110
+ 386              		.loc 1 94 12 is_stmt 0 view .LVU111
+ 387 0066 E368     		ldr	r3, [r4, #12]
+ 388 0068 3344     		add	r3, r3, r6
+ 389 006a E360     		str	r3, [r4, #12]
+  95:Core/Src/RingBuf.c **** 	data += toTransfer;
+ 390              		.loc 1 95 2 is_stmt 1 view .LVU112
+ 391              		.loc 1 95 7 is_stmt 0 view .LVU113
+ 392 006c B919     		adds	r1, r7, r6
+ 393              	.LVL31:
+  96:Core/Src/RingBuf.c **** 	len -= toTransfer;
+ 394              		.loc 1 96 2 is_stmt 1 view .LVU114
+  97:Core/Src/RingBuf.c **** 
+  98:Core/Src/RingBuf.c **** 	if (len > 0)
+ 395              		.loc 1 98 2 view .LVU115
+ 396              		.loc 1 98 5 is_stmt 0 view .LVU116
+ 397 006e AE1B     		subs	r6, r5, r6
+ 398              	.LVL32:
+ 399              		.loc 1 98 5 view .LVU117
+ 400 0070 07D1     		bne	.L24
+ 401              	.LVL33:
+ 402              	.L21:
+  99:Core/Src/RingBuf.c **** 	{
+ 100:Core/Src/RingBuf.c **** 		memcpy(buf->Buf, data, len);
+ 101:Core/Src/RingBuf.c **** 		buf->head = len;
+ 102:Core/Src/RingBuf.c **** 	}
+ 103:Core/Src/RingBuf.c **** 
+ 104:Core/Src/RingBuf.c **** 	if ((buf->head >= buf->size))
+ 403              		.loc 1 104 2 is_stmt 1 view .LVU118
+ 404              		.loc 1 104 10 is_stmt 0 view .LVU119
+ 405 0072 E268     		ldr	r2, [r4, #12]
+ARM GAS  /tmp/ccxznR2O.s 			page 10
+
+
+ 406              		.loc 1 104 23 view .LVU120
+ 407 0074 2368     		ldr	r3, [r4]
+ 408              		.loc 1 104 5 view .LVU121
+ 409 0076 9A42     		cmp	r2, r3
+ 410 0078 01D3     		bcc	.L20
+ 105:Core/Src/RingBuf.c **** 	{
+ 106:Core/Src/RingBuf.c **** 		buf->head = 0;
+ 411              		.loc 1 106 3 is_stmt 1 view .LVU122
+ 412              		.loc 1 106 13 is_stmt 0 view .LVU123
+ 413 007a 0023     		movs	r3, #0
+ 414 007c E360     		str	r3, [r4, #12]
+ 415              	.LVL34:
+ 416              	.L20:
+ 107:Core/Src/RingBuf.c **** 	}
+ 108:Core/Src/RingBuf.c **** 
+ 109:Core/Src/RingBuf.c **** 	return toTransfer+len;
+ 110:Core/Src/RingBuf.c **** }
+ 417              		.loc 1 110 1 view .LVU124
+ 418 007e 2846     		mov	r0, r5
+ 419 0080 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 420              	.LVL35:
+ 421              	.L24:
+ 100:Core/Src/RingBuf.c **** 		buf->head = len;
+ 422              		.loc 1 100 3 is_stmt 1 view .LVU125
+ 423 0082 3246     		mov	r2, r6
+ 424 0084 6068     		ldr	r0, [r4, #4]
+ 425 0086 FFF7FEFF 		bl	memcpy
+ 426              	.LVL36:
+ 101:Core/Src/RingBuf.c **** 	}
+ 427              		.loc 1 101 3 view .LVU126
+ 101:Core/Src/RingBuf.c **** 	}
+ 428              		.loc 1 101 13 is_stmt 0 view .LVU127
+ 429 008a E660     		str	r6, [r4, #12]
+ 430 008c F1E7     		b	.L21
+ 431              	.LVL37:
+ 432              	.L22:
+  79:Core/Src/RingBuf.c **** 		}
+ 433              		.loc 1 79 11 view .LVU128
+ 434 008e 0025     		movs	r5, #0
+ 435              	.LVL38:
+  79:Core/Src/RingBuf.c **** 		}
+ 436              		.loc 1 79 11 view .LVU129
+ 437 0090 F5E7     		b	.L20
+ 438              		.cfi_endproc
+ 439              	.LFE357:
+ 441              		.section	.text.ring_ReadData,"ax",%progbits
+ 442              		.align	1
+ 443              		.global	ring_ReadData
+ 444              		.syntax unified
+ 445              		.thumb
+ 446              		.thumb_func
+ 447              		.fpu fpv5-d16
+ 449              	ring_ReadData:
+ 450              	.LVL39:
+ 451              	.LFB358:
+ 111:Core/Src/RingBuf.c **** 
+ 112:Core/Src/RingBuf.c **** uint32_t ring_ReadData(ring* buf, void* data_buf)
+ARM GAS  /tmp/ccxznR2O.s 			page 11
+
+
+ 113:Core/Src/RingBuf.c **** {
+ 452              		.loc 1 113 1 is_stmt 1 view -0
+ 453              		.cfi_startproc
+ 454              		@ args = 0, pretend = 0, frame = 0
+ 455              		@ frame_needed = 0, uses_anonymous_args = 0
+ 456              		.loc 1 113 1 is_stmt 0 view .LVU131
+ 457 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 458              	.LCFI4:
+ 459              		.cfi_def_cfa_offset 24
+ 460              		.cfi_offset 3, -24
+ 461              		.cfi_offset 4, -20
+ 462              		.cfi_offset 5, -16
+ 463              		.cfi_offset 6, -12
+ 464              		.cfi_offset 7, -8
+ 465              		.cfi_offset 14, -4
+ 466 0002 0546     		mov	r5, r0
+ 467 0004 0F46     		mov	r7, r1
+ 114:Core/Src/RingBuf.c **** 	
+ 115:Core/Src/RingBuf.c **** 	uint8_t* data = (uint8_t *) data_buf;
+ 468              		.loc 1 115 2 is_stmt 1 view .LVU132
+ 469              	.LVL40:
+ 116:Core/Src/RingBuf.c **** 
+ 117:Core/Src/RingBuf.c **** 	uint32_t size = ring_DataFullSize(buf);
+ 470              		.loc 1 117 2 view .LVU133
+ 471              		.loc 1 117 18 is_stmt 0 view .LVU134
+ 472 0006 FFF7FEFF 		bl	ring_DataFullSize
+ 473              	.LVL41:
+ 474              		.loc 1 117 18 view .LVU135
+ 475 000a 0646     		mov	r6, r0
+ 476              	.LVL42:
+ 118:Core/Src/RingBuf.c **** 
+ 119:Core/Src/RingBuf.c **** 	if ((buf->tail >= (buf->size - 1)))
+ 477              		.loc 1 119 2 is_stmt 1 view .LVU136
+ 478              		.loc 1 119 10 is_stmt 0 view .LVU137
+ 479 000c AA68     		ldr	r2, [r5, #8]
+ 480              		.loc 1 119 24 view .LVU138
+ 481 000e 2C68     		ldr	r4, [r5]
+ 482              		.loc 1 119 31 view .LVU139
+ 483 0010 631E     		subs	r3, r4, #1
+ 484              		.loc 1 119 5 view .LVU140
+ 485 0012 9A42     		cmp	r2, r3
+ 486 0014 02D3     		bcc	.L26
+ 120:Core/Src/RingBuf.c **** 	{
+ 121:Core/Src/RingBuf.c **** 		buf->tail = -1;
+ 487              		.loc 1 121 3 is_stmt 1 view .LVU141
+ 488              		.loc 1 121 13 is_stmt 0 view .LVU142
+ 489 0016 4FF0FF33 		mov	r3, #-1
+ 490 001a AB60     		str	r3, [r5, #8]
+ 491              	.L26:
+ 122:Core/Src/RingBuf.c **** 	}
+ 123:Core/Src/RingBuf.c **** 
+ 124:Core/Src/RingBuf.c **** 	uint32_t rest = buf->size - buf->tail - 1;
+ 492              		.loc 1 124 2 is_stmt 1 view .LVU143
+ 493              		.loc 1 124 33 is_stmt 0 view .LVU144
+ 494 001c AB68     		ldr	r3, [r5, #8]
+ 495              		.loc 1 124 28 view .LVU145
+ 496 001e E41A     		subs	r4, r4, r3
+ARM GAS  /tmp/ccxznR2O.s 			page 12
+
+
+ 497              		.loc 1 124 11 view .LVU146
+ 498 0020 013C     		subs	r4, r4, #1
+ 499              	.LVL43:
+ 125:Core/Src/RingBuf.c **** 	uint32_t toTransfer = SMALLER(rest, size);
+ 500              		.loc 1 125 2 is_stmt 1 view .LVU147
+ 501              		.loc 1 125 11 is_stmt 0 view .LVU148
+ 502 0022 B442     		cmp	r4, r6
+ 503 0024 28BF     		it	cs
+ 504 0026 3446     		movcs	r4, r6
+ 505              	.LVL44:
+ 126:Core/Src/RingBuf.c **** 	memcpy(data, &buf->Buf[buf->tail + 1], toTransfer);
+ 506              		.loc 1 126 2 is_stmt 1 view .LVU149
+ 507              		.loc 1 126 19 is_stmt 0 view .LVU150
+ 508 0028 6968     		ldr	r1, [r5, #4]
+ 509              		.loc 1 126 24 view .LVU151
+ 510 002a 0133     		adds	r3, r3, #1
+ 511              	.LVL45:
+ 512              		.loc 1 126 2 view .LVU152
+ 513 002c 2246     		mov	r2, r4
+ 514 002e 1944     		add	r1, r1, r3
+ 515 0030 3846     		mov	r0, r7
+ 516              	.LVL46:
+ 517              		.loc 1 126 2 view .LVU153
+ 518 0032 FFF7FEFF 		bl	memcpy
+ 519              	.LVL47:
+ 127:Core/Src/RingBuf.c **** 	buf->tail += toTransfer;
+ 520              		.loc 1 127 2 is_stmt 1 view .LVU154
+ 521              		.loc 1 127 12 is_stmt 0 view .LVU155
+ 522 0036 AB68     		ldr	r3, [r5, #8]
+ 523 0038 2344     		add	r3, r3, r4
+ 524 003a AB60     		str	r3, [r5, #8]
+ 128:Core/Src/RingBuf.c **** 	data += toTransfer;
+ 525              		.loc 1 128 2 is_stmt 1 view .LVU156
+ 526              		.loc 1 128 7 is_stmt 0 view .LVU157
+ 527 003c 3819     		adds	r0, r7, r4
+ 528              	.LVL48:
+ 129:Core/Src/RingBuf.c **** 	size -= toTransfer;
+ 529              		.loc 1 129 2 is_stmt 1 view .LVU158
+ 130:Core/Src/RingBuf.c **** 
+ 131:Core/Src/RingBuf.c **** 	if (size > 0)
+ 530              		.loc 1 131 2 view .LVU159
+ 531              		.loc 1 131 5 is_stmt 0 view .LVU160
+ 532 003e 341B     		subs	r4, r6, r4
+ 533              	.LVL49:
+ 534              		.loc 1 131 5 view .LVU161
+ 535 0040 01D1     		bne	.L29
+ 536              	.LVL50:
+ 537              	.L25:
+ 132:Core/Src/RingBuf.c **** 	{
+ 133:Core/Src/RingBuf.c **** 		memcpy(data, buf->Buf, size);
+ 134:Core/Src/RingBuf.c **** 		buf->tail = size - 1;
+ 135:Core/Src/RingBuf.c **** 	}
+ 136:Core/Src/RingBuf.c **** 
+ 137:Core/Src/RingBuf.c **** 
+ 138:Core/Src/RingBuf.c **** 	return toTransfer + size;
+ 139:Core/Src/RingBuf.c **** }
+ 538              		.loc 1 139 1 view .LVU162
+ARM GAS  /tmp/ccxznR2O.s 			page 13
+
+
+ 539 0042 3046     		mov	r0, r6
+ 540 0044 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 541              	.LVL51:
+ 542              	.L29:
+ 133:Core/Src/RingBuf.c **** 		buf->tail = size - 1;
+ 543              		.loc 1 133 3 is_stmt 1 view .LVU163
+ 544 0046 2246     		mov	r2, r4
+ 545 0048 6968     		ldr	r1, [r5, #4]
+ 546 004a FFF7FEFF 		bl	memcpy
+ 547              	.LVL52:
+ 134:Core/Src/RingBuf.c **** 	}
+ 548              		.loc 1 134 3 view .LVU164
+ 134:Core/Src/RingBuf.c **** 	}
+ 549              		.loc 1 134 20 is_stmt 0 view .LVU165
+ 550 004e 013C     		subs	r4, r4, #1
+ 551              	.LVL53:
+ 134:Core/Src/RingBuf.c **** 	}
+ 552              		.loc 1 134 13 view .LVU166
+ 553 0050 AC60     		str	r4, [r5, #8]
+ 138:Core/Src/RingBuf.c **** }
+ 554              		.loc 1 138 2 is_stmt 1 view .LVU167
+ 138:Core/Src/RingBuf.c **** }
+ 555              		.loc 1 138 20 is_stmt 0 view .LVU168
+ 556 0052 F6E7     		b	.L25
+ 557              		.cfi_endproc
+ 558              	.LFE358:
+ 560              		.section	.text.ring_ReadSensorData,"ax",%progbits
+ 561              		.align	1
+ 562              		.global	ring_ReadSensorData
+ 563              		.syntax unified
+ 564              		.thumb
+ 565              		.thumb_func
+ 566              		.fpu fpv5-d16
+ 568              	ring_ReadSensorData:
+ 569              	.LVL54:
+ 570              	.LFB359:
+ 140:Core/Src/RingBuf.c **** 
+ 141:Core/Src/RingBuf.c **** /* Only call in combination with ring_IsDataAvailable or if you are sure that there will be data in
+ 142:Core/Src/RingBuf.c **** float ring_ReadSensorData(ring* buf, uint16_t size)
+ 143:Core/Src/RingBuf.c **** {
+ 571              		.loc 1 143 1 is_stmt 1 view -0
+ 572              		.cfi_startproc
+ 573              		@ args = 0, pretend = 0, frame = 8
+ 574              		@ frame_needed = 0, uses_anonymous_args = 0
+ 575              		@ link register save eliminated.
+ 144:Core/Src/RingBuf.c ****      float sum = 0.0f;
+ 576              		.loc 1 144 6 view .LVU170
+ 145:Core/Src/RingBuf.c **** 
+ 146:Core/Src/RingBuf.c ****      uint8_t* x = (uint8_t *) buf->Buf + 1;
+ 577              		.loc 1 146 6 view .LVU171
+ 578              		.loc 1 146 34 is_stmt 0 view .LVU172
+ 579 0000 4368     		ldr	r3, [r0, #4]
+ 580              		.loc 1 146 15 view .LVU173
+ 581 0002 03F1010C 		add	ip, r3, #1
+ 582              	.LVL55:
+ 147:Core/Src/RingBuf.c **** 
+ 148:Core/Src/RingBuf.c **** //     float* data = (float *) x;
+ARM GAS  /tmp/ccxznR2O.s 			page 14
+
+
+ 149:Core/Src/RingBuf.c ****      uint8_t arr[4];
+ 583              		.loc 1 149 6 is_stmt 1 view .LVU174
+ 150:Core/Src/RingBuf.c ****      float* variable;
+ 584              		.loc 1 150 6 view .LVU175
+ 151:Core/Src/RingBuf.c ****      variable = (float *)&arr[0];
+ 585              		.loc 1 151 6 view .LVU176
+ 152:Core/Src/RingBuf.c ****      size = (size == (buf->size/4))? (size-1) : size;
+ 586              		.loc 1 152 6 view .LVU177
+ 587              		.loc 1 152 26 is_stmt 0 view .LVU178
+ 588 0006 0368     		ldr	r3, [r0]
+ 589              		.loc 1 152 11 view .LVU179
+ 590 0008 B1EB930F 		cmp	r1, r3, lsr #2
+ 591 000c 25D0     		beq	.L38
+ 592              	.LVL56:
+ 593              	.L31:
+ 153:Core/Src/RingBuf.c **** 
+ 154:Core/Src/RingBuf.c **** //     uint32_t initVal = TIM2->CNT;
+ 155:Core/Src/RingBuf.c **** 
+ 156:Core/Src/RingBuf.c ****      for (int i = 0; i < (size*4); i+=4)
+ 594              		.loc 1 156 6 is_stmt 1 discriminator 4 view .LVU180
+ 595              	.LBB2:
+ 596              		.loc 1 156 11 discriminator 4 view .LVU181
+ 597              		.loc 1 156 15 is_stmt 0 discriminator 4 view .LVU182
+ 598 000e 0023     		movs	r3, #0
+ 599              	.LBE2:
+ 144:Core/Src/RingBuf.c **** 
+ 600              		.loc 1 144 12 discriminator 4 view .LVU183
+ 601 0010 DFED177A 		vldr.32	s15, .L40
+ 602              	.LVL57:
+ 603              	.LBB3:
+ 604              		.loc 1 156 22 is_stmt 1 discriminator 4 view .LVU184
+ 605              		.loc 1 156 6 is_stmt 0 discriminator 4 view .LVU185
+ 606 0014 B3EB810F 		cmp	r3, r1, lsl #2
+ 607 0018 22DA     		bge	.L39
+ 608              	.LBE3:
+ 143:Core/Src/RingBuf.c ****      float sum = 0.0f;
+ 609              		.loc 1 143 1 view .LVU186
+ 610 001a 82B0     		sub	sp, sp, #8
+ 611              	.LCFI5:
+ 612              		.cfi_def_cfa_offset 8
+ 613              	.LVL58:
+ 614              	.L33:
+ 615              	.LBB4:
+ 157:Core/Src/RingBuf.c ****      {
+ 158:Core/Src/RingBuf.c **** 	     arr[0] = x[i];
+ 616              		.loc 1 158 7 is_stmt 1 discriminator 3 view .LVU187
+ 617              		.loc 1 158 17 is_stmt 0 discriminator 3 view .LVU188
+ 618 001c 1CF80320 		ldrb	r2, [ip, r3]	@ zero_extendqisi2
+ 619              		.loc 1 158 14 discriminator 3 view .LVU189
+ 620 0020 8DF80420 		strb	r2, [sp, #4]
+ 159:Core/Src/RingBuf.c **** 	     arr[1] = x[i+1];
+ 621              		.loc 1 159 7 is_stmt 1 discriminator 3 view .LVU190
+ 622              		.loc 1 159 17 is_stmt 0 discriminator 3 view .LVU191
+ 623 0024 0CEB0302 		add	r2, ip, r3
+ 624 0028 5078     		ldrb	r0, [r2, #1]	@ zero_extendqisi2
+ 625              		.loc 1 159 14 discriminator 3 view .LVU192
+ 626 002a 8DF80500 		strb	r0, [sp, #5]
+ARM GAS  /tmp/ccxznR2O.s 			page 15
+
+
+ 160:Core/Src/RingBuf.c **** 	     arr[2] = x[i+2];
+ 627              		.loc 1 160 7 is_stmt 1 discriminator 3 view .LVU193
+ 628              		.loc 1 160 17 is_stmt 0 discriminator 3 view .LVU194
+ 629 002e 9078     		ldrb	r0, [r2, #2]	@ zero_extendqisi2
+ 630              		.loc 1 160 14 discriminator 3 view .LVU195
+ 631 0030 8DF80600 		strb	r0, [sp, #6]
+ 161:Core/Src/RingBuf.c **** 	     arr[3] = x[i+3];
+ 632              		.loc 1 161 7 is_stmt 1 discriminator 3 view .LVU196
+ 633              		.loc 1 161 17 is_stmt 0 discriminator 3 view .LVU197
+ 634 0034 D278     		ldrb	r2, [r2, #3]	@ zero_extendqisi2
+ 635              		.loc 1 161 14 discriminator 3 view .LVU198
+ 636 0036 8DF80720 		strb	r2, [sp, #7]
+ 162:Core/Src/RingBuf.c **** 
+ 163:Core/Src/RingBuf.c ****     	     sum += variable[0];
+ 637              		.loc 1 163 11 is_stmt 1 discriminator 3 view .LVU199
+ 638              		.loc 1 163 26 is_stmt 0 discriminator 3 view .LVU200
+ 639 003a 9DED017A 		vldr.32	s14, [sp, #4]
+ 640              		.loc 1 163 15 discriminator 3 view .LVU201
+ 641 003e 77EE877A 		vadd.f32	s15, s15, s14
+ 642              	.LVL59:
+ 156:Core/Src/RingBuf.c ****      {
+ 643              		.loc 1 156 36 is_stmt 1 discriminator 3 view .LVU202
+ 156:Core/Src/RingBuf.c ****      {
+ 644              		.loc 1 156 37 is_stmt 0 discriminator 3 view .LVU203
+ 645 0042 0433     		adds	r3, r3, #4
+ 646              	.LVL60:
+ 156:Core/Src/RingBuf.c ****      {
+ 647              		.loc 1 156 22 is_stmt 1 discriminator 3 view .LVU204
+ 156:Core/Src/RingBuf.c ****      {
+ 648              		.loc 1 156 6 is_stmt 0 discriminator 3 view .LVU205
+ 649 0044 B3EB810F 		cmp	r3, r1, lsl #2
+ 650 0048 E8DB     		blt	.L33
+ 651              	.LBE4:
+ 164:Core/Src/RingBuf.c ****      }
+ 165:Core/Src/RingBuf.c **** 
+ 166:Core/Src/RingBuf.c **** //     uint32_t endVal = TIM2->CNT;
+ 167:Core/Src/RingBuf.c **** 
+ 168:Core/Src/RingBuf.c **** //     sendS("i", (endVal-initVal));newL();
+ 169:Core/Src/RingBuf.c **** 
+ 170:Core/Src/RingBuf.c **** 	
+ 171:Core/Src/RingBuf.c **** //     sendS("i", x[0]);space();sendS("i", x[1]);space();sendS("i", x[2]);space();sendS("i", x[3]);
+ 172:Core/Src/RingBuf.c ****      return sum/((float) size);
+ 652              		.loc 1 172 6 is_stmt 1 view .LVU206
+ 653              		.loc 1 172 18 is_stmt 0 view .LVU207
+ 654 004a 07EE101A 		vmov	s14, r1	@ int
+ 655 004e B8EE470A 		vcvt.f32.u32	s0, s14
+ 173:Core/Src/RingBuf.c **** }
+ 656              		.loc 1 173 1 view .LVU208
+ 657 0052 87EE800A 		vdiv.f32	s0, s15, s0
+ 658 0056 02B0     		add	sp, sp, #8
+ 659              	.LCFI6:
+ 660              		.cfi_def_cfa_offset 0
+ 661              	.LVL61:
+ 662              		.loc 1 173 1 view .LVU209
+ 663              		@ sp needed
+ 664 0058 7047     		bx	lr
+ 665              	.LVL62:
+ARM GAS  /tmp/ccxznR2O.s 			page 16
+
+
+ 666              	.L38:
+ 152:Core/Src/RingBuf.c **** 
+ 667              		.loc 1 152 11 discriminator 1 view .LVU210
+ 668 005a 0139     		subs	r1, r1, #1
+ 669              	.LVL63:
+ 152:Core/Src/RingBuf.c **** 
+ 670              		.loc 1 152 11 discriminator 1 view .LVU211
+ 671 005c 89B2     		uxth	r1, r1
+ 672 005e D6E7     		b	.L31
+ 673              	.LVL64:
+ 674              	.L39:
+ 172:Core/Src/RingBuf.c **** }
+ 675              		.loc 1 172 6 is_stmt 1 view .LVU212
+ 172:Core/Src/RingBuf.c **** }
+ 676              		.loc 1 172 18 is_stmt 0 view .LVU213
+ 677 0060 07EE101A 		vmov	s14, r1	@ int
+ 678 0064 B8EE470A 		vcvt.f32.u32	s0, s14
+ 679              		.loc 1 173 1 view .LVU214
+ 680 0068 87EE800A 		vdiv.f32	s0, s15, s0
+ 681 006c 7047     		bx	lr
+ 682              	.L41:
+ 683 006e 00BF     		.align	2
+ 684              	.L40:
+ 685 0070 00000000 		.word	0
+ 686              		.cfi_endproc
+ 687              	.LFE359:
+ 689              		.text
+ 690              	.Letext0:
+ 691              		.file 2 "/usr/lib/gcc/arm-none-eabi/10.3.1/include/stdint.h"
+ 692              		.file 3 "Core/Inc/RingBuf.h"
+ 693              		.file 4 "<built-in>"
+ 694              		.file 5 "Core/Inc/DefFuncs.h"
+ARM GAS  /tmp/ccxznR2O.s 			page 17
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 RingBuf.c
+     /tmp/ccxznR2O.s:17     .rodata.ring_init.str1.4:0000000000000000 $d
+     /tmp/ccxznR2O.s:27     .text.ring_init:0000000000000000 $t
+     /tmp/ccxznR2O.s:35     .text.ring_init:0000000000000000 ring_init
+     /tmp/ccxznR2O.s:112    .text.ring_init:0000000000000038 $d
+     /tmp/ccxznR2O.s:119    .text.ring_DataFullSize:0000000000000000 $t
+     /tmp/ccxznR2O.s:126    .text.ring_DataFullSize:0000000000000000 ring_DataFullSize
+     /tmp/ccxznR2O.s:207    .text.ring_DataEmptySize:0000000000000000 $t
+     /tmp/ccxznR2O.s:214    .text.ring_DataEmptySize:0000000000000000 ring_DataEmptySize
+     /tmp/ccxznR2O.s:245    .text.ring_IsDataAvailable:0000000000000000 $t
+     /tmp/ccxznR2O.s:252    .text.ring_IsDataAvailable:0000000000000000 ring_IsDataAvailable
+     /tmp/ccxznR2O.s:282    .text.ring_WriteData:0000000000000000 $t
+     /tmp/ccxznR2O.s:289    .text.ring_WriteData:0000000000000000 ring_WriteData
+     /tmp/ccxznR2O.s:442    .text.ring_ReadData:0000000000000000 $t
+     /tmp/ccxznR2O.s:449    .text.ring_ReadData:0000000000000000 ring_ReadData
+     /tmp/ccxznR2O.s:561    .text.ring_ReadSensorData:0000000000000000 $t
+     /tmp/ccxznR2O.s:568    .text.ring_ReadSensorData:0000000000000000 ring_ReadSensorData
+     /tmp/ccxznR2O.s:685    .text.ring_ReadSensorData:0000000000000070 $d
+
+UNDEFINED SYMBOLS
+sendS
+memcpy

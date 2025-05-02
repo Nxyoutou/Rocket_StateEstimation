@@ -1,0 +1,348 @@
+ARM GAS  /tmp/ccEE7Cbe.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.eabi_attribute 28, 1
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 1
+  11              		.eabi_attribute 18, 4
+  12              		.file	"arm_mat_scale_q31.c"
+  13              		.text
+  14              	.Ltext0:
+  15              		.cfi_sections	.debug_frame
+  16              		.section	.text.arm_mat_scale_q31,"ax",%progbits
+  17              		.align	1
+  18              		.global	arm_mat_scale_q31
+  19              		.arch armv7e-m
+  20              		.syntax unified
+  21              		.thumb
+  22              		.thumb_func
+  23              		.fpu fpv5-d16
+  25              	arm_mat_scale_q31:
+  26              	.LVL0:
+  27              	.LFB145:
+  28              		.file 1 "Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c"
+   1:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** /* ----------------------------------------------------------------------
+   2:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * Project:      CMSIS DSP Library
+   3:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * Title:        arm_mat_scale_q31.c
+   4:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * Description:  Multiplies a Q31 matrix by a scalar
+   5:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  *
+   6:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * $Date:        18. March 2019
+   7:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * $Revision:    V1.6.0
+   8:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  *
+   9:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * Target Processor: Cortex-M cores
+  10:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * -------------------------------------------------------------------- */
+  11:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** /*
+  12:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * Copyright (C) 2010-2019 ARM Limited or its affiliates. All rights reserved.
+  13:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  *
+  14:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * SPDX-License-Identifier: Apache-2.0
+  15:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  *
+  16:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * Licensed under the Apache License, Version 2.0 (the License); you may
+  17:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * not use this file except in compliance with the License.
+  18:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * You may obtain a copy of the License at
+  19:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  *
+  20:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * www.apache.org/licenses/LICENSE-2.0
+  21:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  *
+  22:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * Unless required by applicable law or agreed to in writing, software
+  23:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+  24:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  25:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * See the License for the specific language governing permissions and
+  26:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  * limitations under the License.
+  27:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  */
+  28:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  29:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** #include "arm_math.h"
+  30:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ARM GAS  /tmp/ccEE7Cbe.s 			page 2
+
+
+  31:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** /**
+  32:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   @ingroup groupMatrix
+  33:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  */
+  34:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  35:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** /**
+  36:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   @addtogroup MatrixScale
+  37:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   @{
+  38:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  */
+  39:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  40:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** /**
+  41:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   @brief         Q31 matrix scaling.
+  42:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   @param[in]     pSrc        points to input matrix
+  43:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   @param[in]     scaleFract  fractional portion of the scale factor
+  44:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   @param[in]     shift       number of bits to shift the result by
+  45:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   @param[out]    pDst        points to output matrix structure
+  46:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   @return        execution status
+  47:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****                    - \ref ARM_MATH_SUCCESS       : Operation successful
+  48:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****                    - \ref ARM_MATH_SIZE_MISMATCH : Matrix size check failed
+  49:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  50:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   @par           Scaling and Overflow Behavior
+  51:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****                    The input data <code>*pSrc</code> and <code>scaleFract</code> are in 1.31 format
+  52:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****                    These are multiplied to yield a 2.62 intermediate result which is shifted with s
+  53:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****  */
+  54:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  55:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** arm_status arm_mat_scale_q31(
+  56:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   const arm_matrix_instance_q31 * pSrc,
+  57:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****         q31_t                     scaleFract,
+  58:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****         int32_t                   shift,
+  59:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****         arm_matrix_instance_q31 * pDst)
+  60:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** {
+  29              		.loc 1 60 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  34              		.loc 1 60 1 is_stmt 0 view .LVU1
+  35 0000 70B4     		push	{r4, r5, r6}
+  36              	.LCFI0:
+  37              		.cfi_def_cfa_offset 12
+  38              		.cfi_offset 4, -12
+  39              		.cfi_offset 5, -8
+  40              		.cfi_offset 6, -4
+  61:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   q31_t *pIn = pSrc->pData;                      /* Input data matrix pointer */
+  41              		.loc 1 61 3 is_stmt 1 view .LVU2
+  42              		.loc 1 61 10 is_stmt 0 view .LVU3
+  43 0002 4468     		ldr	r4, [r0, #4]
+  44              	.LVL1:
+  62:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   q31_t *pOut = pDst->pData;                     /* Output data matrix pointer */
+  45              		.loc 1 62 3 is_stmt 1 view .LVU4
+  46              		.loc 1 62 10 is_stmt 0 view .LVU5
+  47 0004 5D68     		ldr	r5, [r3, #4]
+  48              	.LVL2:
+  63:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   uint32_t numSamples;                           /* Total number of elements in the matrix */
+  49              		.loc 1 63 3 is_stmt 1 view .LVU6
+  64:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   uint32_t blkCnt;                               /* Loop counter */
+  50              		.loc 1 64 3 view .LVU7
+  65:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   arm_status status;                             /* Status of matrix scaling */
+ARM GAS  /tmp/ccEE7Cbe.s 			page 3
+
+
+  51              		.loc 1 65 3 view .LVU8
+  66:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   int32_t kShift = shift + 1;                    /* Shift to apply after scaling */
+  52              		.loc 1 66 3 view .LVU9
+  53              		.loc 1 66 11 is_stmt 0 view .LVU10
+  54 0006 02F1010C 		add	ip, r2, #1
+  55              	.LVL3:
+  67:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   q31_t in, out;                                 /* Temporary variabels */
+  56              		.loc 1 67 3 is_stmt 1 view .LVU11
+  68:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  69:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** #ifdef ARM_MATH_MATRIX_CHECK
+  70:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  71:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   /* Check for matrix mismatch condition */
+  72:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   if ((pSrc->numRows != pDst->numRows) ||
+  73:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       (pSrc->numCols != pDst->numCols)   )
+  74:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   {
+  75:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     /* Set status as ARM_MATH_SIZE_MISMATCH */
+  76:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     status = ARM_MATH_SIZE_MISMATCH;
+  77:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   }
+  78:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   else
+  79:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  80:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** #endif /* #ifdef ARM_MATH_MATRIX_CHECK */
+  81:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  82:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   {
+  83:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     /* Total number of samples in input matrix */
+  84:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     numSamples = (uint32_t) pSrc->numRows * pSrc->numCols;
+  57              		.loc 1 84 5 view .LVU12
+  58              		.loc 1 84 33 is_stmt 0 view .LVU13
+  59 000a 0688     		ldrh	r6, [r0]
+  60              		.loc 1 84 49 view .LVU14
+  61 000c 4388     		ldrh	r3, [r0, #2]
+  62              	.LVL4:
+  63              		.loc 1 84 16 view .LVU15
+  64 000e 03FB06F6 		mul	r6, r3, r6
+  65              	.LVL5:
+  85:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  86:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** #if defined (ARM_MATH_LOOPUNROLL)
+  87:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  88:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     /* Loop unrolling: Compute 4 outputs at a time */
+  89:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     blkCnt = numSamples >> 2U;
+  90:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  91:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     while (blkCnt > 0U)
+  92:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     {
+  93:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       /* C(m,n) = A(m,n) * k */
+  94:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  95:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       /* Scale, saturate and store result in destination buffer. */
+  96:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = *pIn++;                                 /* read four inputs from source */
+  97:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = ((q63_t) in * scaleFract) >> 32;        /* multiply input with scaler value */
+  98:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       out = in << kShift;                          /* apply shifting */
+  99:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       if (in != (out >> kShift))                   /* saturate the results. */
+ 100:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****         out = 0x7FFFFFFF ^ (in >> 31);
+ 101:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       *pOut++ = out;                               /* Store result destination */
+ 102:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 103:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = *pIn++;
+ 104:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = ((q63_t) in * scaleFract) >> 32;
+ 105:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       out = in << kShift;
+ 106:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       if (in != (out >> kShift))
+ 107:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****         out = 0x7FFFFFFF ^ (in >> 31);
+ARM GAS  /tmp/ccEE7Cbe.s 			page 4
+
+
+ 108:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       *pOut++ = out;
+ 109:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 110:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = *pIn++;
+ 111:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = ((q63_t) in * scaleFract) >> 32;
+ 112:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       out = in << kShift;
+ 113:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       if (in != (out >> kShift))
+ 114:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****         out = 0x7FFFFFFF ^ (in >> 31);
+ 115:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       *pOut++ = out;
+ 116:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 117:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = *pIn++;
+ 118:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = ((q63_t) in * scaleFract) >> 32;
+ 119:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       out = in << kShift;
+ 120:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       if (in != (out >> kShift))
+ 121:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****         out = 0x7FFFFFFF ^ (in >> 31);
+ 122:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       *pOut++ = out;
+ 123:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 124:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       /* Decrement loop counter */
+ 125:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       blkCnt--;
+ 126:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     }
+ 127:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 128:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     /* Loop unrolling: Compute remaining outputs */
+ 129:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     blkCnt = numSamples % 0x4U;
+ 130:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 131:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** #else
+ 132:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 133:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     /* Initialize blkCnt with number of samples */
+ 134:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     blkCnt = numSamples;
+  66              		.loc 1 134 5 is_stmt 1 view .LVU16
+ 135:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 136:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** #endif /* #if defined (ARM_MATH_LOOPUNROLL) */
+ 137:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 138:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     while (blkCnt > 0U)
+  67              		.loc 1 138 5 view .LVU17
+  68              		.loc 1 138 11 is_stmt 0 view .LVU18
+  69 0012 04E0     		b	.L2
+  70              	.LVL6:
+  71              	.L3:
+ 139:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     {
+ 140:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       /* C(m,n) = A(m,n) * k */
+ 141:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 142:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       /* Scale, saturate and store result in destination buffer. */
+ 143:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = *pIn++;
+ 144:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = ((q63_t) in * scaleFract) >> 32;
+ 145:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       out = in << kShift;
+ 146:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       if (in != (out >> kShift))
+ 147:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****         out = 0x7FFFFFFF ^ (in >> 31);
+ 148:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       *pOut++ = out;
+  72              		.loc 1 148 7 is_stmt 1 view .LVU19
+  73              		.loc 1 148 12 is_stmt 0 view .LVU20
+  74 0014 2B46     		mov	r3, r5
+  75              	.LVL7:
+  76              		.loc 1 148 15 view .LVU21
+  77 0016 43F8040B 		str	r0, [r3], #4
+  78              	.LVL8:
+ 149:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 150:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       /* Decrement loop counter */
+ 151:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       blkCnt--;
+ARM GAS  /tmp/ccEE7Cbe.s 			page 5
+
+
+  79              		.loc 1 151 7 is_stmt 1 view .LVU22
+  80              		.loc 1 151 13 is_stmt 0 view .LVU23
+  81 001a 013E     		subs	r6, r6, #1
+  82              	.LVL9:
+ 148:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+  83              		.loc 1 148 12 view .LVU24
+  84 001c 1D46     		mov	r5, r3
+  85              	.LVL10:
+  86              	.L2:
+ 138:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     {
+  87              		.loc 1 138 11 is_stmt 1 view .LVU25
+  88 001e AEB1     		cbz	r6, .L6
+ 143:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = ((q63_t) in * scaleFract) >> 32;
+  89              		.loc 1 143 7 view .LVU26
+  90              	.LVL11:
+ 143:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       in = ((q63_t) in * scaleFract) >> 32;
+  91              		.loc 1 143 10 is_stmt 0 view .LVU27
+  92 0020 54F8042B 		ldr	r2, [r4], #4
+  93              	.LVL12:
+ 144:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       out = in << kShift;
+  94              		.loc 1 144 7 is_stmt 1 view .LVU28
+ 144:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       out = in << kShift;
+  95              		.loc 1 144 13 is_stmt 0 view .LVU29
+  96 0024 D017     		asrs	r0, r2, #31
+ 144:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       out = in << kShift;
+  97              		.loc 1 144 24 view .LVU30
+  98 0026 CB17     		asrs	r3, r1, #31
+  99 0028 01FB00F0 		mul	r0, r1, r0
+ 100 002c 02FB0303 		mla	r3, r2, r3, r0
+ 101 0030 A1FB0220 		umull	r2, r0, r1, r2
+ 102              	.LVL13:
+ 144:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       out = in << kShift;
+ 103              		.loc 1 144 24 view .LVU31
+ 104 0034 0344     		add	r3, r3, r0
+ 105              	.LVL14:
+ 145:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       if (in != (out >> kShift))
+ 106              		.loc 1 145 7 is_stmt 1 view .LVU32
+ 145:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       if (in != (out >> kShift))
+ 107              		.loc 1 145 11 is_stmt 0 view .LVU33
+ 108 0036 03FA0CF0 		lsl	r0, r3, ip
+ 109              	.LVL15:
+ 146:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****         out = 0x7FFFFFFF ^ (in >> 31);
+ 110              		.loc 1 146 7 is_stmt 1 view .LVU34
+ 146:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****         out = 0x7FFFFFFF ^ (in >> 31);
+ 111              		.loc 1 146 22 is_stmt 0 view .LVU35
+ 112 003a 40FA0CF2 		asr	r2, r0, ip
+ 146:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****         out = 0x7FFFFFFF ^ (in >> 31);
+ 113              		.loc 1 146 10 view .LVU36
+ 114 003e 9A42     		cmp	r2, r3
+ 115 0040 E8D0     		beq	.L3
+ 147:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       *pOut++ = out;
+ 116              		.loc 1 147 9 is_stmt 1 view .LVU37
+ 147:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       *pOut++ = out;
+ 117              		.loc 1 147 13 is_stmt 0 view .LVU38
+ 118 0042 6FF00040 		mvn	r0, #-2147483648
+ 119              	.LVL16:
+ 147:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       *pOut++ = out;
+ARM GAS  /tmp/ccEE7Cbe.s 			page 6
+
+
+ 120              		.loc 1 147 13 view .LVU39
+ 121 0046 80EAE370 		eor	r0, r0, r3, asr #31
+ 122              	.LVL17:
+ 147:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****       *pOut++ = out;
+ 123              		.loc 1 147 13 view .LVU40
+ 124 004a E3E7     		b	.L3
+ 125              	.LVL18:
+ 126              	.L6:
+ 152:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     }
+ 153:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 154:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     /* Set status as ARM_MATH_SUCCESS */
+ 155:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****     status = ARM_MATH_SUCCESS;
+ 127              		.loc 1 155 5 is_stmt 1 view .LVU41
+ 156:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   }
+ 157:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** 
+ 158:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   /* Return to application */
+ 159:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c ****   return (status);
+ 128              		.loc 1 159 3 view .LVU42
+ 160:Drivers/CMSIS/DSP/Source/MatrixFunctions/arm_mat_scale_q31.c **** }
+ 129              		.loc 1 160 1 is_stmt 0 view .LVU43
+ 130 004c 0020     		movs	r0, #0
+ 131 004e 70BC     		pop	{r4, r5, r6}
+ 132              	.LCFI1:
+ 133              		.cfi_restore 6
+ 134              		.cfi_restore 5
+ 135              		.cfi_restore 4
+ 136              		.cfi_def_cfa_offset 0
+ 137              	.LVL19:
+ 138              		.loc 1 160 1 view .LVU44
+ 139 0050 7047     		bx	lr
+ 140              		.cfi_endproc
+ 141              	.LFE145:
+ 143              		.text
+ 144              	.Letext0:
+ 145              		.file 2 "/usr/lib/gcc/arm-none-eabi/10.3.1/include/stdint.h"
+ 146              		.file 3 "Drivers/CMSIS/DSP/Include/arm_math.h"
+ARM GAS  /tmp/ccEE7Cbe.s 			page 7
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 arm_mat_scale_q31.c
+     /tmp/ccEE7Cbe.s:17     .text.arm_mat_scale_q31:0000000000000000 $t
+     /tmp/ccEE7Cbe.s:25     .text.arm_mat_scale_q31:0000000000000000 arm_mat_scale_q31
+
+NO UNDEFINED SYMBOLS

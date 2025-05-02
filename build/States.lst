@@ -1,0 +1,1713 @@
+ARM GAS  /tmp/ccc4g6PM.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.eabi_attribute 28, 1
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 1
+  11              		.eabi_attribute 18, 4
+  12              		.file	"States.c"
+  13              		.text
+  14              	.Ltext0:
+  15              		.cfi_sections	.debug_frame
+  16              		.section	.rodata.BaseState.str1.4,"aMS",%progbits,1
+  17              		.align	2
+  18              	.LC0:
+  19 0000 456E7465 		.ascii	"Entered Base State, to arm the vehicle type 'ARM'.."
+  19      72656420 
+  19      42617365 
+  19      20537461 
+  19      74652C20 
+  20 0033 2E0A0D00 		.ascii	".\012\015\000"
+  21 0037 00       		.align	2
+  22              	.LC1:
+  23 0038 6300     		.ascii	"c\000"
+  24 003a 0000     		.align	2
+  25              	.LC2:
+  26 003c 41524D00 		.ascii	"ARM\000"
+  27              		.align	2
+  28              	.LC3:
+  29 0040 5472616E 		.ascii	"Transitoning into GROUND State...\012\015\000"
+  29      7369746F 
+  29      6E696E67 
+  29      20696E74 
+  29      6F204752 
+  30              		.section	.text.BaseState,"ax",%progbits
+  31              		.align	1
+  32              		.global	BaseState
+  33              		.arch armv7e-m
+  34              		.syntax unified
+  35              		.thumb
+  36              		.thumb_func
+  37              		.fpu fpv5-d16
+  39              	BaseState:
+  40              	.LVL0:
+  41              	.LFB394:
+  42              		.file 1 "Core/Src/States.c"
+   1:Core/Src/States.c **** /************** This is the document to define all the Vehicle State functions **************/
+   2:Core/Src/States.c **** #include "init.h"
+   3:Core/Src/States.c **** #include "States.h"
+   4:Core/Src/States.c **** #include "DefFuncs.h"
+   5:Core/Src/States.c **** 
+   6:Core/Src/States.c **** char dataPol[4];
+   7:Core/Src/States.c **** char dataIT[2];
+   8:Core/Src/States.c **** float finalData[8] = {1.0f, 2.2f, 3.0f, 4.57f, 5.37f, 6.24f, 7.30f, 0.00f};
+ARM GAS  /tmp/ccc4g6PM.s 			page 2
+
+
+   9:Core/Src/States.c **** uint8_t print_Arm_msg = 1;
+  10:Core/Src/States.c **** 
+  11:Core/Src/States.c **** uint8_t stat;
+  12:Core/Src/States.c **** 
+  13:Core/Src/States.c **** extern uint32_t generalTime;
+  14:Core/Src/States.c **** extern VehicleStates States;
+  15:Core/Src/States.c **** extern sensors meas;
+  16:Core/Src/States.c **** 
+  17:Core/Src/States.c **** uint32_t GroundStart;
+  18:Core/Src/States.c **** uint32_t ArmStart;
+  19:Core/Src/States.c **** uint32_t FastAscentStart;
+  20:Core/Src/States.c **** uint32_t SlowAscentStart;
+  21:Core/Src/States.c **** uint32_t ApogeeStart;
+  22:Core/Src/States.c **** uint32_t FreefallStart;
+  23:Core/Src/States.c **** uint32_t LandedStart;
+  24:Core/Src/States.c **** 
+  25:Core/Src/States.c **** 
+  26:Core/Src/States.c **** uint8_t GroundFirst = 1;
+  27:Core/Src/States.c **** uint8_t ArmFirst = 1;
+  28:Core/Src/States.c **** uint8_t FastAscentFirst = 1;
+  29:Core/Src/States.c **** uint8_t SlowAscentFirst = 1;
+  30:Core/Src/States.c **** uint8_t ApogeeFirst = 1;
+  31:Core/Src/States.c **** uint8_t FreefallFirst = 1;
+  32:Core/Src/States.c **** uint8_t LandedFirst = 1;
+  33:Core/Src/States.c **** 
+  34:Core/Src/States.c **** 
+  35:Core/Src/States.c **** 
+  36:Core/Src/States.c **** void BaseState(VehicleStates* State)
+  37:Core/Src/States.c **** {
+  43              		.loc 1 37 1 view -0
+  44              		.cfi_startproc
+  45              		@ args = 0, pretend = 0, frame = 0
+  46              		@ frame_needed = 0, uses_anonymous_args = 0
+  47              		.loc 1 37 1 is_stmt 0 view .LVU1
+  48 0000 38B5     		push	{r3, r4, r5, lr}
+  49              	.LCFI0:
+  50              		.cfi_def_cfa_offset 16
+  51              		.cfi_offset 3, -16
+  52              		.cfi_offset 4, -12
+  53              		.cfi_offset 5, -8
+  54              		.cfi_offset 14, -4
+  55 0002 0446     		mov	r4, r0
+  38:Core/Src/States.c **** 	if (print_Arm_msg)
+  56              		.loc 1 38 2 is_stmt 1 view .LVU2
+  57              		.loc 1 38 6 is_stmt 0 view .LVU3
+  58 0004 104B     		ldr	r3, .L7
+  59 0006 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  60              		.loc 1 38 5 view .LVU4
+  61 0008 73B9     		cbnz	r3, .L5
+  62              	.LVL1:
+  63              	.L2:
+  39:Core/Src/States.c **** 	{
+  40:Core/Src/States.c **** 
+  41:Core/Src/States.c **** 		sendS("c", "Entered Base State, to arm the vehicle type 'ARM'...\n\r");
+  42:Core/Src/States.c **** 		print_Arm_msg = 0;
+  43:Core/Src/States.c **** 	}
+  44:Core/Src/States.c **** 
+ARM GAS  /tmp/ccc4g6PM.s 			page 3
+
+
+  45:Core/Src/States.c **** 	receiveS_B(dataPol, 3);
+  64              		.loc 1 45 2 is_stmt 1 view .LVU5
+  65 000a 104D     		ldr	r5, .L7+4
+  66 000c 0321     		movs	r1, #3
+  67 000e 2846     		mov	r0, r5
+  68 0010 FFF7FEFF 		bl	receiveS_B
+  69              	.LVL2:
+  46:Core/Src/States.c **** 	if (strcmp(dataPol, "ARM") == 0)
+  70              		.loc 1 46 2 view .LVU6
+  71              		.loc 1 46 6 is_stmt 0 view .LVU7
+  72 0014 0E49     		ldr	r1, .L7+8
+  73 0016 2846     		mov	r0, r5
+  74 0018 FFF7FEFF 		bl	strcmp
+  75              	.LVL3:
+  76              		.loc 1 46 5 view .LVU8
+  77 001c 60B1     		cbz	r0, .L6
+  78              	.L3:
+  47:Core/Src/States.c **** 	{
+  48:Core/Src/States.c **** 		sendS("c", "Transitoning into GROUND State...\n\r");
+  49:Core/Src/States.c **** 		State->currentState = GROUND;
+  50:Core/Src/States.c **** 	}
+  51:Core/Src/States.c **** 	receiveS_IT(dataIT, sizeof(dataIT));
+  79              		.loc 1 51 2 is_stmt 1 view .LVU9
+  80 001e 0221     		movs	r1, #2
+  81 0020 0C48     		ldr	r0, .L7+12
+  82 0022 FFF7FEFF 		bl	receiveS_IT
+  83              	.LVL4:
+  52:Core/Src/States.c **** 
+  53:Core/Src/States.c **** }
+  84              		.loc 1 53 1 is_stmt 0 view .LVU10
+  85 0026 38BD     		pop	{r3, r4, r5, pc}
+  86              	.LVL5:
+  87              	.L5:
+  41:Core/Src/States.c **** 		print_Arm_msg = 0;
+  88              		.loc 1 41 3 is_stmt 1 view .LVU11
+  89 0028 0B49     		ldr	r1, .L7+16
+  90 002a 0C48     		ldr	r0, .L7+20
+  91              	.LVL6:
+  41:Core/Src/States.c **** 		print_Arm_msg = 0;
+  92              		.loc 1 41 3 is_stmt 0 view .LVU12
+  93 002c FFF7FEFF 		bl	sendS
+  94              	.LVL7:
+  42:Core/Src/States.c **** 	}
+  95              		.loc 1 42 3 is_stmt 1 view .LVU13
+  42:Core/Src/States.c **** 	}
+  96              		.loc 1 42 17 is_stmt 0 view .LVU14
+  97 0030 054B     		ldr	r3, .L7
+  98 0032 0022     		movs	r2, #0
+  99 0034 1A70     		strb	r2, [r3]
+ 100 0036 E8E7     		b	.L2
+ 101              	.L6:
+  48:Core/Src/States.c **** 		State->currentState = GROUND;
+ 102              		.loc 1 48 3 is_stmt 1 view .LVU15
+ 103 0038 0949     		ldr	r1, .L7+24
+ 104 003a 0848     		ldr	r0, .L7+20
+ 105 003c FFF7FEFF 		bl	sendS
+ 106              	.LVL8:
+ARM GAS  /tmp/ccc4g6PM.s 			page 4
+
+
+  49:Core/Src/States.c **** 	}
+ 107              		.loc 1 49 3 view .LVU16
+  49:Core/Src/States.c **** 	}
+ 108              		.loc 1 49 23 is_stmt 0 view .LVU17
+ 109 0040 0123     		movs	r3, #1
+ 110 0042 6370     		strb	r3, [r4, #1]
+ 111 0044 EBE7     		b	.L3
+ 112              	.L8:
+ 113 0046 00BF     		.align	2
+ 114              	.L7:
+ 115 0048 00000000 		.word	.LANCHOR0
+ 116 004c 00000000 		.word	.LANCHOR1
+ 117 0050 3C000000 		.word	.LC2
+ 118 0054 00000000 		.word	.LANCHOR2
+ 119 0058 00000000 		.word	.LC0
+ 120 005c 38000000 		.word	.LC1
+ 121 0060 40000000 		.word	.LC3
+ 122              		.cfi_endproc
+ 123              	.LFE394:
+ 125              		.section	.rodata.GroundState.str1.4,"aMS",%progbits,1
+ 126              		.align	2
+ 127              	.LC4:
+ 128 0000 456E6162 		.ascii	"Enabled interrupt...\012\015\000"
+ 128      6C656420 
+ 128      696E7465 
+ 128      72727570 
+ 128      742E2E2E 
+ 129 0017 00       		.align	2
+ 130              	.LC5:
+ 131 0018 526F636B 		.ascii	"Rocket is now ARMED...\012\015\000"
+ 131      65742069 
+ 131      73206E6F 
+ 131      77204152 
+ 131      4D45442E 
+ 132              		.section	.text.GroundState,"ax",%progbits
+ 133              		.align	1
+ 134              		.global	GroundState
+ 135              		.syntax unified
+ 136              		.thumb
+ 137              		.thumb_func
+ 138              		.fpu fpv5-d16
+ 140              	GroundState:
+ 141              	.LVL9:
+ 142              	.LFB395:
+  54:Core/Src/States.c **** 
+  55:Core/Src/States.c **** 
+  56:Core/Src/States.c **** void GroundState(gekf* gkal, sensors* meas, VehicleStates* State)
+  57:Core/Src/States.c **** {
+ 143              		.loc 1 57 1 is_stmt 1 view -0
+ 144              		.cfi_startproc
+ 145              		@ args = 0, pretend = 0, frame = 0
+ 146              		@ frame_needed = 0, uses_anonymous_args = 0
+ 147              		.loc 1 57 1 is_stmt 0 view .LVU19
+ 148 0000 70B5     		push	{r4, r5, r6, lr}
+ 149              	.LCFI1:
+ 150              		.cfi_def_cfa_offset 16
+ 151              		.cfi_offset 4, -16
+ARM GAS  /tmp/ccc4g6PM.s 			page 5
+
+
+ 152              		.cfi_offset 5, -12
+ 153              		.cfi_offset 6, -8
+ 154              		.cfi_offset 14, -4
+ 155 0002 0446     		mov	r4, r0
+ 156 0004 0D46     		mov	r5, r1
+ 157 0006 1646     		mov	r6, r2
+  58:Core/Src/States.c **** 	if (ArmFirst)
+ 158              		.loc 1 58 2 is_stmt 1 view .LVU20
+ 159              		.loc 1 58 6 is_stmt 0 view .LVU21
+ 160 0008 114B     		ldr	r3, .L15
+ 161 000a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 162              		.loc 1 58 5 view .LVU22
+ 163 000c 43B9     		cbnz	r3, .L13
+ 164              	.LVL10:
+ 165              	.L10:
+  59:Core/Src/States.c **** 	{
+  60:Core/Src/States.c **** 		ArmStart = HAL_GetTick();
+  61:Core/Src/States.c **** 		ArmFirst = 0;
+  62:Core/Src/States.c **** 		receiveS_IT(dataIT, sizeof(dataIT));
+  63:Core/Src/States.c **** 		sendS("c", "Enabled interrupt...\n\r");
+  64:Core/Src/States.c **** 	}
+  65:Core/Src/States.c **** 
+  66:Core/Src/States.c **** 	GroundEKF_run(gkal, meas);
+ 166              		.loc 1 66 2 is_stmt 1 view .LVU23
+ 167 000e 2946     		mov	r1, r5
+ 168 0010 2046     		mov	r0, r4
+ 169 0012 FFF7FEFF 		bl	GroundEKF_run
+ 170              	.LVL11:
+  67:Core/Src/States.c **** 	if (gkal->armed == 1)
+ 171              		.loc 1 67 2 view .LVU24
+ 172              		.loc 1 67 10 is_stmt 0 view .LVU25
+ 173 0016 94F8A830 		ldrb	r3, [r4, #168]	@ zero_extendqisi2
+ 174              		.loc 1 67 5 view .LVU26
+ 175 001a 012B     		cmp	r3, #1
+ 176 001c 10D0     		beq	.L14
+ 177              	.L9:
+  68:Core/Src/States.c **** 	{
+  69:Core/Src/States.c **** 		sendS("c", "Rocket is now ARMED...\n\r");
+  70:Core/Src/States.c **** 		State->currentState = ARMED;
+  71:Core/Src/States.c **** 	}
+  72:Core/Src/States.c **** }
+ 178              		.loc 1 72 1 view .LVU27
+ 179 001e 70BD     		pop	{r4, r5, r6, pc}
+ 180              	.LVL12:
+ 181              	.L13:
+  60:Core/Src/States.c **** 		ArmFirst = 0;
+ 182              		.loc 1 60 3 is_stmt 1 view .LVU28
+  60:Core/Src/States.c **** 		ArmFirst = 0;
+ 183              		.loc 1 60 14 is_stmt 0 view .LVU29
+ 184 0020 FFF7FEFF 		bl	HAL_GetTick
+ 185              	.LVL13:
+  60:Core/Src/States.c **** 		ArmFirst = 0;
+ 186              		.loc 1 60 12 view .LVU30
+ 187 0024 0B4B     		ldr	r3, .L15+4
+ 188 0026 1860     		str	r0, [r3]
+  61:Core/Src/States.c **** 		receiveS_IT(dataIT, sizeof(dataIT));
+ 189              		.loc 1 61 3 is_stmt 1 view .LVU31
+ARM GAS  /tmp/ccc4g6PM.s 			page 6
+
+
+  61:Core/Src/States.c **** 		receiveS_IT(dataIT, sizeof(dataIT));
+ 190              		.loc 1 61 12 is_stmt 0 view .LVU32
+ 191 0028 094B     		ldr	r3, .L15
+ 192 002a 0022     		movs	r2, #0
+ 193 002c 1A70     		strb	r2, [r3]
+  62:Core/Src/States.c **** 		sendS("c", "Enabled interrupt...\n\r");
+ 194              		.loc 1 62 3 is_stmt 1 view .LVU33
+ 195 002e 0221     		movs	r1, #2
+ 196 0030 0948     		ldr	r0, .L15+8
+ 197 0032 FFF7FEFF 		bl	receiveS_IT
+ 198              	.LVL14:
+  63:Core/Src/States.c **** 	}
+ 199              		.loc 1 63 3 view .LVU34
+ 200 0036 0949     		ldr	r1, .L15+12
+ 201 0038 0948     		ldr	r0, .L15+16
+ 202 003a FFF7FEFF 		bl	sendS
+ 203              	.LVL15:
+ 204 003e E6E7     		b	.L10
+ 205              	.L14:
+  69:Core/Src/States.c **** 		State->currentState = ARMED;
+ 206              		.loc 1 69 3 view .LVU35
+ 207 0040 0849     		ldr	r1, .L15+20
+ 208 0042 0748     		ldr	r0, .L15+16
+ 209 0044 FFF7FEFF 		bl	sendS
+ 210              	.LVL16:
+  70:Core/Src/States.c **** 	}
+ 211              		.loc 1 70 3 view .LVU36
+  70:Core/Src/States.c **** 	}
+ 212              		.loc 1 70 23 is_stmt 0 view .LVU37
+ 213 0048 0223     		movs	r3, #2
+ 214 004a 7370     		strb	r3, [r6, #1]
+ 215              		.loc 1 72 1 view .LVU38
+ 216 004c E7E7     		b	.L9
+ 217              	.L16:
+ 218 004e 00BF     		.align	2
+ 219              	.L15:
+ 220 0050 00000000 		.word	.LANCHOR3
+ 221 0054 00000000 		.word	.LANCHOR4
+ 222 0058 00000000 		.word	.LANCHOR2
+ 223 005c 00000000 		.word	.LC4
+ 224 0060 38000000 		.word	.LC1
+ 225 0064 18000000 		.word	.LC5
+ 226              		.cfi_endproc
+ 227              	.LFE395:
+ 229              		.section	.rodata.ArmedState.str1.4,"aMS",%progbits,1
+ 230              		.align	2
+ 231              	.LC6:
+ 232 0000 526F636B 		.ascii	"Rocket in FAST ASCENT...\012\015\000"
+ 232      65742069 
+ 232      6E204641 
+ 232      53542041 
+ 232      5343454E 
+ 233              		.section	.text.ArmedState,"ax",%progbits
+ 234              		.align	1
+ 235              		.global	ArmedState
+ 236              		.syntax unified
+ 237              		.thumb
+ARM GAS  /tmp/ccc4g6PM.s 			page 7
+
+
+ 238              		.thumb_func
+ 239              		.fpu fpv5-d16
+ 241              	ArmedState:
+ 242              	.LVL17:
+ 243              	.LFB396:
+  73:Core/Src/States.c **** 
+  74:Core/Src/States.c **** void ArmedState(fekf* fkal, VehicleAtd* atd, VehicleStates* State)
+  75:Core/Src/States.c **** {
+ 244              		.loc 1 75 1 is_stmt 1 view -0
+ 245              		.cfi_startproc
+ 246              		@ args = 0, pretend = 0, frame = 0
+ 247              		@ frame_needed = 0, uses_anonymous_args = 0
+ 248              		.loc 1 75 1 is_stmt 0 view .LVU40
+ 249 0000 70B5     		push	{r4, r5, r6, lr}
+ 250              	.LCFI2:
+ 251              		.cfi_def_cfa_offset 16
+ 252              		.cfi_offset 4, -16
+ 253              		.cfi_offset 5, -12
+ 254              		.cfi_offset 6, -8
+ 255              		.cfi_offset 14, -4
+ 256 0002 0446     		mov	r4, r0
+ 257 0004 0D46     		mov	r5, r1
+ 258 0006 1646     		mov	r6, r2
+  76:Core/Src/States.c **** 	if (GroundFirst)
+ 259              		.loc 1 76 2 is_stmt 1 view .LVU41
+ 260              		.loc 1 76 6 is_stmt 0 view .LVU42
+ 261 0008 174B     		ldr	r3, .L25
+ 262 000a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 263              		.loc 1 76 5 view .LVU43
+ 264 000c 8BB9     		cbnz	r3, .L23
+ 265              	.LVL18:
+ 266              	.L18:
+  77:Core/Src/States.c **** 	{
+  78:Core/Src/States.c **** 		GroundStart = HAL_GetTick();
+  79:Core/Src/States.c **** 		GroundFirst = 0;
+  80:Core/Src/States.c **** 		receiveS_IT(dataIT, sizeof(dataIT));
+  81:Core/Src/States.c **** 		sendS("c", "Enabled interrupt...\n\r");
+  82:Core/Src/States.c **** 
+  83:Core/Src/States.c **** 	}
+  84:Core/Src/States.c **** 
+  85:Core/Src/States.c **** 	Attitude_run(atd);
+ 267              		.loc 1 85 2 is_stmt 1 view .LVU44
+ 268 000e 2846     		mov	r0, r5
+ 269 0010 FFF7FEFF 		bl	Attitude_run
+ 270              	.LVL19:
+  86:Core/Src/States.c **** 	FlightEKF_run(fkal, atd);
+ 271              		.loc 1 86 2 view .LVU45
+ 272 0014 2946     		mov	r1, r5
+ 273 0016 2046     		mov	r0, r4
+ 274 0018 FFF7FEFF 		bl	FlightEKF_run
+ 275              	.LVL20:
+  87:Core/Src/States.c **** 	if (fkal->x.pData[5] > 2)
+ 276              		.loc 1 87 2 view .LVU46
+ 277              		.loc 1 87 13 is_stmt 0 view .LVU47
+ 278 001c 6368     		ldr	r3, [r4, #4]
+ 279              		.loc 1 87 19 view .LVU48
+ 280 001e 93ED057A 		vldr.32	s14, [r3, #20]
+ARM GAS  /tmp/ccc4g6PM.s 			page 8
+
+
+ 281              		.loc 1 87 5 view .LVU49
+ 282 0022 F0EE007A 		vmov.f32	s15, #2.0e+0
+ 283 0026 B4EEE77A 		vcmpe.f32	s14, s15
+ 284 002a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 285 002e 10DC     		bgt	.L24
+ 286              	.LVL21:
+ 287              	.L17:
+  88:Core/Src/States.c **** 	{
+  89:Core/Src/States.c **** 		sendS("c", "Rocket in FAST ASCENT...\n\r");
+  90:Core/Src/States.c **** 		XBee_Transmit("Rocket in FAST ASCENT...\n\r");
+  91:Core/Src/States.c **** 		State->currentState = FASTASCENT;
+  92:Core/Src/States.c **** 	}
+  93:Core/Src/States.c **** 
+  94:Core/Src/States.c **** }
+ 288              		.loc 1 94 1 view .LVU50
+ 289 0030 70BD     		pop	{r4, r5, r6, pc}
+ 290              	.LVL22:
+ 291              	.L23:
+  78:Core/Src/States.c **** 		GroundFirst = 0;
+ 292              		.loc 1 78 3 is_stmt 1 view .LVU51
+  78:Core/Src/States.c **** 		GroundFirst = 0;
+ 293              		.loc 1 78 17 is_stmt 0 view .LVU52
+ 294 0032 FFF7FEFF 		bl	HAL_GetTick
+ 295              	.LVL23:
+  78:Core/Src/States.c **** 		GroundFirst = 0;
+ 296              		.loc 1 78 15 view .LVU53
+ 297 0036 0D4B     		ldr	r3, .L25+4
+ 298 0038 1860     		str	r0, [r3]
+  79:Core/Src/States.c **** 		receiveS_IT(dataIT, sizeof(dataIT));
+ 299              		.loc 1 79 3 is_stmt 1 view .LVU54
+  79:Core/Src/States.c **** 		receiveS_IT(dataIT, sizeof(dataIT));
+ 300              		.loc 1 79 15 is_stmt 0 view .LVU55
+ 301 003a 0B4B     		ldr	r3, .L25
+ 302 003c 0022     		movs	r2, #0
+ 303 003e 1A70     		strb	r2, [r3]
+  80:Core/Src/States.c **** 		sendS("c", "Enabled interrupt...\n\r");
+ 304              		.loc 1 80 3 is_stmt 1 view .LVU56
+ 305 0040 0221     		movs	r1, #2
+ 306 0042 0B48     		ldr	r0, .L25+8
+ 307 0044 FFF7FEFF 		bl	receiveS_IT
+ 308              	.LVL24:
+  81:Core/Src/States.c **** 
+ 309              		.loc 1 81 3 view .LVU57
+ 310 0048 0A49     		ldr	r1, .L25+12
+ 311 004a 0B48     		ldr	r0, .L25+16
+ 312 004c FFF7FEFF 		bl	sendS
+ 313              	.LVL25:
+ 314 0050 DDE7     		b	.L18
+ 315              	.L24:
+  89:Core/Src/States.c **** 		XBee_Transmit("Rocket in FAST ASCENT...\n\r");
+ 316              		.loc 1 89 3 view .LVU58
+ 317 0052 0A4C     		ldr	r4, .L25+20
+ 318              	.LVL26:
+  89:Core/Src/States.c **** 		XBee_Transmit("Rocket in FAST ASCENT...\n\r");
+ 319              		.loc 1 89 3 is_stmt 0 view .LVU59
+ 320 0054 2146     		mov	r1, r4
+ 321 0056 0848     		ldr	r0, .L25+16
+ARM GAS  /tmp/ccc4g6PM.s 			page 9
+
+
+ 322 0058 FFF7FEFF 		bl	sendS
+ 323              	.LVL27:
+  90:Core/Src/States.c **** 		State->currentState = FASTASCENT;
+ 324              		.loc 1 90 3 is_stmt 1 view .LVU60
+ 325 005c 2046     		mov	r0, r4
+ 326 005e FFF7FEFF 		bl	XBee_Transmit
+ 327              	.LVL28:
+  91:Core/Src/States.c **** 	}
+ 328              		.loc 1 91 3 view .LVU61
+  91:Core/Src/States.c **** 	}
+ 329              		.loc 1 91 23 is_stmt 0 view .LVU62
+ 330 0062 0323     		movs	r3, #3
+ 331 0064 7370     		strb	r3, [r6, #1]
+ 332              		.loc 1 94 1 view .LVU63
+ 333 0066 E3E7     		b	.L17
+ 334              	.L26:
+ 335              		.align	2
+ 336              	.L25:
+ 337 0068 00000000 		.word	.LANCHOR5
+ 338 006c 00000000 		.word	.LANCHOR6
+ 339 0070 00000000 		.word	.LANCHOR2
+ 340 0074 00000000 		.word	.LC4
+ 341 0078 38000000 		.word	.LC1
+ 342 007c 00000000 		.word	.LC6
+ 343              		.cfi_endproc
+ 344              	.LFE396:
+ 346              		.section	.rodata.FastAscentState.str1.4,"aMS",%progbits,1
+ 347              		.align	2
+ 348              	.LC7:
+ 349 0000 526F636B 		.ascii	"Rocket in SLOW ASCENT...\012\015\000"
+ 349      65742069 
+ 349      6E20534C 
+ 349      4F572041 
+ 349      5343454E 
+ 350              		.section	.text.FastAscentState,"ax",%progbits
+ 351              		.align	1
+ 352              		.global	FastAscentState
+ 353              		.syntax unified
+ 354              		.thumb
+ 355              		.thumb_func
+ 356              		.fpu fpv5-d16
+ 358              	FastAscentState:
+ 359              	.LVL29:
+ 360              	.LFB397:
+  95:Core/Src/States.c **** 
+  96:Core/Src/States.c **** void FastAscentState(fekf* fkal, VehicleAtd* atd, VehicleStates* State)
+  97:Core/Src/States.c **** {
+ 361              		.loc 1 97 1 is_stmt 1 view -0
+ 362              		.cfi_startproc
+ 363              		@ args = 0, pretend = 0, frame = 0
+ 364              		@ frame_needed = 0, uses_anonymous_args = 0
+ 365              		.loc 1 97 1 is_stmt 0 view .LVU65
+ 366 0000 70B5     		push	{r4, r5, r6, lr}
+ 367              	.LCFI3:
+ 368              		.cfi_def_cfa_offset 16
+ 369              		.cfi_offset 4, -16
+ 370              		.cfi_offset 5, -12
+ARM GAS  /tmp/ccc4g6PM.s 			page 10
+
+
+ 371              		.cfi_offset 6, -8
+ 372              		.cfi_offset 14, -4
+ 373 0002 0646     		mov	r6, r0
+ 374 0004 0C46     		mov	r4, r1
+ 375 0006 1546     		mov	r5, r2
+  98:Core/Src/States.c **** 	if (FastAscentFirst)
+ 376              		.loc 1 98 2 is_stmt 1 view .LVU66
+ 377              		.loc 1 98 6 is_stmt 0 view .LVU67
+ 378 0008 154B     		ldr	r3, .L33
+ 379 000a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 380              		.loc 1 98 5 view .LVU68
+ 381 000c 83B9     		cbnz	r3, .L31
+ 382              	.LVL30:
+ 383              	.L28:
+  99:Core/Src/States.c **** 	{
+ 100:Core/Src/States.c **** 		FastAscentStart = HAL_GetTick();
+ 101:Core/Src/States.c **** 		FastAscentFirst = 0;
+ 102:Core/Src/States.c **** 		receiveS_IT(dataIT, sizeof(dataIT));
+ 103:Core/Src/States.c **** 
+ 104:Core/Src/States.c **** 	}
+ 105:Core/Src/States.c **** 
+ 106:Core/Src/States.c **** 	Attitude_run(atd);
+ 384              		.loc 1 106 2 is_stmt 1 view .LVU69
+ 385 000e 2046     		mov	r0, r4
+ 386 0010 FFF7FEFF 		bl	Attitude_run
+ 387              	.LVL31:
+ 107:Core/Src/States.c **** 	FlightEKF_run(fkal, atd);
+ 388              		.loc 1 107 2 view .LVU70
+ 389 0014 2146     		mov	r1, r4
+ 390 0016 3046     		mov	r0, r6
+ 391 0018 FFF7FEFF 		bl	FlightEKF_run
+ 392              	.LVL32:
+ 108:Core/Src/States.c **** 
+ 109:Core/Src/States.c **** 	if ((HAL_GetTick() - FastAscentStart) > BURN_TIME)
+ 393              		.loc 1 109 2 view .LVU71
+ 394              		.loc 1 109 7 is_stmt 0 view .LVU72
+ 395 001c FFF7FEFF 		bl	HAL_GetTick
+ 396              	.LVL33:
+ 397              		.loc 1 109 21 view .LVU73
+ 398 0020 104B     		ldr	r3, .L33+4
+ 399 0022 1B68     		ldr	r3, [r3]
+ 400 0024 C01A     		subs	r0, r0, r3
+ 401              		.loc 1 109 5 view .LVU74
+ 402 0026 41F27073 		movw	r3, #6000
+ 403 002a 9842     		cmp	r0, r3
+ 404 002c 0CD8     		bhi	.L32
+ 405              	.LVL34:
+ 406              	.L27:
+ 110:Core/Src/States.c **** 	{
+ 111:Core/Src/States.c **** 		sendS("c", "Rocket in SLOW ASCENT...\n\r");
+ 112:Core/Src/States.c **** 		XBee_Transmit("Rocket in SLOW ASCENT...\n\r");
+ 113:Core/Src/States.c **** 		State->currentState = SLOWASCENT;
+ 114:Core/Src/States.c **** 	}
+ 115:Core/Src/States.c **** 
+ 116:Core/Src/States.c **** }
+ 407              		.loc 1 116 1 view .LVU75
+ 408 002e 70BD     		pop	{r4, r5, r6, pc}
+ARM GAS  /tmp/ccc4g6PM.s 			page 11
+
+
+ 409              	.LVL35:
+ 410              	.L31:
+ 100:Core/Src/States.c **** 		FastAscentFirst = 0;
+ 411              		.loc 1 100 3 is_stmt 1 view .LVU76
+ 100:Core/Src/States.c **** 		FastAscentFirst = 0;
+ 412              		.loc 1 100 21 is_stmt 0 view .LVU77
+ 413 0030 FFF7FEFF 		bl	HAL_GetTick
+ 414              	.LVL36:
+ 100:Core/Src/States.c **** 		FastAscentFirst = 0;
+ 415              		.loc 1 100 19 view .LVU78
+ 416 0034 0B4B     		ldr	r3, .L33+4
+ 417 0036 1860     		str	r0, [r3]
+ 101:Core/Src/States.c **** 		receiveS_IT(dataIT, sizeof(dataIT));
+ 418              		.loc 1 101 3 is_stmt 1 view .LVU79
+ 101:Core/Src/States.c **** 		receiveS_IT(dataIT, sizeof(dataIT));
+ 419              		.loc 1 101 19 is_stmt 0 view .LVU80
+ 420 0038 094B     		ldr	r3, .L33
+ 421 003a 0022     		movs	r2, #0
+ 422 003c 1A70     		strb	r2, [r3]
+ 102:Core/Src/States.c **** 
+ 423              		.loc 1 102 3 is_stmt 1 view .LVU81
+ 424 003e 0221     		movs	r1, #2
+ 425 0040 0948     		ldr	r0, .L33+8
+ 426 0042 FFF7FEFF 		bl	receiveS_IT
+ 427              	.LVL37:
+ 428 0046 E2E7     		b	.L28
+ 429              	.L32:
+ 111:Core/Src/States.c **** 		XBee_Transmit("Rocket in SLOW ASCENT...\n\r");
+ 430              		.loc 1 111 3 view .LVU82
+ 431 0048 084C     		ldr	r4, .L33+12
+ 432              	.LVL38:
+ 111:Core/Src/States.c **** 		XBee_Transmit("Rocket in SLOW ASCENT...\n\r");
+ 433              		.loc 1 111 3 is_stmt 0 view .LVU83
+ 434 004a 2146     		mov	r1, r4
+ 435 004c 0848     		ldr	r0, .L33+16
+ 436 004e FFF7FEFF 		bl	sendS
+ 437              	.LVL39:
+ 112:Core/Src/States.c **** 		State->currentState = SLOWASCENT;
+ 438              		.loc 1 112 3 is_stmt 1 view .LVU84
+ 439 0052 2046     		mov	r0, r4
+ 440 0054 FFF7FEFF 		bl	XBee_Transmit
+ 441              	.LVL40:
+ 113:Core/Src/States.c **** 	}
+ 442              		.loc 1 113 3 view .LVU85
+ 113:Core/Src/States.c **** 	}
+ 443              		.loc 1 113 23 is_stmt 0 view .LVU86
+ 444 0058 0423     		movs	r3, #4
+ 445 005a 6B70     		strb	r3, [r5, #1]
+ 446              		.loc 1 116 1 view .LVU87
+ 447 005c E7E7     		b	.L27
+ 448              	.L34:
+ 449 005e 00BF     		.align	2
+ 450              	.L33:
+ 451 0060 00000000 		.word	.LANCHOR7
+ 452 0064 00000000 		.word	.LANCHOR8
+ 453 0068 00000000 		.word	.LANCHOR2
+ 454 006c 00000000 		.word	.LC7
+ARM GAS  /tmp/ccc4g6PM.s 			page 12
+
+
+ 455 0070 38000000 		.word	.LC1
+ 456              		.cfi_endproc
+ 457              	.LFE397:
+ 459              		.section	.rodata.SlowAscentState.str1.4,"aMS",%progbits,1
+ 460              		.align	2
+ 461              	.LC8:
+ 462 0000 41504F47 		.ascii	"APOGEE detected...\012\015\000"
+ 462      45452064 
+ 462      65746563 
+ 462      7465642E 
+ 462      2E2E0A0D 
+ 463              		.section	.text.SlowAscentState,"ax",%progbits
+ 464              		.align	1
+ 465              		.global	SlowAscentState
+ 466              		.syntax unified
+ 467              		.thumb
+ 468              		.thumb_func
+ 469              		.fpu fpv5-d16
+ 471              	SlowAscentState:
+ 472              	.LVL41:
+ 473              	.LFB398:
+ 117:Core/Src/States.c **** 
+ 118:Core/Src/States.c **** void SlowAscentState(fekf* fkal, VehicleAtd* atd, VehicleStates* State)
+ 119:Core/Src/States.c **** {
+ 474              		.loc 1 119 1 is_stmt 1 view -0
+ 475              		.cfi_startproc
+ 476              		@ args = 0, pretend = 0, frame = 0
+ 477              		@ frame_needed = 0, uses_anonymous_args = 0
+ 478              		.loc 1 119 1 is_stmt 0 view .LVU89
+ 479 0000 70B5     		push	{r4, r5, r6, lr}
+ 480              	.LCFI4:
+ 481              		.cfi_def_cfa_offset 16
+ 482              		.cfi_offset 4, -16
+ 483              		.cfi_offset 5, -12
+ 484              		.cfi_offset 6, -8
+ 485              		.cfi_offset 14, -4
+ 486 0002 0446     		mov	r4, r0
+ 487 0004 0D46     		mov	r5, r1
+ 488 0006 1646     		mov	r6, r2
+ 120:Core/Src/States.c **** 	if (SlowAscentFirst)
+ 489              		.loc 1 120 2 is_stmt 1 view .LVU90
+ 490              		.loc 1 120 6 is_stmt 0 view .LVU91
+ 491 0008 194B     		ldr	r3, .L45
+ 492 000a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 493              		.loc 1 120 5 view .LVU92
+ 494 000c C3B9     		cbnz	r3, .L43
+ 495              	.LVL42:
+ 496              	.L36:
+ 121:Core/Src/States.c **** 	{
+ 122:Core/Src/States.c **** 		SlowAscentStart = HAL_GetTick();
+ 123:Core/Src/States.c **** 		SlowAscentFirst = 0;
+ 124:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 125:Core/Src/States.c **** 
+ 126:Core/Src/States.c **** 	}
+ 127:Core/Src/States.c **** 
+ 128:Core/Src/States.c **** 	Attitude_run(atd);
+ 497              		.loc 1 128 2 is_stmt 1 view .LVU93
+ARM GAS  /tmp/ccc4g6PM.s 			page 13
+
+
+ 498 000e 2846     		mov	r0, r5
+ 499 0010 FFF7FEFF 		bl	Attitude_run
+ 500              	.LVL43:
+ 129:Core/Src/States.c **** 	FlightEKF_run(fkal, atd);
+ 501              		.loc 1 129 2 view .LVU94
+ 502 0014 2946     		mov	r1, r5
+ 503 0016 2046     		mov	r0, r4
+ 504 0018 FFF7FEFF 		bl	FlightEKF_run
+ 505              	.LVL44:
+ 130:Core/Src/States.c **** 
+ 131:Core/Src/States.c **** 	if ((fkal->x.pData[5] > (-1.0f)) && (fkal->x.pData[5] < 1.0f))
+ 506              		.loc 1 131 2 view .LVU95
+ 507              		.loc 1 131 14 is_stmt 0 view .LVU96
+ 508 001c 6368     		ldr	r3, [r4, #4]
+ 509              		.loc 1 131 20 view .LVU97
+ 510 001e D3ED057A 		vldr.32	s15, [r3, #20]
+ 511              		.loc 1 131 5 view .LVU98
+ 512 0022 BFEE007A 		vmov.f32	s14, #-1.0e+0
+ 513 0026 F4EEC77A 		vcmpe.f32	s15, s14
+ 514 002a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 515 002e 06DD     		ble	.L35
+ 516              		.loc 1 131 35 discriminator 1 view .LVU99
+ 517 0030 B7EE007A 		vmov.f32	s14, #1.0e+0
+ 518 0034 F4EEC77A 		vcmpe.f32	s15, s14
+ 519 0038 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 520 003c 0CD4     		bmi	.L44
+ 521              	.LVL45:
+ 522              	.L35:
+ 132:Core/Src/States.c **** 	{
+ 133:Core/Src/States.c **** 		sendS("c", "APOGEE detected...\n\r");
+ 134:Core/Src/States.c **** 		XBee_Transmit("APOGEE detected...\n\r");
+ 135:Core/Src/States.c **** 		State->currentState = APOGEE;
+ 136:Core/Src/States.c **** 	}
+ 137:Core/Src/States.c **** 
+ 138:Core/Src/States.c **** }
+ 523              		.loc 1 138 1 view .LVU100
+ 524 003e 70BD     		pop	{r4, r5, r6, pc}
+ 525              	.LVL46:
+ 526              	.L43:
+ 122:Core/Src/States.c **** 		SlowAscentFirst = 0;
+ 527              		.loc 1 122 3 is_stmt 1 view .LVU101
+ 122:Core/Src/States.c **** 		SlowAscentFirst = 0;
+ 528              		.loc 1 122 21 is_stmt 0 view .LVU102
+ 529 0040 FFF7FEFF 		bl	HAL_GetTick
+ 530              	.LVL47:
+ 122:Core/Src/States.c **** 		SlowAscentFirst = 0;
+ 531              		.loc 1 122 19 view .LVU103
+ 532 0044 0B4B     		ldr	r3, .L45+4
+ 533 0046 1860     		str	r0, [r3]
+ 123:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 534              		.loc 1 123 3 is_stmt 1 view .LVU104
+ 123:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 535              		.loc 1 123 19 is_stmt 0 view .LVU105
+ 536 0048 094B     		ldr	r3, .L45
+ 537 004a 0022     		movs	r2, #0
+ 538 004c 1A70     		strb	r2, [r3]
+ 124:Core/Src/States.c **** 
+ARM GAS  /tmp/ccc4g6PM.s 			page 14
+
+
+ 539              		.loc 1 124 3 is_stmt 1 view .LVU106
+ 540 004e 0221     		movs	r1, #2
+ 541 0050 0948     		ldr	r0, .L45+8
+ 542 0052 FFF7FEFF 		bl	receiveS_IT
+ 543              	.LVL48:
+ 544 0056 DAE7     		b	.L36
+ 545              	.L44:
+ 133:Core/Src/States.c **** 		XBee_Transmit("APOGEE detected...\n\r");
+ 546              		.loc 1 133 3 view .LVU107
+ 547 0058 084C     		ldr	r4, .L45+12
+ 548              	.LVL49:
+ 133:Core/Src/States.c **** 		XBee_Transmit("APOGEE detected...\n\r");
+ 549              		.loc 1 133 3 is_stmt 0 view .LVU108
+ 550 005a 2146     		mov	r1, r4
+ 551 005c 0848     		ldr	r0, .L45+16
+ 552 005e FFF7FEFF 		bl	sendS
+ 553              	.LVL50:
+ 134:Core/Src/States.c **** 		State->currentState = APOGEE;
+ 554              		.loc 1 134 3 is_stmt 1 view .LVU109
+ 555 0062 2046     		mov	r0, r4
+ 556 0064 FFF7FEFF 		bl	XBee_Transmit
+ 557              	.LVL51:
+ 135:Core/Src/States.c **** 	}
+ 558              		.loc 1 135 3 view .LVU110
+ 135:Core/Src/States.c **** 	}
+ 559              		.loc 1 135 23 is_stmt 0 view .LVU111
+ 560 0068 0523     		movs	r3, #5
+ 561 006a 7370     		strb	r3, [r6, #1]
+ 562              		.loc 1 138 1 view .LVU112
+ 563 006c E7E7     		b	.L35
+ 564              	.L46:
+ 565 006e 00BF     		.align	2
+ 566              	.L45:
+ 567 0070 00000000 		.word	.LANCHOR9
+ 568 0074 00000000 		.word	.LANCHOR10
+ 569 0078 00000000 		.word	.LANCHOR2
+ 570 007c 00000000 		.word	.LC8
+ 571 0080 38000000 		.word	.LC1
+ 572              		.cfi_endproc
+ 573              	.LFE398:
+ 575              		.section	.rodata.ApogeeState.str1.4,"aMS",%progbits,1
+ 576              		.align	2
+ 577              	.LC9:
+ 578 0000 526F636B 		.ascii	"Rocket in FREEFALL...\012\015\000"
+ 578      65742069 
+ 578      6E204652 
+ 578      45454641 
+ 578      4C4C2E2E 
+ 579              		.section	.text.ApogeeState,"ax",%progbits
+ 580              		.align	1
+ 581              		.global	ApogeeState
+ 582              		.syntax unified
+ 583              		.thumb
+ 584              		.thumb_func
+ 585              		.fpu fpv5-d16
+ 587              	ApogeeState:
+ 588              	.LVL52:
+ARM GAS  /tmp/ccc4g6PM.s 			page 15
+
+
+ 589              	.LFB399:
+ 139:Core/Src/States.c **** 
+ 140:Core/Src/States.c **** void ApogeeState(fekf* fkal, VehicleAtd* atd, VehicleStates* State)
+ 141:Core/Src/States.c **** {
+ 590              		.loc 1 141 1 is_stmt 1 view -0
+ 591              		.cfi_startproc
+ 592              		@ args = 0, pretend = 0, frame = 0
+ 593              		@ frame_needed = 0, uses_anonymous_args = 0
+ 594              		.loc 1 141 1 is_stmt 0 view .LVU114
+ 595 0000 70B5     		push	{r4, r5, r6, lr}
+ 596              	.LCFI5:
+ 597              		.cfi_def_cfa_offset 16
+ 598              		.cfi_offset 4, -16
+ 599              		.cfi_offset 5, -12
+ 600              		.cfi_offset 6, -8
+ 601              		.cfi_offset 14, -4
+ 602 0002 0446     		mov	r4, r0
+ 603 0004 0D46     		mov	r5, r1
+ 604 0006 1646     		mov	r6, r2
+ 142:Core/Src/States.c **** 	if (ApogeeFirst)
+ 605              		.loc 1 142 2 is_stmt 1 view .LVU115
+ 606              		.loc 1 142 6 is_stmt 0 view .LVU116
+ 607 0008 154B     		ldr	r3, .L55
+ 608 000a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 609              		.loc 1 142 5 view .LVU117
+ 610 000c 8BB9     		cbnz	r3, .L53
+ 611              	.LVL53:
+ 612              	.L48:
+ 143:Core/Src/States.c **** 	{
+ 144:Core/Src/States.c **** 		ApogeeStart = HAL_GetTick();
+ 145:Core/Src/States.c **** 		ApogeeFirst = 0;
+ 146:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 147:Core/Src/States.c **** 
+ 148:Core/Src/States.c **** 	}
+ 149:Core/Src/States.c **** 
+ 150:Core/Src/States.c **** 	Attitude_run(atd);
+ 613              		.loc 1 150 2 is_stmt 1 view .LVU118
+ 614 000e 2846     		mov	r0, r5
+ 615 0010 FFF7FEFF 		bl	Attitude_run
+ 616              	.LVL54:
+ 151:Core/Src/States.c **** 	FlightEKF_run(fkal, atd);
+ 617              		.loc 1 151 2 view .LVU119
+ 618 0014 2946     		mov	r1, r5
+ 619 0016 2046     		mov	r0, r4
+ 620 0018 FFF7FEFF 		bl	FlightEKF_run
+ 621              	.LVL55:
+ 152:Core/Src/States.c **** 
+ 153:Core/Src/States.c **** 	if ((fkal->x.pData[5] < (-1.0f)) )
+ 622              		.loc 1 153 2 view .LVU120
+ 623              		.loc 1 153 14 is_stmt 0 view .LVU121
+ 624 001c 6368     		ldr	r3, [r4, #4]
+ 625              		.loc 1 153 20 view .LVU122
+ 626 001e 93ED057A 		vldr.32	s14, [r3, #20]
+ 627              		.loc 1 153 5 view .LVU123
+ 628 0022 FFEE007A 		vmov.f32	s15, #-1.0e+0
+ 629 0026 B4EEE77A 		vcmpe.f32	s14, s15
+ 630 002a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ARM GAS  /tmp/ccc4g6PM.s 			page 16
+
+
+ 631 002e 0CD4     		bmi	.L54
+ 632              	.LVL56:
+ 633              	.L47:
+ 154:Core/Src/States.c **** 	{
+ 155:Core/Src/States.c **** 		sendS("c", "Rocket in FREEFALL...\n\r");
+ 156:Core/Src/States.c **** 		XBee_Transmit("Rocket in FREEFALL...\n\r");
+ 157:Core/Src/States.c **** 		State->currentState = FREEFALL;
+ 158:Core/Src/States.c **** 	}
+ 159:Core/Src/States.c **** 
+ 160:Core/Src/States.c **** }
+ 634              		.loc 1 160 1 view .LVU124
+ 635 0030 70BD     		pop	{r4, r5, r6, pc}
+ 636              	.LVL57:
+ 637              	.L53:
+ 144:Core/Src/States.c **** 		ApogeeFirst = 0;
+ 638              		.loc 1 144 3 is_stmt 1 view .LVU125
+ 144:Core/Src/States.c **** 		ApogeeFirst = 0;
+ 639              		.loc 1 144 17 is_stmt 0 view .LVU126
+ 640 0032 FFF7FEFF 		bl	HAL_GetTick
+ 641              	.LVL58:
+ 144:Core/Src/States.c **** 		ApogeeFirst = 0;
+ 642              		.loc 1 144 15 view .LVU127
+ 643 0036 0B4B     		ldr	r3, .L55+4
+ 644 0038 1860     		str	r0, [r3]
+ 145:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 645              		.loc 1 145 3 is_stmt 1 view .LVU128
+ 145:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 646              		.loc 1 145 15 is_stmt 0 view .LVU129
+ 647 003a 094B     		ldr	r3, .L55
+ 648 003c 0022     		movs	r2, #0
+ 649 003e 1A70     		strb	r2, [r3]
+ 146:Core/Src/States.c **** 
+ 650              		.loc 1 146 3 is_stmt 1 view .LVU130
+ 651 0040 0221     		movs	r1, #2
+ 652 0042 0948     		ldr	r0, .L55+8
+ 653 0044 FFF7FEFF 		bl	receiveS_IT
+ 654              	.LVL59:
+ 655 0048 E1E7     		b	.L48
+ 656              	.L54:
+ 155:Core/Src/States.c **** 		XBee_Transmit("Rocket in FREEFALL...\n\r");
+ 657              		.loc 1 155 3 view .LVU131
+ 658 004a 084C     		ldr	r4, .L55+12
+ 659              	.LVL60:
+ 155:Core/Src/States.c **** 		XBee_Transmit("Rocket in FREEFALL...\n\r");
+ 660              		.loc 1 155 3 is_stmt 0 view .LVU132
+ 661 004c 2146     		mov	r1, r4
+ 662 004e 0848     		ldr	r0, .L55+16
+ 663 0050 FFF7FEFF 		bl	sendS
+ 664              	.LVL61:
+ 156:Core/Src/States.c **** 		State->currentState = FREEFALL;
+ 665              		.loc 1 156 3 is_stmt 1 view .LVU133
+ 666 0054 2046     		mov	r0, r4
+ 667 0056 FFF7FEFF 		bl	XBee_Transmit
+ 668              	.LVL62:
+ 157:Core/Src/States.c **** 	}
+ 669              		.loc 1 157 3 view .LVU134
+ 157:Core/Src/States.c **** 	}
+ARM GAS  /tmp/ccc4g6PM.s 			page 17
+
+
+ 670              		.loc 1 157 23 is_stmt 0 view .LVU135
+ 671 005a 0623     		movs	r3, #6
+ 672 005c 7370     		strb	r3, [r6, #1]
+ 673              		.loc 1 160 1 view .LVU136
+ 674 005e E7E7     		b	.L47
+ 675              	.L56:
+ 676              		.align	2
+ 677              	.L55:
+ 678 0060 00000000 		.word	.LANCHOR11
+ 679 0064 00000000 		.word	.LANCHOR12
+ 680 0068 00000000 		.word	.LANCHOR2
+ 681 006c 00000000 		.word	.LC9
+ 682 0070 38000000 		.word	.LC1
+ 683              		.cfi_endproc
+ 684              	.LFE399:
+ 686              		.section	.rodata.FreefallState.str1.4,"aMS",%progbits,1
+ 687              		.align	2
+ 688              	.LC10:
+ 689 0000 526F636B 		.ascii	"Rocket LANDED...\012\015\000"
+ 689      6574204C 
+ 689      414E4445 
+ 689      442E2E2E 
+ 689      0A0D00
+ 690              		.section	.text.FreefallState,"ax",%progbits
+ 691              		.align	1
+ 692              		.global	FreefallState
+ 693              		.syntax unified
+ 694              		.thumb
+ 695              		.thumb_func
+ 696              		.fpu fpv5-d16
+ 698              	FreefallState:
+ 699              	.LVL63:
+ 700              	.LFB400:
+ 161:Core/Src/States.c **** 
+ 162:Core/Src/States.c **** void FreefallState(fekf* fkal, VehicleAtd* atd, VehicleStates* State)
+ 163:Core/Src/States.c **** {
+ 701              		.loc 1 163 1 is_stmt 1 view -0
+ 702              		.cfi_startproc
+ 703              		@ args = 0, pretend = 0, frame = 0
+ 704              		@ frame_needed = 0, uses_anonymous_args = 0
+ 705              		.loc 1 163 1 is_stmt 0 view .LVU138
+ 706 0000 70B5     		push	{r4, r5, r6, lr}
+ 707              	.LCFI6:
+ 708              		.cfi_def_cfa_offset 16
+ 709              		.cfi_offset 4, -16
+ 710              		.cfi_offset 5, -12
+ 711              		.cfi_offset 6, -8
+ 712              		.cfi_offset 14, -4
+ 713 0002 0446     		mov	r4, r0
+ 714 0004 0D46     		mov	r5, r1
+ 715 0006 1646     		mov	r6, r2
+ 164:Core/Src/States.c **** 	if (FreefallFirst)
+ 716              		.loc 1 164 2 is_stmt 1 view .LVU139
+ 717              		.loc 1 164 6 is_stmt 0 view .LVU140
+ 718 0008 1B4B     		ldr	r3, .L67
+ 719 000a 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 720              		.loc 1 164 5 view .LVU141
+ARM GAS  /tmp/ccc4g6PM.s 			page 18
+
+
+ 721 000c C3B9     		cbnz	r3, .L65
+ 722              	.LVL64:
+ 723              	.L58:
+ 165:Core/Src/States.c **** 	{
+ 166:Core/Src/States.c **** 		FreefallStart = HAL_GetTick();
+ 167:Core/Src/States.c **** 		FreefallFirst = 0;
+ 168:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 169:Core/Src/States.c **** 	}
+ 170:Core/Src/States.c **** 
+ 171:Core/Src/States.c **** 	Attitude_run(atd);
+ 724              		.loc 1 171 2 is_stmt 1 view .LVU142
+ 725 000e 2846     		mov	r0, r5
+ 726 0010 FFF7FEFF 		bl	Attitude_run
+ 727              	.LVL65:
+ 172:Core/Src/States.c **** 	FlightEKF_run(fkal, atd);
+ 728              		.loc 1 172 2 view .LVU143
+ 729 0014 2946     		mov	r1, r5
+ 730 0016 2046     		mov	r0, r4
+ 731 0018 FFF7FEFF 		bl	FlightEKF_run
+ 732              	.LVL66:
+ 173:Core/Src/States.c **** 
+ 174:Core/Src/States.c **** 	if ((fkal->x.pData[5] > (-1.0f)) && (fkal->x.pData[5] < 1.0f))
+ 733              		.loc 1 174 2 view .LVU144
+ 734              		.loc 1 174 14 is_stmt 0 view .LVU145
+ 735 001c 6368     		ldr	r3, [r4, #4]
+ 736              		.loc 1 174 20 view .LVU146
+ 737 001e D3ED057A 		vldr.32	s15, [r3, #20]
+ 738              		.loc 1 174 5 view .LVU147
+ 739 0022 BFEE007A 		vmov.f32	s14, #-1.0e+0
+ 740 0026 F4EEC77A 		vcmpe.f32	s15, s14
+ 741 002a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 742 002e 06DD     		ble	.L57
+ 743              		.loc 1 174 35 discriminator 1 view .LVU148
+ 744 0030 B7EE007A 		vmov.f32	s14, #1.0e+0
+ 745 0034 F4EEC77A 		vcmpe.f32	s15, s14
+ 746 0038 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 747 003c 0CD4     		bmi	.L66
+ 748              	.LVL67:
+ 749              	.L57:
+ 175:Core/Src/States.c **** 	{
+ 176:Core/Src/States.c **** 		sendS("c", "Rocket LANDED...\n\r");
+ 177:Core/Src/States.c **** 		States.APRS[2] = fkal->x.pData[5];
+ 178:Core/Src/States.c **** 		XBee_Transmit("Rocket LANDED...\n\r");
+ 179:Core/Src/States.c **** 		State->currentState = LANDED;
+ 180:Core/Src/States.c **** 	}
+ 181:Core/Src/States.c **** 
+ 182:Core/Src/States.c **** }
+ 750              		.loc 1 182 1 view .LVU149
+ 751 003e 70BD     		pop	{r4, r5, r6, pc}
+ 752              	.LVL68:
+ 753              	.L65:
+ 166:Core/Src/States.c **** 		FreefallFirst = 0;
+ 754              		.loc 1 166 3 is_stmt 1 view .LVU150
+ 166:Core/Src/States.c **** 		FreefallFirst = 0;
+ 755              		.loc 1 166 19 is_stmt 0 view .LVU151
+ 756 0040 FFF7FEFF 		bl	HAL_GetTick
+ 757              	.LVL69:
+ARM GAS  /tmp/ccc4g6PM.s 			page 19
+
+
+ 166:Core/Src/States.c **** 		FreefallFirst = 0;
+ 758              		.loc 1 166 17 view .LVU152
+ 759 0044 0D4B     		ldr	r3, .L67+4
+ 760 0046 1860     		str	r0, [r3]
+ 167:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 761              		.loc 1 167 3 is_stmt 1 view .LVU153
+ 167:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 762              		.loc 1 167 17 is_stmt 0 view .LVU154
+ 763 0048 0B4B     		ldr	r3, .L67
+ 764 004a 0022     		movs	r2, #0
+ 765 004c 1A70     		strb	r2, [r3]
+ 168:Core/Src/States.c **** 	}
+ 766              		.loc 1 168 3 is_stmt 1 view .LVU155
+ 767 004e 0221     		movs	r1, #2
+ 768 0050 0B48     		ldr	r0, .L67+8
+ 769 0052 FFF7FEFF 		bl	receiveS_IT
+ 770              	.LVL70:
+ 771 0056 DAE7     		b	.L58
+ 772              	.L66:
+ 176:Core/Src/States.c **** 		States.APRS[2] = fkal->x.pData[5];
+ 773              		.loc 1 176 3 view .LVU156
+ 774 0058 0A4D     		ldr	r5, .L67+12
+ 775              	.LVL71:
+ 176:Core/Src/States.c **** 		States.APRS[2] = fkal->x.pData[5];
+ 776              		.loc 1 176 3 is_stmt 0 view .LVU157
+ 777 005a 2946     		mov	r1, r5
+ 778 005c 0A48     		ldr	r0, .L67+16
+ 779 005e FFF7FEFF 		bl	sendS
+ 780              	.LVL72:
+ 177:Core/Src/States.c **** 		XBee_Transmit("Rocket LANDED...\n\r");
+ 781              		.loc 1 177 3 is_stmt 1 view .LVU158
+ 177:Core/Src/States.c **** 		XBee_Transmit("Rocket LANDED...\n\r");
+ 782              		.loc 1 177 27 is_stmt 0 view .LVU159
+ 783 0062 6368     		ldr	r3, [r4, #4]
+ 177:Core/Src/States.c **** 		XBee_Transmit("Rocket LANDED...\n\r");
+ 784              		.loc 1 177 18 view .LVU160
+ 785 0064 5A69     		ldr	r2, [r3, #20]	@ float
+ 786 0066 094B     		ldr	r3, .L67+20
+ 787 0068 9A62     		str	r2, [r3, #40]	@ float
+ 178:Core/Src/States.c **** 		State->currentState = LANDED;
+ 788              		.loc 1 178 3 is_stmt 1 view .LVU161
+ 789 006a 2846     		mov	r0, r5
+ 790 006c FFF7FEFF 		bl	XBee_Transmit
+ 791              	.LVL73:
+ 179:Core/Src/States.c **** 	}
+ 792              		.loc 1 179 3 view .LVU162
+ 179:Core/Src/States.c **** 	}
+ 793              		.loc 1 179 23 is_stmt 0 view .LVU163
+ 794 0070 0723     		movs	r3, #7
+ 795 0072 7370     		strb	r3, [r6, #1]
+ 796              		.loc 1 182 1 view .LVU164
+ 797 0074 E3E7     		b	.L57
+ 798              	.L68:
+ 799 0076 00BF     		.align	2
+ 800              	.L67:
+ 801 0078 00000000 		.word	.LANCHOR13
+ 802 007c 00000000 		.word	.LANCHOR14
+ARM GAS  /tmp/ccc4g6PM.s 			page 20
+
+
+ 803 0080 00000000 		.word	.LANCHOR2
+ 804 0084 00000000 		.word	.LC10
+ 805 0088 38000000 		.word	.LC1
+ 806 008c 00000000 		.word	States
+ 807              		.cfi_endproc
+ 808              	.LFE400:
+ 810              		.section	.rodata.LandedState.str1.4,"aMS",%progbits,1
+ 811              		.align	2
+ 812              	.LC11:
+ 813 0000 526F636B 		.ascii	"Rocket touch down...\012\015\000"
+ 813      65742074 
+ 813      6F756368 
+ 813      20646F77 
+ 813      6E2E2E2E 
+ 814 0017 00       		.align	2
+ 815              	.LC12:
+ 816 0018 5472616E 		.ascii	"Transmissitting to NASA...\012\015\000"
+ 816      736D6973 
+ 816      73697474 
+ 816      696E6720 
+ 816      746F204E 
+ 817 0035 000000   		.align	2
+ 818              	.LC13:
+ 819 0038 4661696C 		.ascii	"Failed to initiate Transmission\012\015\000"
+ 819      65642074 
+ 819      6F20696E 
+ 819      69746961 
+ 819      74652054 
+ 820              		.section	.text.LandedState,"ax",%progbits
+ 821              		.align	1
+ 822              		.global	LandedState
+ 823              		.syntax unified
+ 824              		.thumb
+ 825              		.thumb_func
+ 826              		.fpu fpv5-d16
+ 828              	LandedState:
+ 829              	.LVL74:
+ 830              	.LFB401:
+ 183:Core/Src/States.c **** 
+ 184:Core/Src/States.c **** void LandedState(fekf* fkal, VehicleAtd* atd, VehicleStates* State)
+ 185:Core/Src/States.c **** {
+ 831              		.loc 1 185 1 is_stmt 1 view -0
+ 832              		.cfi_startproc
+ 833              		@ args = 0, pretend = 0, frame = 0
+ 834              		@ frame_needed = 0, uses_anonymous_args = 0
+ 835              		.loc 1 185 1 is_stmt 0 view .LVU166
+ 836 0000 10B5     		push	{r4, lr}
+ 837              	.LCFI7:
+ 838              		.cfi_def_cfa_offset 8
+ 839              		.cfi_offset 4, -8
+ 840              		.cfi_offset 14, -4
+ 186:Core/Src/States.c **** 	if (LandedFirst)
+ 841              		.loc 1 186 2 is_stmt 1 view .LVU167
+ 842              		.loc 1 186 6 is_stmt 0 view .LVU168
+ 843 0002 1B4B     		ldr	r3, .L76
+ 844 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 845              		.loc 1 186 5 view .LVU169
+ARM GAS  /tmp/ccc4g6PM.s 			page 21
+
+
+ 846 0006 7BB9     		cbnz	r3, .L74
+ 847              	.LVL75:
+ 848              	.L70:
+ 187:Core/Src/States.c **** 	{
+ 188:Core/Src/States.c **** 		LandedStart = HAL_GetTick();
+ 189:Core/Src/States.c **** 		States.APRS[3] = (float) LandedStart;
+ 190:Core/Src/States.c **** 		States.APRS[4] = atd->euler[0];
+ 191:Core/Src/States.c **** 		States.APRS[5] = atd->euler[1];
+ 192:Core/Src/States.c **** 		States.APRS[7] = meas.meas[7];
+ 193:Core/Src/States.c **** 		LandedFirst = 0;
+ 194:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 195:Core/Src/States.c **** 		sendS("c", "Rocket touch down...\n\r");
+ 196:Core/Src/States.c **** 	}
+ 197:Core/Src/States.c **** 
+ 198:Core/Src/States.c **** 	stat =	APRS_Transmit((uint8_t *)States.APRS);
+ 849              		.loc 1 198 2 is_stmt 1 view .LVU170
+ 850              		.loc 1 198 9 is_stmt 0 view .LVU171
+ 851 0008 1A48     		ldr	r0, .L76+4
+ 852 000a FFF7FEFF 		bl	APRS_Transmit
+ 853              	.LVL76:
+ 854              		.loc 1 198 7 view .LVU172
+ 855 000e 1A4B     		ldr	r3, .L76+8
+ 856 0010 1870     		strb	r0, [r3]
+ 199:Core/Src/States.c **** 	if (stat == 1)
+ 857              		.loc 1 199 2 is_stmt 1 view .LVU173
+ 858              		.loc 1 199 5 is_stmt 0 view .LVU174
+ 859 0012 0128     		cmp	r0, #1
+ 860 0014 27D0     		beq	.L75
+ 200:Core/Src/States.c **** 	{
+ 201:Core/Src/States.c **** 		sendS("c", "Transmissitting to NASA...\n\r");
+ 202:Core/Src/States.c **** 	} else {
+ 203:Core/Src/States.c **** 		sendS("c", "Failed to initiate Transmission\n\r");
+ 861              		.loc 1 203 3 is_stmt 1 view .LVU175
+ 862 0016 1949     		ldr	r1, .L76+12
+ 863 0018 1948     		ldr	r0, .L76+16
+ 864 001a FFF7FEFF 		bl	sendS
+ 865              	.LVL77:
+ 866              	.L72:
+ 204:Core/Src/States.c **** 	}
+ 205:Core/Src/States.c **** 	HAL_Delay(1000);
+ 867              		.loc 1 205 2 view .LVU176
+ 868 001e 4FF47A70 		mov	r0, #1000
+ 869 0022 FFF7FEFF 		bl	HAL_Delay
+ 870              	.LVL78:
+ 206:Core/Src/States.c **** 
+ 207:Core/Src/States.c **** }
+ 871              		.loc 1 207 1 is_stmt 0 view .LVU177
+ 872 0026 10BD     		pop	{r4, pc}
+ 873              	.LVL79:
+ 874              	.L74:
+ 875              		.loc 1 207 1 view .LVU178
+ 876 0028 0C46     		mov	r4, r1
+ 188:Core/Src/States.c **** 		States.APRS[3] = (float) LandedStart;
+ 877              		.loc 1 188 3 is_stmt 1 view .LVU179
+ 188:Core/Src/States.c **** 		States.APRS[3] = (float) LandedStart;
+ 878              		.loc 1 188 17 is_stmt 0 view .LVU180
+ 879 002a FFF7FEFF 		bl	HAL_GetTick
+ARM GAS  /tmp/ccc4g6PM.s 			page 22
+
+
+ 880              	.LVL80:
+ 188:Core/Src/States.c **** 		States.APRS[3] = (float) LandedStart;
+ 881              		.loc 1 188 15 view .LVU181
+ 882 002e 154B     		ldr	r3, .L76+20
+ 883 0030 1860     		str	r0, [r3]
+ 189:Core/Src/States.c **** 		States.APRS[4] = atd->euler[0];
+ 884              		.loc 1 189 3 is_stmt 1 view .LVU182
+ 189:Core/Src/States.c **** 		States.APRS[4] = atd->euler[0];
+ 885              		.loc 1 189 20 is_stmt 0 view .LVU183
+ 886 0032 07EE900A 		vmov	s15, r0	@ int
+ 887 0036 F8EE677A 		vcvt.f32.u32	s15, s15
+ 189:Core/Src/States.c **** 		States.APRS[4] = atd->euler[0];
+ 888              		.loc 1 189 18 view .LVU184
+ 889 003a 134B     		ldr	r3, .L76+24
+ 890 003c C3ED0B7A 		vstr.32	s15, [r3, #44]
+ 190:Core/Src/States.c **** 		States.APRS[5] = atd->euler[1];
+ 891              		.loc 1 190 3 is_stmt 1 view .LVU185
+ 190:Core/Src/States.c **** 		States.APRS[5] = atd->euler[1];
+ 892              		.loc 1 190 30 is_stmt 0 view .LVU186
+ 893 0040 226C     		ldr	r2, [r4, #64]	@ float
+ 190:Core/Src/States.c **** 		States.APRS[5] = atd->euler[1];
+ 894              		.loc 1 190 18 view .LVU187
+ 895 0042 1A63     		str	r2, [r3, #48]	@ float
+ 191:Core/Src/States.c **** 		States.APRS[7] = meas.meas[7];
+ 896              		.loc 1 191 3 is_stmt 1 view .LVU188
+ 191:Core/Src/States.c **** 		States.APRS[7] = meas.meas[7];
+ 897              		.loc 1 191 30 is_stmt 0 view .LVU189
+ 898 0044 626C     		ldr	r2, [r4, #68]	@ float
+ 191:Core/Src/States.c **** 		States.APRS[7] = meas.meas[7];
+ 899              		.loc 1 191 18 view .LVU190
+ 900 0046 5A63     		str	r2, [r3, #52]	@ float
+ 192:Core/Src/States.c **** 		LandedFirst = 0;
+ 901              		.loc 1 192 3 is_stmt 1 view .LVU191
+ 192:Core/Src/States.c **** 		LandedFirst = 0;
+ 902              		.loc 1 192 29 is_stmt 0 view .LVU192
+ 903 0048 104A     		ldr	r2, .L76+28
+ 904 004a D269     		ldr	r2, [r2, #28]	@ float
+ 192:Core/Src/States.c **** 		LandedFirst = 0;
+ 905              		.loc 1 192 18 view .LVU193
+ 906 004c DA63     		str	r2, [r3, #60]	@ float
+ 193:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 907              		.loc 1 193 3 is_stmt 1 view .LVU194
+ 193:Core/Src/States.c **** 		receiveS_IT(&dataIT, sizeof(dataIT));
+ 908              		.loc 1 193 15 is_stmt 0 view .LVU195
+ 909 004e 084B     		ldr	r3, .L76
+ 910 0050 0022     		movs	r2, #0
+ 911 0052 1A70     		strb	r2, [r3]
+ 194:Core/Src/States.c **** 		sendS("c", "Rocket touch down...\n\r");
+ 912              		.loc 1 194 3 is_stmt 1 view .LVU196
+ 913 0054 0221     		movs	r1, #2
+ 914 0056 0E48     		ldr	r0, .L76+32
+ 915 0058 FFF7FEFF 		bl	receiveS_IT
+ 916              	.LVL81:
+ 195:Core/Src/States.c **** 	}
+ 917              		.loc 1 195 3 view .LVU197
+ 918 005c 0D49     		ldr	r1, .L76+36
+ 919 005e 0848     		ldr	r0, .L76+16
+ARM GAS  /tmp/ccc4g6PM.s 			page 23
+
+
+ 920 0060 FFF7FEFF 		bl	sendS
+ 921              	.LVL82:
+ 922 0064 D0E7     		b	.L70
+ 923              	.LVL83:
+ 924              	.L75:
+ 201:Core/Src/States.c **** 	} else {
+ 925              		.loc 1 201 3 view .LVU198
+ 926 0066 0C49     		ldr	r1, .L76+40
+ 927 0068 0548     		ldr	r0, .L76+16
+ 928 006a FFF7FEFF 		bl	sendS
+ 929              	.LVL84:
+ 930 006e D6E7     		b	.L72
+ 931              	.L77:
+ 932              		.align	2
+ 933              	.L76:
+ 934 0070 00000000 		.word	.LANCHOR15
+ 935 0074 20000000 		.word	States+32
+ 936 0078 00000000 		.word	.LANCHOR17
+ 937 007c 38000000 		.word	.LC13
+ 938 0080 38000000 		.word	.LC1
+ 939 0084 00000000 		.word	.LANCHOR16
+ 940 0088 00000000 		.word	States
+ 941 008c 00000000 		.word	meas
+ 942 0090 00000000 		.word	.LANCHOR2
+ 943 0094 00000000 		.word	.LC11
+ 944 0098 18000000 		.word	.LC12
+ 945              		.cfi_endproc
+ 946              	.LFE401:
+ 948              		.section	.rodata.HAL_UART_RxCpltCallback.str1.4,"aMS",%progbits,1
+ 949              		.align	2
+ 950              	.LC14:
+ 951 0000 496E7465 		.ascii	"Interrupted...\012\015\000"
+ 951      72727570 
+ 951      7465642E 
+ 951      2E2E0A0D 
+ 951      00
+ 952 0011 000000   		.align	2
+ 953              	.LC15:
+ 954 0014 545800   		.ascii	"TX\000"
+ 955 0017 00       		.align	2
+ 956              	.LC16:
+ 957 0018 5472616E 		.ascii	"Transmit interrupt triggered...\012\015\000"
+ 957      736D6974 
+ 957      20696E74 
+ 957      65727275 
+ 957      70742074 
+ 958 003a 0000     		.align	2
+ 959              	.LC17:
+ 960 003c 496E7465 		.ascii	"Interrupted..\012\015\000"
+ 960      72727570 
+ 960      7465642E 
+ 960      2E0A0D00 
+ 961              		.section	.text.HAL_UART_RxCpltCallback,"ax",%progbits
+ 962              		.align	1
+ 963              		.global	HAL_UART_RxCpltCallback
+ 964              		.syntax unified
+ 965              		.thumb
+ARM GAS  /tmp/ccc4g6PM.s 			page 24
+
+
+ 966              		.thumb_func
+ 967              		.fpu fpv5-d16
+ 969              	HAL_UART_RxCpltCallback:
+ 970              	.LVL85:
+ 971              	.LFB402:
+ 208:Core/Src/States.c **** 
+ 209:Core/Src/States.c **** void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+ 210:Core/Src/States.c **** {
+ 972              		.loc 1 210 1 view -0
+ 973              		.cfi_startproc
+ 974              		@ args = 0, pretend = 0, frame = 0
+ 975              		@ frame_needed = 0, uses_anonymous_args = 0
+ 976              		.loc 1 210 1 is_stmt 0 view .LVU200
+ 977 0000 08B5     		push	{r3, lr}
+ 978              	.LCFI8:
+ 979              		.cfi_def_cfa_offset 8
+ 980              		.cfi_offset 3, -8
+ 981              		.cfi_offset 14, -4
+ 211:Core/Src/States.c **** 	if (huart->Instance == USART1)
+ 982              		.loc 1 211 2 is_stmt 1 view .LVU201
+ 983              		.loc 1 211 11 is_stmt 0 view .LVU202
+ 984 0002 0268     		ldr	r2, [r0]
+ 985              		.loc 1 211 5 view .LVU203
+ 986 0004 0C4B     		ldr	r3, .L82
+ 987 0006 9A42     		cmp	r2, r3
+ 988 0008 00D0     		beq	.L81
+ 989              	.LVL86:
+ 990              	.L78:
+ 212:Core/Src/States.c **** 	{
+ 213:Core/Src/States.c **** 			sendS("c", "Interrupted...\n\r");
+ 214:Core/Src/States.c **** 
+ 215:Core/Src/States.c **** 		if (strcmp(dataIT, "TX") == 0)
+ 216:Core/Src/States.c **** 		{
+ 217:Core/Src/States.c **** 			XBee_Transmit("Transmit interrupt triggered...\n\r");
+ 218:Core/Src/States.c **** 			sendS("c", "Interrupted..\n\r");
+ 219:Core/Src/States.c **** 			States.currentState = LANDED;
+ 220:Core/Src/States.c **** 
+ 221:Core/Src/States.c **** 		}	
+ 222:Core/Src/States.c **** 		
+ 223:Core/Src/States.c **** 		
+ 224:Core/Src/States.c **** 
+ 225:Core/Src/States.c **** 	}
+ 226:Core/Src/States.c **** }
+ 991              		.loc 1 226 1 view .LVU204
+ 992 000a 08BD     		pop	{r3, pc}
+ 993              	.LVL87:
+ 994              	.L81:
+ 213:Core/Src/States.c **** 
+ 995              		.loc 1 213 4 is_stmt 1 view .LVU205
+ 996 000c 0B49     		ldr	r1, .L82+4
+ 997 000e 0C48     		ldr	r0, .L82+8
+ 998              	.LVL88:
+ 213:Core/Src/States.c **** 
+ 999              		.loc 1 213 4 is_stmt 0 view .LVU206
+ 1000 0010 FFF7FEFF 		bl	sendS
+ 1001              	.LVL89:
+ 215:Core/Src/States.c **** 		{
+ARM GAS  /tmp/ccc4g6PM.s 			page 25
+
+
+ 1002              		.loc 1 215 3 is_stmt 1 view .LVU207
+ 215:Core/Src/States.c **** 		{
+ 1003              		.loc 1 215 7 is_stmt 0 view .LVU208
+ 1004 0014 0B49     		ldr	r1, .L82+12
+ 1005 0016 0C48     		ldr	r0, .L82+16
+ 1006 0018 FFF7FEFF 		bl	strcmp
+ 1007              	.LVL90:
+ 215:Core/Src/States.c **** 		{
+ 1008              		.loc 1 215 6 view .LVU209
+ 1009 001c 0028     		cmp	r0, #0
+ 1010 001e F4D1     		bne	.L78
+ 217:Core/Src/States.c **** 			sendS("c", "Interrupted..\n\r");
+ 1011              		.loc 1 217 4 is_stmt 1 view .LVU210
+ 1012 0020 0A48     		ldr	r0, .L82+20
+ 1013 0022 FFF7FEFF 		bl	XBee_Transmit
+ 1014              	.LVL91:
+ 218:Core/Src/States.c **** 			States.currentState = LANDED;
+ 1015              		.loc 1 218 4 view .LVU211
+ 1016 0026 0A49     		ldr	r1, .L82+24
+ 1017 0028 0548     		ldr	r0, .L82+8
+ 1018 002a FFF7FEFF 		bl	sendS
+ 1019              	.LVL92:
+ 219:Core/Src/States.c **** 
+ 1020              		.loc 1 219 4 view .LVU212
+ 219:Core/Src/States.c **** 
+ 1021              		.loc 1 219 24 is_stmt 0 view .LVU213
+ 1022 002e 094B     		ldr	r3, .L82+28
+ 1023 0030 0722     		movs	r2, #7
+ 1024 0032 5A70     		strb	r2, [r3, #1]
+ 1025              		.loc 1 226 1 view .LVU214
+ 1026 0034 E9E7     		b	.L78
+ 1027              	.L83:
+ 1028 0036 00BF     		.align	2
+ 1029              	.L82:
+ 1030 0038 00100140 		.word	1073811456
+ 1031 003c 00000000 		.word	.LC14
+ 1032 0040 38000000 		.word	.LC1
+ 1033 0044 14000000 		.word	.LC15
+ 1034 0048 00000000 		.word	.LANCHOR2
+ 1035 004c 18000000 		.word	.LC16
+ 1036 0050 3C000000 		.word	.LC17
+ 1037 0054 00000000 		.word	States
+ 1038              		.cfi_endproc
+ 1039              	.LFE402:
+ 1041              		.global	LandedFirst
+ 1042              		.global	FreefallFirst
+ 1043              		.global	ApogeeFirst
+ 1044              		.global	SlowAscentFirst
+ 1045              		.global	FastAscentFirst
+ 1046              		.global	ArmFirst
+ 1047              		.global	GroundFirst
+ 1048              		.global	LandedStart
+ 1049              		.global	FreefallStart
+ 1050              		.global	ApogeeStart
+ 1051              		.global	SlowAscentStart
+ 1052              		.global	FastAscentStart
+ 1053              		.global	ArmStart
+ARM GAS  /tmp/ccc4g6PM.s 			page 26
+
+
+ 1054              		.global	GroundStart
+ 1055              		.global	stat
+ 1056              		.global	print_Arm_msg
+ 1057              		.global	finalData
+ 1058              		.global	dataIT
+ 1059              		.global	dataPol
+ 1060              		.section	.bss.ApogeeStart,"aw",%nobits
+ 1061              		.align	2
+ 1062              		.set	.LANCHOR12,. + 0
+ 1065              	ApogeeStart:
+ 1066 0000 00000000 		.space	4
+ 1067              		.section	.bss.ArmStart,"aw",%nobits
+ 1068              		.align	2
+ 1069              		.set	.LANCHOR4,. + 0
+ 1072              	ArmStart:
+ 1073 0000 00000000 		.space	4
+ 1074              		.section	.bss.FastAscentStart,"aw",%nobits
+ 1075              		.align	2
+ 1076              		.set	.LANCHOR8,. + 0
+ 1079              	FastAscentStart:
+ 1080 0000 00000000 		.space	4
+ 1081              		.section	.bss.FreefallStart,"aw",%nobits
+ 1082              		.align	2
+ 1083              		.set	.LANCHOR14,. + 0
+ 1086              	FreefallStart:
+ 1087 0000 00000000 		.space	4
+ 1088              		.section	.bss.GroundStart,"aw",%nobits
+ 1089              		.align	2
+ 1090              		.set	.LANCHOR6,. + 0
+ 1093              	GroundStart:
+ 1094 0000 00000000 		.space	4
+ 1095              		.section	.bss.LandedStart,"aw",%nobits
+ 1096              		.align	2
+ 1097              		.set	.LANCHOR16,. + 0
+ 1100              	LandedStart:
+ 1101 0000 00000000 		.space	4
+ 1102              		.section	.bss.SlowAscentStart,"aw",%nobits
+ 1103              		.align	2
+ 1104              		.set	.LANCHOR10,. + 0
+ 1107              	SlowAscentStart:
+ 1108 0000 00000000 		.space	4
+ 1109              		.section	.bss.dataIT,"aw",%nobits
+ 1110              		.align	2
+ 1111              		.set	.LANCHOR2,. + 0
+ 1114              	dataIT:
+ 1115 0000 0000     		.space	2
+ 1116              		.section	.bss.dataPol,"aw",%nobits
+ 1117              		.align	2
+ 1118              		.set	.LANCHOR1,. + 0
+ 1121              	dataPol:
+ 1122 0000 00000000 		.space	4
+ 1123              		.section	.bss.stat,"aw",%nobits
+ 1124              		.set	.LANCHOR17,. + 0
+ 1127              	stat:
+ 1128 0000 00       		.space	1
+ 1129              		.section	.data.ApogeeFirst,"aw"
+ 1130              		.set	.LANCHOR11,. + 0
+ARM GAS  /tmp/ccc4g6PM.s 			page 27
+
+
+ 1133              	ApogeeFirst:
+ 1134 0000 01       		.byte	1
+ 1135              		.section	.data.ArmFirst,"aw"
+ 1136              		.set	.LANCHOR3,. + 0
+ 1139              	ArmFirst:
+ 1140 0000 01       		.byte	1
+ 1141              		.section	.data.FastAscentFirst,"aw"
+ 1142              		.set	.LANCHOR7,. + 0
+ 1145              	FastAscentFirst:
+ 1146 0000 01       		.byte	1
+ 1147              		.section	.data.FreefallFirst,"aw"
+ 1148              		.set	.LANCHOR13,. + 0
+ 1151              	FreefallFirst:
+ 1152 0000 01       		.byte	1
+ 1153              		.section	.data.GroundFirst,"aw"
+ 1154              		.set	.LANCHOR5,. + 0
+ 1157              	GroundFirst:
+ 1158 0000 01       		.byte	1
+ 1159              		.section	.data.LandedFirst,"aw"
+ 1160              		.set	.LANCHOR15,. + 0
+ 1163              	LandedFirst:
+ 1164 0000 01       		.byte	1
+ 1165              		.section	.data.SlowAscentFirst,"aw"
+ 1166              		.set	.LANCHOR9,. + 0
+ 1169              	SlowAscentFirst:
+ 1170 0000 01       		.byte	1
+ 1171              		.section	.data.finalData,"aw"
+ 1172              		.align	2
+ 1175              	finalData:
+ 1176 0000 0000803F 		.word	1065353216
+ 1177 0004 CDCC0C40 		.word	1074580685
+ 1178 0008 00004040 		.word	1077936128
+ 1179 000c 713D9240 		.word	1083325809
+ 1180 0010 0AD7AB40 		.word	1085003530
+ 1181 0014 14AEC740 		.word	1086828052
+ 1182 0018 9A99E940 		.word	1089051034
+ 1183 001c 00000000 		.word	0
+ 1184              		.section	.data.print_Arm_msg,"aw"
+ 1185              		.set	.LANCHOR0,. + 0
+ 1188              	print_Arm_msg:
+ 1189 0000 01       		.byte	1
+ 1190              		.text
+ 1191              	.Letext0:
+ 1192              		.file 2 "/usr/lib/gcc/arm-none-eabi/10.3.1/include/stdint.h"
+ 1193              		.file 3 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+ 1194              		.file 4 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 1195              		.file 5 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 1196              		.file 6 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h"
+ 1197              		.file 7 "Core/Inc/Sensors.h"
+ 1198              		.file 8 "Drivers/CMSIS/DSP/Include/arm_math.h"
+ 1199              		.file 9 "Core/Inc/GEKF.h"
+ 1200              		.file 10 "Core/Inc/AttitudeEstimation.h"
+ 1201              		.file 11 "Core/Inc/FEKF.h"
+ 1202              		.file 12 "Core/Inc/StateMachine.h"
+ 1203              		.file 13 "Core/Inc/DefFuncs.h"
+ 1204              		.file 14 "/usr/include/newlib/string.h"
+ 1205              		.file 15 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
+ARM GAS  /tmp/ccc4g6PM.s 			page 28
+
+
+ 1206              		.file 16 "Core/Inc/init.h"
+ARM GAS  /tmp/ccc4g6PM.s 			page 29
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 States.c
+     /tmp/ccc4g6PM.s:17     .rodata.BaseState.str1.4:0000000000000000 $d
+     /tmp/ccc4g6PM.s:31     .text.BaseState:0000000000000000 $t
+     /tmp/ccc4g6PM.s:39     .text.BaseState:0000000000000000 BaseState
+     /tmp/ccc4g6PM.s:115    .text.BaseState:0000000000000048 $d
+     /tmp/ccc4g6PM.s:126    .rodata.GroundState.str1.4:0000000000000000 $d
+     /tmp/ccc4g6PM.s:133    .text.GroundState:0000000000000000 $t
+     /tmp/ccc4g6PM.s:140    .text.GroundState:0000000000000000 GroundState
+     /tmp/ccc4g6PM.s:220    .text.GroundState:0000000000000050 $d
+     /tmp/ccc4g6PM.s:230    .rodata.ArmedState.str1.4:0000000000000000 $d
+     /tmp/ccc4g6PM.s:234    .text.ArmedState:0000000000000000 $t
+     /tmp/ccc4g6PM.s:241    .text.ArmedState:0000000000000000 ArmedState
+     /tmp/ccc4g6PM.s:337    .text.ArmedState:0000000000000068 $d
+     /tmp/ccc4g6PM.s:347    .rodata.FastAscentState.str1.4:0000000000000000 $d
+     /tmp/ccc4g6PM.s:351    .text.FastAscentState:0000000000000000 $t
+     /tmp/ccc4g6PM.s:358    .text.FastAscentState:0000000000000000 FastAscentState
+     /tmp/ccc4g6PM.s:451    .text.FastAscentState:0000000000000060 $d
+     /tmp/ccc4g6PM.s:460    .rodata.SlowAscentState.str1.4:0000000000000000 $d
+     /tmp/ccc4g6PM.s:464    .text.SlowAscentState:0000000000000000 $t
+     /tmp/ccc4g6PM.s:471    .text.SlowAscentState:0000000000000000 SlowAscentState
+     /tmp/ccc4g6PM.s:567    .text.SlowAscentState:0000000000000070 $d
+     /tmp/ccc4g6PM.s:576    .rodata.ApogeeState.str1.4:0000000000000000 $d
+     /tmp/ccc4g6PM.s:580    .text.ApogeeState:0000000000000000 $t
+     /tmp/ccc4g6PM.s:587    .text.ApogeeState:0000000000000000 ApogeeState
+     /tmp/ccc4g6PM.s:678    .text.ApogeeState:0000000000000060 $d
+     /tmp/ccc4g6PM.s:687    .rodata.FreefallState.str1.4:0000000000000000 $d
+     /tmp/ccc4g6PM.s:691    .text.FreefallState:0000000000000000 $t
+     /tmp/ccc4g6PM.s:698    .text.FreefallState:0000000000000000 FreefallState
+     /tmp/ccc4g6PM.s:801    .text.FreefallState:0000000000000078 $d
+     /tmp/ccc4g6PM.s:811    .rodata.LandedState.str1.4:0000000000000000 $d
+     /tmp/ccc4g6PM.s:821    .text.LandedState:0000000000000000 $t
+     /tmp/ccc4g6PM.s:828    .text.LandedState:0000000000000000 LandedState
+     /tmp/ccc4g6PM.s:934    .text.LandedState:0000000000000070 $d
+     /tmp/ccc4g6PM.s:949    .rodata.HAL_UART_RxCpltCallback.str1.4:0000000000000000 $d
+     /tmp/ccc4g6PM.s:962    .text.HAL_UART_RxCpltCallback:0000000000000000 $t
+     /tmp/ccc4g6PM.s:969    .text.HAL_UART_RxCpltCallback:0000000000000000 HAL_UART_RxCpltCallback
+     /tmp/ccc4g6PM.s:1030   .text.HAL_UART_RxCpltCallback:0000000000000038 $d
+     /tmp/ccc4g6PM.s:1163   .data.LandedFirst:0000000000000000 LandedFirst
+     /tmp/ccc4g6PM.s:1151   .data.FreefallFirst:0000000000000000 FreefallFirst
+     /tmp/ccc4g6PM.s:1133   .data.ApogeeFirst:0000000000000000 ApogeeFirst
+     /tmp/ccc4g6PM.s:1169   .data.SlowAscentFirst:0000000000000000 SlowAscentFirst
+     /tmp/ccc4g6PM.s:1145   .data.FastAscentFirst:0000000000000000 FastAscentFirst
+     /tmp/ccc4g6PM.s:1139   .data.ArmFirst:0000000000000000 ArmFirst
+     /tmp/ccc4g6PM.s:1157   .data.GroundFirst:0000000000000000 GroundFirst
+     /tmp/ccc4g6PM.s:1100   .bss.LandedStart:0000000000000000 LandedStart
+     /tmp/ccc4g6PM.s:1086   .bss.FreefallStart:0000000000000000 FreefallStart
+     /tmp/ccc4g6PM.s:1065   .bss.ApogeeStart:0000000000000000 ApogeeStart
+     /tmp/ccc4g6PM.s:1107   .bss.SlowAscentStart:0000000000000000 SlowAscentStart
+     /tmp/ccc4g6PM.s:1079   .bss.FastAscentStart:0000000000000000 FastAscentStart
+     /tmp/ccc4g6PM.s:1072   .bss.ArmStart:0000000000000000 ArmStart
+     /tmp/ccc4g6PM.s:1093   .bss.GroundStart:0000000000000000 GroundStart
+     /tmp/ccc4g6PM.s:1127   .bss.stat:0000000000000000 stat
+     /tmp/ccc4g6PM.s:1188   .data.print_Arm_msg:0000000000000000 print_Arm_msg
+     /tmp/ccc4g6PM.s:1175   .data.finalData:0000000000000000 finalData
+     /tmp/ccc4g6PM.s:1114   .bss.dataIT:0000000000000000 dataIT
+     /tmp/ccc4g6PM.s:1121   .bss.dataPol:0000000000000000 dataPol
+ARM GAS  /tmp/ccc4g6PM.s 			page 30
+
+
+     /tmp/ccc4g6PM.s:1061   .bss.ApogeeStart:0000000000000000 $d
+     /tmp/ccc4g6PM.s:1068   .bss.ArmStart:0000000000000000 $d
+     /tmp/ccc4g6PM.s:1075   .bss.FastAscentStart:0000000000000000 $d
+     /tmp/ccc4g6PM.s:1082   .bss.FreefallStart:0000000000000000 $d
+     /tmp/ccc4g6PM.s:1089   .bss.GroundStart:0000000000000000 $d
+     /tmp/ccc4g6PM.s:1096   .bss.LandedStart:0000000000000000 $d
+     /tmp/ccc4g6PM.s:1103   .bss.SlowAscentStart:0000000000000000 $d
+     /tmp/ccc4g6PM.s:1110   .bss.dataIT:0000000000000000 $d
+     /tmp/ccc4g6PM.s:1117   .bss.dataPol:0000000000000000 $d
+     /tmp/ccc4g6PM.s:1128   .bss.stat:0000000000000000 $d
+     /tmp/ccc4g6PM.s:1172   .data.finalData:0000000000000000 $d
+
+UNDEFINED SYMBOLS
+receiveS_B
+strcmp
+receiveS_IT
+sendS
+GroundEKF_run
+HAL_GetTick
+Attitude_run
+FlightEKF_run
+XBee_Transmit
+States
+APRS_Transmit
+HAL_Delay
+meas

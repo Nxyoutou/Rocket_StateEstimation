@@ -1,0 +1,1060 @@
+ARM GAS  /tmp/ccvrZ0GC.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.eabi_attribute 28, 1
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 1
+  10              		.eabi_attribute 34, 1
+  11              		.eabi_attribute 18, 4
+  12              		.file	"StateMachine.c"
+  13              		.text
+  14              	.Ltext0:
+  15              		.cfi_sections	.debug_frame
+  16              		.section	.text.BASE_Handle,"ax",%progbits
+  17              		.align	1
+  18              		.global	BASE_Handle
+  19              		.arch armv7e-m
+  20              		.syntax unified
+  21              		.thumb
+  22              		.thumb_func
+  23              		.fpu fpv5-d16
+  25              	BASE_Handle:
+  26              	.LFB396:
+  27              		.file 1 "Core/Src/StateMachine.c"
+   1:Core/Src/StateMachine.c **** #include "init.h"
+   2:Core/Src/StateMachine.c **** #include "DefFuncs.h"
+   3:Core/Src/StateMachine.c **** #include "StateMachine.h"
+   4:Core/Src/StateMachine.c **** #include "Sensors.h"
+   5:Core/Src/StateMachine.c **** #include "BMP_280.h"
+   6:Core/Src/StateMachine.c **** #include "Time.h"
+   7:Core/Src/StateMachine.c **** #include "GEKF.h"
+   8:Core/Src/StateMachine.c **** #include "FEKF.h"
+   9:Core/Src/StateMachine.c **** #include "AttitudeEstimation.h"
+  10:Core/Src/StateMachine.c **** #include "States.h"
+  11:Core/Src/StateMachine.c **** #include "fatfs.h"
+  12:Core/Src/StateMachine.c **** #include "fatfs_sd.h"
+  13:Core/Src/StateMachine.c **** 
+  14:Core/Src/StateMachine.c **** sensors meas;
+  15:Core/Src/StateMachine.c **** extern bmp280 bmp;
+  16:Core/Src/StateMachine.c **** extern TIM_HandleTypeDef htim2;
+  17:Core/Src/StateMachine.c **** extern TIM_HandleTypeDef htim3;
+  18:Core/Src/StateMachine.c **** extern TIM_HandleTypeDef htim4;
+  19:Core/Src/StateMachine.c **** extern uint8_t finalData[8];
+  20:Core/Src/StateMachine.c **** extern uint8_t stat;
+  21:Core/Src/StateMachine.c **** 
+  22:Core/Src/StateMachine.c **** FATFS fs;
+  23:Core/Src/StateMachine.c **** FIL fil;
+  24:Core/Src/StateMachine.c **** DIR dir;
+  25:Core/Src/StateMachine.c **** FRESULT fresult;
+  26:Core/Src/StateMachine.c **** char buffer[1024];
+  27:Core/Src/StateMachine.c **** 
+  28:Core/Src/StateMachine.c **** UINT br, bw;
+  29:Core/Src/StateMachine.c **** 
+  30:Core/Src/StateMachine.c **** FATFS *pfs;
+  31:Core/Src/StateMachine.c **** DWORD fre_clust;
+ARM GAS  /tmp/ccvrZ0GC.s 			page 2
+
+
+  32:Core/Src/StateMachine.c **** uint32_t total, free_space;
+  33:Core/Src/StateMachine.c **** 
+  34:Core/Src/StateMachine.c **** 
+  35:Core/Src/StateMachine.c **** 
+  36:Core/Src/StateMachine.c **** sensors meas;
+  37:Core/Src/StateMachine.c **** gekf gkal;
+  38:Core/Src/StateMachine.c **** fekf fkal;
+  39:Core/Src/StateMachine.c **** VehicleAtd atd;
+  40:Core/Src/StateMachine.c **** VehicleStates States;
+  41:Core/Src/StateMachine.c **** 
+  42:Core/Src/StateMachine.c **** uint32_t generalTime;
+  43:Core/Src/StateMachine.c **** uint32_t generalTimeStart;
+  44:Core/Src/StateMachine.c **** uint8_t startUpMeas = 1;
+  45:Core/Src/StateMachine.c **** uint8_t notLanded = 1;
+  46:Core/Src/StateMachine.c **** uint8_t statXBee;
+  47:Core/Src/StateMachine.c **** 
+  48:Core/Src/StateMachine.c **** 
+  49:Core/Src/StateMachine.c **** void statemachine_init(void)
+  50:Core/Src/StateMachine.c **** {
+  51:Core/Src/StateMachine.c ****         init_measurements(&meas);
+  52:Core/Src/StateMachine.c ****         GroundEKF_init(&gkal, 0.01f, 1.0f);
+  53:Core/Src/StateMachine.c ****         Attitude_init(&atd);
+  54:Core/Src/StateMachine.c ****         FlightEKF_init(&fkal, 0.01f, 0.003f);
+  55:Core/Src/StateMachine.c ****         States.currentState = GROUND;
+  56:Core/Src/StateMachine.c ****         States.StateHandlers[BASE] = BASE_Handle;
+  57:Core/Src/StateMachine.c ****         States.StateHandlers[GROUND] = GROUND_Handle;
+  58:Core/Src/StateMachine.c ****         States.StateHandlers[ARMED] = ARMED_Handle;
+  59:Core/Src/StateMachine.c ****         States.StateHandlers[FASTASCENT] = FASTASCENT_Handle;
+  60:Core/Src/StateMachine.c ****         States.StateHandlers[SLOWASCENT] = SLOWASCENT_Handle;
+  61:Core/Src/StateMachine.c ****         States.StateHandlers[APOGEE] = APOGEE_Handle;
+  62:Core/Src/StateMachine.c ****         States.StateHandlers[FREEFALL] = FREEFALL_Handle;
+  63:Core/Src/StateMachine.c ****         States.StateHandlers[LANDED] = LANDED_Handle;
+  64:Core/Src/StateMachine.c ****         HAL_TIM_Base_Start(&htim2);
+  65:Core/Src/StateMachine.c ****         HAL_TIM_Base_Start_IT(&htim3);
+  66:Core/Src/StateMachine.c ****         HAL_TIM_Base_Start_IT(&htim4);
+  67:Core/Src/StateMachine.c **** 	fresult = f_mount(&fs, "", 1);
+  68:Core/Src/StateMachine.c **** 
+  69:Core/Src/StateMachine.c **** 	if (fresult != FR_OK) 
+  70:Core/Src/StateMachine.c **** 	{
+  71:Core/Src/StateMachine.c **** 		sendS("c", "Unsuccessful again\r\n");
+  72:Core/Src/StateMachine.c **** 	} else 
+  73:Core/Src/StateMachine.c **** 	{
+  74:Core/Src/StateMachine.c **** 		sendS("c", "Mounted successfully! \r\n");
+  75:Core/Src/StateMachine.c **** 	}
+  76:Core/Src/StateMachine.c **** 	
+  77:Core/Src/StateMachine.c ****         generalTimeStart = HAL_GetTick();
+  78:Core/Src/StateMachine.c **** //	bmp280_PresCal(&bmp, 100);
+  79:Core/Src/StateMachine.c **** 
+  80:Core/Src/StateMachine.c **** }
+  81:Core/Src/StateMachine.c **** 
+  82:Core/Src/StateMachine.c **** void statemachine_run(void)
+  83:Core/Src/StateMachine.c **** {
+  84:Core/Src/StateMachine.c **** 	if (startUpMeas < 63)
+  85:Core/Src/StateMachine.c **** 	{
+  86:Core/Src/StateMachine.c **** 		for (startUpMeas; startUpMeas < 64; startUpMeas++)
+  87:Core/Src/StateMachine.c **** 		{
+  88:Core/Src/StateMachine.c **** 			make_measurements(&meas);
+ARM GAS  /tmp/ccvrZ0GC.s 			page 3
+
+
+  89:Core/Src/StateMachine.c **** 		}
+  90:Core/Src/StateMachine.c **** 	}
+  91:Core/Src/StateMachine.c **** 	make_measurements(&meas);
+  92:Core/Src/StateMachine.c **** //	sendS("f", meas.meas[6]);space();sendS("f", meas.meas[2]);newL();
+  93:Core/Src/StateMachine.c ****         States.StateHandlers[States.currentState]();
+  94:Core/Src/StateMachine.c **** 	generalTime = HAL_GetTick();
+  95:Core/Src/StateMachine.c **** //	sendMat(&meas.meas[0], 1, 7);newL();
+  96:Core/Src/StateMachine.c **** //	sendS("i", generalTime);newL();
+  97:Core/Src/StateMachine.c **** 
+  98:Core/Src/StateMachine.c **** 
+  99:Core/Src/StateMachine.c **** }
+ 100:Core/Src/StateMachine.c **** 
+ 101:Core/Src/StateMachine.c **** void BASE_Handle(void)
+ 102:Core/Src/StateMachine.c **** {
+  28              		.loc 1 102 1 view -0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32 0000 08B5     		push	{r3, lr}
+  33              	.LCFI0:
+  34              		.cfi_def_cfa_offset 8
+  35              		.cfi_offset 3, -8
+  36              		.cfi_offset 14, -4
+ 103:Core/Src/StateMachine.c ****         BaseState(&States);
+  37              		.loc 1 103 9 view .LVU1
+  38 0002 0248     		ldr	r0, .L3
+  39 0004 FFF7FEFF 		bl	BaseState
+  40              	.LVL0:
+ 104:Core/Src/StateMachine.c **** }
+  41              		.loc 1 104 1 is_stmt 0 view .LVU2
+  42 0008 08BD     		pop	{r3, pc}
+  43              	.L4:
+  44 000a 00BF     		.align	2
+  45              	.L3:
+  46 000c 00000000 		.word	.LANCHOR0
+  47              		.cfi_endproc
+  48              	.LFE396:
+  50              		.section	.text.GROUND_Handle,"ax",%progbits
+  51              		.align	1
+  52              		.global	GROUND_Handle
+  53              		.syntax unified
+  54              		.thumb
+  55              		.thumb_func
+  56              		.fpu fpv5-d16
+  58              	GROUND_Handle:
+  59              	.LFB397:
+ 105:Core/Src/StateMachine.c **** 
+ 106:Core/Src/StateMachine.c **** void GROUND_Handle(void)
+ 107:Core/Src/StateMachine.c **** {
+  60              		.loc 1 107 1 is_stmt 1 view -0
+  61              		.cfi_startproc
+  62              		@ args = 0, pretend = 0, frame = 0
+  63              		@ frame_needed = 0, uses_anonymous_args = 0
+  64 0000 08B5     		push	{r3, lr}
+  65              	.LCFI1:
+  66              		.cfi_def_cfa_offset 8
+  67              		.cfi_offset 3, -8
+ARM GAS  /tmp/ccvrZ0GC.s 			page 4
+
+
+  68              		.cfi_offset 14, -4
+ 108:Core/Src/StateMachine.c ****         GroundState(&gkal, &meas, &States);
+  69              		.loc 1 108 9 view .LVU4
+  70 0002 034A     		ldr	r2, .L7
+  71 0004 0349     		ldr	r1, .L7+4
+  72 0006 0448     		ldr	r0, .L7+8
+  73 0008 FFF7FEFF 		bl	GroundState
+  74              	.LVL1:
+ 109:Core/Src/StateMachine.c **** }
+  75              		.loc 1 109 1 is_stmt 0 view .LVU5
+  76 000c 08BD     		pop	{r3, pc}
+  77              	.L8:
+  78 000e 00BF     		.align	2
+  79              	.L7:
+  80 0010 00000000 		.word	.LANCHOR0
+  81 0014 00000000 		.word	.LANCHOR1
+  82 0018 00000000 		.word	.LANCHOR2
+  83              		.cfi_endproc
+  84              	.LFE397:
+  86              		.section	.text.ARMED_Handle,"ax",%progbits
+  87              		.align	1
+  88              		.global	ARMED_Handle
+  89              		.syntax unified
+  90              		.thumb
+  91              		.thumb_func
+  92              		.fpu fpv5-d16
+  94              	ARMED_Handle:
+  95              	.LFB398:
+ 110:Core/Src/StateMachine.c **** 
+ 111:Core/Src/StateMachine.c **** 
+ 112:Core/Src/StateMachine.c **** void ARMED_Handle(void)
+ 113:Core/Src/StateMachine.c **** {
+  96              		.loc 1 113 1 is_stmt 1 view -0
+  97              		.cfi_startproc
+  98              		@ args = 0, pretend = 0, frame = 0
+  99              		@ frame_needed = 0, uses_anonymous_args = 0
+ 100 0000 08B5     		push	{r3, lr}
+ 101              	.LCFI2:
+ 102              		.cfi_def_cfa_offset 8
+ 103              		.cfi_offset 3, -8
+ 104              		.cfi_offset 14, -4
+ 114:Core/Src/StateMachine.c ****         ArmedState(&fkal, &atd, &States);
+ 105              		.loc 1 114 9 view .LVU7
+ 106 0002 034A     		ldr	r2, .L11
+ 107 0004 0349     		ldr	r1, .L11+4
+ 108 0006 0448     		ldr	r0, .L11+8
+ 109 0008 FFF7FEFF 		bl	ArmedState
+ 110              	.LVL2:
+ 115:Core/Src/StateMachine.c **** }
+ 111              		.loc 1 115 1 is_stmt 0 view .LVU8
+ 112 000c 08BD     		pop	{r3, pc}
+ 113              	.L12:
+ 114 000e 00BF     		.align	2
+ 115              	.L11:
+ 116 0010 00000000 		.word	.LANCHOR0
+ 117 0014 00000000 		.word	.LANCHOR3
+ 118 0018 00000000 		.word	.LANCHOR4
+ARM GAS  /tmp/ccvrZ0GC.s 			page 5
+
+
+ 119              		.cfi_endproc
+ 120              	.LFE398:
+ 122              		.section	.text.FASTASCENT_Handle,"ax",%progbits
+ 123              		.align	1
+ 124              		.global	FASTASCENT_Handle
+ 125              		.syntax unified
+ 126              		.thumb
+ 127              		.thumb_func
+ 128              		.fpu fpv5-d16
+ 130              	FASTASCENT_Handle:
+ 131              	.LFB399:
+ 116:Core/Src/StateMachine.c **** 
+ 117:Core/Src/StateMachine.c **** void FASTASCENT_Handle(void)
+ 118:Core/Src/StateMachine.c **** {
+ 132              		.loc 1 118 1 is_stmt 1 view -0
+ 133              		.cfi_startproc
+ 134              		@ args = 0, pretend = 0, frame = 0
+ 135              		@ frame_needed = 0, uses_anonymous_args = 0
+ 136 0000 08B5     		push	{r3, lr}
+ 137              	.LCFI3:
+ 138              		.cfi_def_cfa_offset 8
+ 139              		.cfi_offset 3, -8
+ 140              		.cfi_offset 14, -4
+ 119:Core/Src/StateMachine.c ****         FastAscentState(&fkal, &atd, &States);
+ 141              		.loc 1 119 9 view .LVU10
+ 142 0002 034A     		ldr	r2, .L15
+ 143 0004 0349     		ldr	r1, .L15+4
+ 144 0006 0448     		ldr	r0, .L15+8
+ 145 0008 FFF7FEFF 		bl	FastAscentState
+ 146              	.LVL3:
+ 120:Core/Src/StateMachine.c **** }
+ 147              		.loc 1 120 1 is_stmt 0 view .LVU11
+ 148 000c 08BD     		pop	{r3, pc}
+ 149              	.L16:
+ 150 000e 00BF     		.align	2
+ 151              	.L15:
+ 152 0010 00000000 		.word	.LANCHOR0
+ 153 0014 00000000 		.word	.LANCHOR3
+ 154 0018 00000000 		.word	.LANCHOR4
+ 155              		.cfi_endproc
+ 156              	.LFE399:
+ 158              		.section	.text.SLOWASCENT_Handle,"ax",%progbits
+ 159              		.align	1
+ 160              		.global	SLOWASCENT_Handle
+ 161              		.syntax unified
+ 162              		.thumb
+ 163              		.thumb_func
+ 164              		.fpu fpv5-d16
+ 166              	SLOWASCENT_Handle:
+ 167              	.LFB400:
+ 121:Core/Src/StateMachine.c **** 
+ 122:Core/Src/StateMachine.c **** void SLOWASCENT_Handle(void)
+ 123:Core/Src/StateMachine.c **** {
+ 168              		.loc 1 123 1 is_stmt 1 view -0
+ 169              		.cfi_startproc
+ 170              		@ args = 0, pretend = 0, frame = 0
+ 171              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  /tmp/ccvrZ0GC.s 			page 6
+
+
+ 172 0000 08B5     		push	{r3, lr}
+ 173              	.LCFI4:
+ 174              		.cfi_def_cfa_offset 8
+ 175              		.cfi_offset 3, -8
+ 176              		.cfi_offset 14, -4
+ 124:Core/Src/StateMachine.c ****         SlowAscentState(&fkal, &atd, &States);
+ 177              		.loc 1 124 9 view .LVU13
+ 178 0002 034A     		ldr	r2, .L19
+ 179 0004 0349     		ldr	r1, .L19+4
+ 180 0006 0448     		ldr	r0, .L19+8
+ 181 0008 FFF7FEFF 		bl	SlowAscentState
+ 182              	.LVL4:
+ 125:Core/Src/StateMachine.c **** }
+ 183              		.loc 1 125 1 is_stmt 0 view .LVU14
+ 184 000c 08BD     		pop	{r3, pc}
+ 185              	.L20:
+ 186 000e 00BF     		.align	2
+ 187              	.L19:
+ 188 0010 00000000 		.word	.LANCHOR0
+ 189 0014 00000000 		.word	.LANCHOR3
+ 190 0018 00000000 		.word	.LANCHOR4
+ 191              		.cfi_endproc
+ 192              	.LFE400:
+ 194              		.section	.text.APOGEE_Handle,"ax",%progbits
+ 195              		.align	1
+ 196              		.global	APOGEE_Handle
+ 197              		.syntax unified
+ 198              		.thumb
+ 199              		.thumb_func
+ 200              		.fpu fpv5-d16
+ 202              	APOGEE_Handle:
+ 203              	.LFB401:
+ 126:Core/Src/StateMachine.c **** 
+ 127:Core/Src/StateMachine.c **** void APOGEE_Handle(void)
+ 128:Core/Src/StateMachine.c **** {
+ 204              		.loc 1 128 1 is_stmt 1 view -0
+ 205              		.cfi_startproc
+ 206              		@ args = 0, pretend = 0, frame = 0
+ 207              		@ frame_needed = 0, uses_anonymous_args = 0
+ 208 0000 08B5     		push	{r3, lr}
+ 209              	.LCFI5:
+ 210              		.cfi_def_cfa_offset 8
+ 211              		.cfi_offset 3, -8
+ 212              		.cfi_offset 14, -4
+ 129:Core/Src/StateMachine.c ****         ApogeeState(&fkal, &atd, &States);
+ 213              		.loc 1 129 9 view .LVU16
+ 214 0002 034A     		ldr	r2, .L23
+ 215 0004 0349     		ldr	r1, .L23+4
+ 216 0006 0448     		ldr	r0, .L23+8
+ 217 0008 FFF7FEFF 		bl	ApogeeState
+ 218              	.LVL5:
+ 130:Core/Src/StateMachine.c **** }
+ 219              		.loc 1 130 1 is_stmt 0 view .LVU17
+ 220 000c 08BD     		pop	{r3, pc}
+ 221              	.L24:
+ 222 000e 00BF     		.align	2
+ 223              	.L23:
+ARM GAS  /tmp/ccvrZ0GC.s 			page 7
+
+
+ 224 0010 00000000 		.word	.LANCHOR0
+ 225 0014 00000000 		.word	.LANCHOR3
+ 226 0018 00000000 		.word	.LANCHOR4
+ 227              		.cfi_endproc
+ 228              	.LFE401:
+ 230              		.section	.text.FREEFALL_Handle,"ax",%progbits
+ 231              		.align	1
+ 232              		.global	FREEFALL_Handle
+ 233              		.syntax unified
+ 234              		.thumb
+ 235              		.thumb_func
+ 236              		.fpu fpv5-d16
+ 238              	FREEFALL_Handle:
+ 239              	.LFB402:
+ 131:Core/Src/StateMachine.c **** 
+ 132:Core/Src/StateMachine.c **** void FREEFALL_Handle(void)
+ 133:Core/Src/StateMachine.c **** {
+ 240              		.loc 1 133 1 is_stmt 1 view -0
+ 241              		.cfi_startproc
+ 242              		@ args = 0, pretend = 0, frame = 0
+ 243              		@ frame_needed = 0, uses_anonymous_args = 0
+ 244 0000 08B5     		push	{r3, lr}
+ 245              	.LCFI6:
+ 246              		.cfi_def_cfa_offset 8
+ 247              		.cfi_offset 3, -8
+ 248              		.cfi_offset 14, -4
+ 134:Core/Src/StateMachine.c ****         FreefallState(&fkal, &atd, &States);
+ 249              		.loc 1 134 9 view .LVU19
+ 250 0002 034A     		ldr	r2, .L27
+ 251 0004 0349     		ldr	r1, .L27+4
+ 252 0006 0448     		ldr	r0, .L27+8
+ 253 0008 FFF7FEFF 		bl	FreefallState
+ 254              	.LVL6:
+ 135:Core/Src/StateMachine.c **** }
+ 255              		.loc 1 135 1 is_stmt 0 view .LVU20
+ 256 000c 08BD     		pop	{r3, pc}
+ 257              	.L28:
+ 258 000e 00BF     		.align	2
+ 259              	.L27:
+ 260 0010 00000000 		.word	.LANCHOR0
+ 261 0014 00000000 		.word	.LANCHOR3
+ 262 0018 00000000 		.word	.LANCHOR4
+ 263              		.cfi_endproc
+ 264              	.LFE402:
+ 266              		.section	.text.LANDED_Handle,"ax",%progbits
+ 267              		.align	1
+ 268              		.global	LANDED_Handle
+ 269              		.syntax unified
+ 270              		.thumb
+ 271              		.thumb_func
+ 272              		.fpu fpv5-d16
+ 274              	LANDED_Handle:
+ 275              	.LFB403:
+ 136:Core/Src/StateMachine.c **** 
+ 137:Core/Src/StateMachine.c **** void LANDED_Handle(void)
+ 138:Core/Src/StateMachine.c **** {
+ 276              		.loc 1 138 1 is_stmt 1 view -0
+ARM GAS  /tmp/ccvrZ0GC.s 			page 8
+
+
+ 277              		.cfi_startproc
+ 278              		@ args = 0, pretend = 0, frame = 0
+ 279              		@ frame_needed = 0, uses_anonymous_args = 0
+ 280 0000 08B5     		push	{r3, lr}
+ 281              	.LCFI7:
+ 282              		.cfi_def_cfa_offset 8
+ 283              		.cfi_offset 3, -8
+ 284              		.cfi_offset 14, -4
+ 139:Core/Src/StateMachine.c ****         LandedState(&fkal, &atd, &States);
+ 285              		.loc 1 139 9 view .LVU22
+ 286 0002 034A     		ldr	r2, .L31
+ 287 0004 0349     		ldr	r1, .L31+4
+ 288 0006 0448     		ldr	r0, .L31+8
+ 289 0008 FFF7FEFF 		bl	LandedState
+ 290              	.LVL7:
+ 140:Core/Src/StateMachine.c **** }
+ 291              		.loc 1 140 1 is_stmt 0 view .LVU23
+ 292 000c 08BD     		pop	{r3, pc}
+ 293              	.L32:
+ 294 000e 00BF     		.align	2
+ 295              	.L31:
+ 296 0010 00000000 		.word	.LANCHOR0
+ 297 0014 00000000 		.word	.LANCHOR3
+ 298 0018 00000000 		.word	.LANCHOR4
+ 299              		.cfi_endproc
+ 300              	.LFE403:
+ 302              		.section	.rodata.statemachine_init.str1.4,"aMS",%progbits,1
+ 303              		.align	2
+ 304              	.LC0:
+ 305 0000 00       		.ascii	"\000"
+ 306 0001 000000   		.align	2
+ 307              	.LC1:
+ 308 0004 556E7375 		.ascii	"Unsuccessful again\015\012\000"
+ 308      63636573 
+ 308      7366756C 
+ 308      20616761 
+ 308      696E0D0A 
+ 309 0019 000000   		.align	2
+ 310              	.LC2:
+ 311 001c 6300     		.ascii	"c\000"
+ 312 001e 0000     		.align	2
+ 313              	.LC3:
+ 314 0020 4D6F756E 		.ascii	"Mounted successfully! \015\012\000"
+ 314      74656420 
+ 314      73756363 
+ 314      65737366 
+ 314      756C6C79 
+ 315              		.section	.text.statemachine_init,"ax",%progbits
+ 316              		.align	1
+ 317              		.global	statemachine_init
+ 318              		.syntax unified
+ 319              		.thumb
+ 320              		.thumb_func
+ 321              		.fpu fpv5-d16
+ 323              	statemachine_init:
+ 324              	.LFB394:
+  50:Core/Src/StateMachine.c ****         init_measurements(&meas);
+ARM GAS  /tmp/ccvrZ0GC.s 			page 9
+
+
+ 325              		.loc 1 50 1 is_stmt 1 view -0
+ 326              		.cfi_startproc
+ 327              		@ args = 0, pretend = 0, frame = 0
+ 328              		@ frame_needed = 0, uses_anonymous_args = 0
+ 329 0000 10B5     		push	{r4, lr}
+ 330              	.LCFI8:
+ 331              		.cfi_def_cfa_offset 8
+ 332              		.cfi_offset 4, -8
+ 333              		.cfi_offset 14, -4
+ 334 0002 2DED028B 		vpush.64	{d8}
+ 335              	.LCFI9:
+ 336              		.cfi_def_cfa_offset 16
+ 337              		.cfi_offset 80, -16
+ 338              		.cfi_offset 81, -12
+  51:Core/Src/StateMachine.c ****         GroundEKF_init(&gkal, 0.01f, 1.0f);
+ 339              		.loc 1 51 9 view .LVU25
+ 340 0006 2548     		ldr	r0, .L37
+ 341 0008 FFF7FEFF 		bl	init_measurements
+ 342              	.LVL8:
+  52:Core/Src/StateMachine.c ****         Attitude_init(&atd);
+ 343              		.loc 1 52 9 view .LVU26
+ 344 000c 9FED248A 		vldr.32	s16, .L37+4
+ 345 0010 F7EE000A 		vmov.f32	s1, #1.0e+0
+ 346 0014 B0EE480A 		vmov.f32	s0, s16
+ 347 0018 2248     		ldr	r0, .L37+8
+ 348 001a FFF7FEFF 		bl	GroundEKF_init
+ 349              	.LVL9:
+  53:Core/Src/StateMachine.c ****         FlightEKF_init(&fkal, 0.01f, 0.003f);
+ 350              		.loc 1 53 9 view .LVU27
+ 351 001e 2248     		ldr	r0, .L37+12
+ 352 0020 FFF7FEFF 		bl	Attitude_init
+ 353              	.LVL10:
+  54:Core/Src/StateMachine.c ****         States.currentState = GROUND;
+ 354              		.loc 1 54 9 view .LVU28
+ 355 0024 DFED210A 		vldr.32	s1, .L37+16
+ 356 0028 B0EE480A 		vmov.f32	s0, s16
+ 357 002c 2048     		ldr	r0, .L37+20
+ 358 002e FFF7FEFF 		bl	FlightEKF_init
+ 359              	.LVL11:
+  55:Core/Src/StateMachine.c ****         States.StateHandlers[BASE] = BASE_Handle;
+ 360              		.loc 1 55 9 view .LVU29
+  55:Core/Src/StateMachine.c ****         States.StateHandlers[BASE] = BASE_Handle;
+ 361              		.loc 1 55 29 is_stmt 0 view .LVU30
+ 362 0032 204B     		ldr	r3, .L37+24
+ 363 0034 0124     		movs	r4, #1
+ 364 0036 5C70     		strb	r4, [r3, #1]
+  56:Core/Src/StateMachine.c ****         States.StateHandlers[GROUND] = GROUND_Handle;
+ 365              		.loc 1 56 9 is_stmt 1 view .LVU31
+  56:Core/Src/StateMachine.c ****         States.StateHandlers[GROUND] = GROUND_Handle;
+ 366              		.loc 1 56 36 is_stmt 0 view .LVU32
+ 367 0038 1F4A     		ldr	r2, .L37+28
+ 368 003a 5A60     		str	r2, [r3, #4]
+  57:Core/Src/StateMachine.c ****         States.StateHandlers[ARMED] = ARMED_Handle;
+ 369              		.loc 1 57 9 is_stmt 1 view .LVU33
+  57:Core/Src/StateMachine.c ****         States.StateHandlers[ARMED] = ARMED_Handle;
+ 370              		.loc 1 57 38 is_stmt 0 view .LVU34
+ 371 003c 1F4A     		ldr	r2, .L37+32
+ARM GAS  /tmp/ccvrZ0GC.s 			page 10
+
+
+ 372 003e 9A60     		str	r2, [r3, #8]
+  58:Core/Src/StateMachine.c ****         States.StateHandlers[FASTASCENT] = FASTASCENT_Handle;
+ 373              		.loc 1 58 9 is_stmt 1 view .LVU35
+  58:Core/Src/StateMachine.c ****         States.StateHandlers[FASTASCENT] = FASTASCENT_Handle;
+ 374              		.loc 1 58 37 is_stmt 0 view .LVU36
+ 375 0040 1F4A     		ldr	r2, .L37+36
+ 376 0042 DA60     		str	r2, [r3, #12]
+  59:Core/Src/StateMachine.c ****         States.StateHandlers[SLOWASCENT] = SLOWASCENT_Handle;
+ 377              		.loc 1 59 9 is_stmt 1 view .LVU37
+  59:Core/Src/StateMachine.c ****         States.StateHandlers[SLOWASCENT] = SLOWASCENT_Handle;
+ 378              		.loc 1 59 42 is_stmt 0 view .LVU38
+ 379 0044 1F4A     		ldr	r2, .L37+40
+ 380 0046 1A61     		str	r2, [r3, #16]
+  60:Core/Src/StateMachine.c ****         States.StateHandlers[APOGEE] = APOGEE_Handle;
+ 381              		.loc 1 60 9 is_stmt 1 view .LVU39
+  60:Core/Src/StateMachine.c ****         States.StateHandlers[APOGEE] = APOGEE_Handle;
+ 382              		.loc 1 60 42 is_stmt 0 view .LVU40
+ 383 0048 1F4A     		ldr	r2, .L37+44
+ 384 004a 5A61     		str	r2, [r3, #20]
+  61:Core/Src/StateMachine.c ****         States.StateHandlers[FREEFALL] = FREEFALL_Handle;
+ 385              		.loc 1 61 9 is_stmt 1 view .LVU41
+  61:Core/Src/StateMachine.c ****         States.StateHandlers[FREEFALL] = FREEFALL_Handle;
+ 386              		.loc 1 61 38 is_stmt 0 view .LVU42
+ 387 004c 1F4A     		ldr	r2, .L37+48
+ 388 004e 9A61     		str	r2, [r3, #24]
+  62:Core/Src/StateMachine.c ****         States.StateHandlers[LANDED] = LANDED_Handle;
+ 389              		.loc 1 62 9 is_stmt 1 view .LVU43
+  62:Core/Src/StateMachine.c ****         States.StateHandlers[LANDED] = LANDED_Handle;
+ 390              		.loc 1 62 40 is_stmt 0 view .LVU44
+ 391 0050 1F4A     		ldr	r2, .L37+52
+ 392 0052 DA61     		str	r2, [r3, #28]
+  63:Core/Src/StateMachine.c ****         HAL_TIM_Base_Start(&htim2);
+ 393              		.loc 1 63 9 is_stmt 1 view .LVU45
+  63:Core/Src/StateMachine.c ****         HAL_TIM_Base_Start(&htim2);
+ 394              		.loc 1 63 38 is_stmt 0 view .LVU46
+ 395 0054 1F4A     		ldr	r2, .L37+56
+ 396 0056 1A62     		str	r2, [r3, #32]
+  64:Core/Src/StateMachine.c ****         HAL_TIM_Base_Start_IT(&htim3);
+ 397              		.loc 1 64 9 is_stmt 1 view .LVU47
+ 398 0058 1F48     		ldr	r0, .L37+60
+ 399 005a FFF7FEFF 		bl	HAL_TIM_Base_Start
+ 400              	.LVL12:
+  65:Core/Src/StateMachine.c ****         HAL_TIM_Base_Start_IT(&htim4);
+ 401              		.loc 1 65 9 view .LVU48
+ 402 005e 1F48     		ldr	r0, .L37+64
+ 403 0060 FFF7FEFF 		bl	HAL_TIM_Base_Start_IT
+ 404              	.LVL13:
+  66:Core/Src/StateMachine.c **** 	fresult = f_mount(&fs, "", 1);
+ 405              		.loc 1 66 9 view .LVU49
+ 406 0064 1E48     		ldr	r0, .L37+68
+ 407 0066 FFF7FEFF 		bl	HAL_TIM_Base_Start_IT
+ 408              	.LVL14:
+  67:Core/Src/StateMachine.c **** 
+ 409              		.loc 1 67 2 view .LVU50
+  67:Core/Src/StateMachine.c **** 
+ 410              		.loc 1 67 12 is_stmt 0 view .LVU51
+ 411 006a 2246     		mov	r2, r4
+ARM GAS  /tmp/ccvrZ0GC.s 			page 11
+
+
+ 412 006c 1D49     		ldr	r1, .L37+72
+ 413 006e 1E48     		ldr	r0, .L37+76
+ 414 0070 FFF7FEFF 		bl	f_mount
+ 415              	.LVL15:
+  67:Core/Src/StateMachine.c **** 
+ 416              		.loc 1 67 10 view .LVU52
+ 417 0074 1D4B     		ldr	r3, .L37+80
+ 418 0076 1870     		strb	r0, [r3]
+  69:Core/Src/StateMachine.c **** 	{
+ 419              		.loc 1 69 2 is_stmt 1 view .LVU53
+  69:Core/Src/StateMachine.c **** 	{
+ 420              		.loc 1 69 5 is_stmt 0 view .LVU54
+ 421 0078 50B1     		cbz	r0, .L34
+  71:Core/Src/StateMachine.c **** 	} else 
+ 422              		.loc 1 71 3 is_stmt 1 view .LVU55
+ 423 007a 1D49     		ldr	r1, .L37+84
+ 424 007c 1D48     		ldr	r0, .L37+88
+ 425 007e FFF7FEFF 		bl	sendS
+ 426              	.LVL16:
+ 427              	.L35:
+  77:Core/Src/StateMachine.c **** //	bmp280_PresCal(&bmp, 100);
+ 428              		.loc 1 77 9 view .LVU56
+  77:Core/Src/StateMachine.c **** //	bmp280_PresCal(&bmp, 100);
+ 429              		.loc 1 77 28 is_stmt 0 view .LVU57
+ 430 0082 FFF7FEFF 		bl	HAL_GetTick
+ 431              	.LVL17:
+  77:Core/Src/StateMachine.c **** //	bmp280_PresCal(&bmp, 100);
+ 432              		.loc 1 77 26 view .LVU58
+ 433 0086 1C4B     		ldr	r3, .L37+92
+ 434 0088 1860     		str	r0, [r3]
+  80:Core/Src/StateMachine.c **** 
+ 435              		.loc 1 80 1 view .LVU59
+ 436 008a BDEC028B 		vldm	sp!, {d8}
+ 437              	.LCFI10:
+ 438              		.cfi_remember_state
+ 439              		.cfi_restore 80
+ 440              		.cfi_restore 81
+ 441              		.cfi_def_cfa_offset 8
+ 442 008e 10BD     		pop	{r4, pc}
+ 443              	.L34:
+ 444              	.LCFI11:
+ 445              		.cfi_restore_state
+  74:Core/Src/StateMachine.c **** 	}
+ 446              		.loc 1 74 3 is_stmt 1 view .LVU60
+ 447 0090 1A49     		ldr	r1, .L37+96
+ 448 0092 1848     		ldr	r0, .L37+88
+ 449 0094 FFF7FEFF 		bl	sendS
+ 450              	.LVL18:
+ 451 0098 F3E7     		b	.L35
+ 452              	.L38:
+ 453 009a 00BF     		.align	2
+ 454              	.L37:
+ 455 009c 00000000 		.word	.LANCHOR1
+ 456 00a0 0AD7233C 		.word	1008981770
+ 457 00a4 00000000 		.word	.LANCHOR2
+ 458 00a8 00000000 		.word	.LANCHOR3
+ 459 00ac A69B443B 		.word	994352038
+ARM GAS  /tmp/ccvrZ0GC.s 			page 12
+
+
+ 460 00b0 00000000 		.word	.LANCHOR4
+ 461 00b4 00000000 		.word	.LANCHOR0
+ 462 00b8 00000000 		.word	BASE_Handle
+ 463 00bc 00000000 		.word	GROUND_Handle
+ 464 00c0 00000000 		.word	ARMED_Handle
+ 465 00c4 00000000 		.word	FASTASCENT_Handle
+ 466 00c8 00000000 		.word	SLOWASCENT_Handle
+ 467 00cc 00000000 		.word	APOGEE_Handle
+ 468 00d0 00000000 		.word	FREEFALL_Handle
+ 469 00d4 00000000 		.word	LANDED_Handle
+ 470 00d8 00000000 		.word	htim2
+ 471 00dc 00000000 		.word	htim3
+ 472 00e0 00000000 		.word	htim4
+ 473 00e4 00000000 		.word	.LC0
+ 474 00e8 00000000 		.word	fs
+ 475 00ec 00000000 		.word	.LANCHOR5
+ 476 00f0 04000000 		.word	.LC1
+ 477 00f4 1C000000 		.word	.LC2
+ 478 00f8 00000000 		.word	.LANCHOR6
+ 479 00fc 20000000 		.word	.LC3
+ 480              		.cfi_endproc
+ 481              	.LFE394:
+ 483              		.section	.text.statemachine_run,"ax",%progbits
+ 484              		.align	1
+ 485              		.global	statemachine_run
+ 486              		.syntax unified
+ 487              		.thumb
+ 488              		.thumb_func
+ 489              		.fpu fpv5-d16
+ 491              	statemachine_run:
+ 492              	.LFB395:
+  83:Core/Src/StateMachine.c **** 	if (startUpMeas < 63)
+ 493              		.loc 1 83 1 view -0
+ 494              		.cfi_startproc
+ 495              		@ args = 0, pretend = 0, frame = 0
+ 496              		@ frame_needed = 0, uses_anonymous_args = 0
+ 497 0000 08B5     		push	{r3, lr}
+ 498              	.LCFI12:
+ 499              		.cfi_def_cfa_offset 8
+ 500              		.cfi_offset 3, -8
+ 501              		.cfi_offset 14, -4
+  84:Core/Src/StateMachine.c **** 	{
+ 502              		.loc 1 84 2 view .LVU62
+  84:Core/Src/StateMachine.c **** 	{
+ 503              		.loc 1 84 18 is_stmt 0 view .LVU63
+ 504 0002 0F4B     		ldr	r3, .L44
+ 505 0004 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  84:Core/Src/StateMachine.c **** 	{
+ 506              		.loc 1 84 5 view .LVU64
+ 507 0006 3E2B     		cmp	r3, #62
+ 508 0008 14D9     		bls	.L40
+ 509              	.L41:
+  91:Core/Src/StateMachine.c **** //	sendS("f", meas.meas[6]);space();sendS("f", meas.meas[2]);newL();
+ 510              		.loc 1 91 2 is_stmt 1 view .LVU65
+ 511 000a 0E48     		ldr	r0, .L44+4
+ 512 000c FFF7FEFF 		bl	make_measurements
+ 513              	.LVL19:
+ARM GAS  /tmp/ccvrZ0GC.s 			page 13
+
+
+  93:Core/Src/StateMachine.c **** 	generalTime = HAL_GetTick();
+ 514              		.loc 1 93 9 view .LVU66
+  93:Core/Src/StateMachine.c **** 	generalTime = HAL_GetTick();
+ 515              		.loc 1 93 36 is_stmt 0 view .LVU67
+ 516 0010 0D4B     		ldr	r3, .L44+8
+ 517 0012 5A78     		ldrb	r2, [r3, #1]	@ zero_extendqisi2
+  93:Core/Src/StateMachine.c **** 	generalTime = HAL_GetTick();
+ 518              		.loc 1 93 29 view .LVU68
+ 519 0014 03EB8203 		add	r3, r3, r2, lsl #2
+ 520 0018 5B68     		ldr	r3, [r3, #4]
+  93:Core/Src/StateMachine.c **** 	generalTime = HAL_GetTick();
+ 521              		.loc 1 93 9 view .LVU69
+ 522 001a 9847     		blx	r3
+ 523              	.LVL20:
+  94:Core/Src/StateMachine.c **** //	sendMat(&meas.meas[0], 1, 7);newL();
+ 524              		.loc 1 94 2 is_stmt 1 view .LVU70
+  94:Core/Src/StateMachine.c **** //	sendMat(&meas.meas[0], 1, 7);newL();
+ 525              		.loc 1 94 16 is_stmt 0 view .LVU71
+ 526 001c FFF7FEFF 		bl	HAL_GetTick
+ 527              	.LVL21:
+  94:Core/Src/StateMachine.c **** //	sendMat(&meas.meas[0], 1, 7);newL();
+ 528              		.loc 1 94 14 view .LVU72
+ 529 0020 0A4B     		ldr	r3, .L44+12
+ 530 0022 1860     		str	r0, [r3]
+  99:Core/Src/StateMachine.c **** 
+ 531              		.loc 1 99 1 view .LVU73
+ 532 0024 08BD     		pop	{r3, pc}
+ 533              	.L42:
+  88:Core/Src/StateMachine.c **** 		}
+ 534              		.loc 1 88 4 is_stmt 1 discriminator 2 view .LVU74
+ 535 0026 0748     		ldr	r0, .L44+4
+ 536 0028 FFF7FEFF 		bl	make_measurements
+ 537              	.LVL22:
+  86:Core/Src/StateMachine.c **** 		{
+ 538              		.loc 1 86 39 discriminator 2 view .LVU75
+  86:Core/Src/StateMachine.c **** 		{
+ 539              		.loc 1 86 50 is_stmt 0 discriminator 2 view .LVU76
+ 540 002c 044A     		ldr	r2, .L44
+ 541 002e 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
+ 542 0030 0133     		adds	r3, r3, #1
+ 543 0032 1370     		strb	r3, [r2]
+ 544              	.L40:
+  86:Core/Src/StateMachine.c **** 		{
+ 545              		.loc 1 86 21 is_stmt 1 discriminator 1 view .LVU77
+  86:Core/Src/StateMachine.c **** 		{
+ 546              		.loc 1 86 33 is_stmt 0 discriminator 1 view .LVU78
+ 547 0034 024B     		ldr	r3, .L44
+ 548 0036 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+  86:Core/Src/StateMachine.c **** 		{
+ 549              		.loc 1 86 3 discriminator 1 view .LVU79
+ 550 0038 3F2B     		cmp	r3, #63
+ 551 003a F4D9     		bls	.L42
+ 552 003c E5E7     		b	.L41
+ 553              	.L45:
+ 554 003e 00BF     		.align	2
+ 555              	.L44:
+ 556 0040 00000000 		.word	.LANCHOR7
+ARM GAS  /tmp/ccvrZ0GC.s 			page 14
+
+
+ 557 0044 00000000 		.word	.LANCHOR1
+ 558 0048 00000000 		.word	.LANCHOR0
+ 559 004c 00000000 		.word	.LANCHOR8
+ 560              		.cfi_endproc
+ 561              	.LFE395:
+ 563              		.global	statXBee
+ 564              		.global	notLanded
+ 565              		.global	startUpMeas
+ 566              		.global	generalTimeStart
+ 567              		.global	generalTime
+ 568              		.global	States
+ 569              		.global	atd
+ 570              		.global	fkal
+ 571              		.global	gkal
+ 572              		.global	free_space
+ 573              		.global	total
+ 574              		.global	fre_clust
+ 575              		.global	pfs
+ 576              		.global	bw
+ 577              		.global	br
+ 578              		.global	buffer
+ 579              		.global	fresult
+ 580              		.global	dir
+ 581              		.global	fil
+ 582              		.global	fs
+ 583              		.global	meas
+ 584              		.section	.bss.States,"aw",%nobits
+ 585              		.align	2
+ 586              		.set	.LANCHOR0,. + 0
+ 589              	States:
+ 590 0000 00000000 		.space	64
+ 590      00000000 
+ 590      00000000 
+ 590      00000000 
+ 590      00000000 
+ 591              		.section	.bss.atd,"aw",%nobits
+ 592              		.align	2
+ 593              		.set	.LANCHOR3,. + 0
+ 596              	atd:
+ 597 0000 00000000 		.space	80
+ 597      00000000 
+ 597      00000000 
+ 597      00000000 
+ 597      00000000 
+ 598              		.section	.bss.br,"aw",%nobits
+ 599              		.align	2
+ 602              	br:
+ 603 0000 00000000 		.space	4
+ 604              		.section	.bss.buffer,"aw",%nobits
+ 605              		.align	2
+ 608              	buffer:
+ 609 0000 00000000 		.space	1024
+ 609      00000000 
+ 609      00000000 
+ 609      00000000 
+ 609      00000000 
+ 610              		.section	.bss.bw,"aw",%nobits
+ARM GAS  /tmp/ccvrZ0GC.s 			page 15
+
+
+ 611              		.align	2
+ 614              	bw:
+ 615 0000 00000000 		.space	4
+ 616              		.section	.bss.dir,"aw",%nobits
+ 617              		.align	2
+ 620              	dir:
+ 621 0000 00000000 		.space	52
+ 621      00000000 
+ 621      00000000 
+ 621      00000000 
+ 621      00000000 
+ 622              		.section	.bss.fil,"aw",%nobits
+ 623              		.align	2
+ 626              	fil:
+ 627 0000 00000000 		.space	4144
+ 627      00000000 
+ 627      00000000 
+ 627      00000000 
+ 627      00000000 
+ 628              		.section	.bss.fkal,"aw",%nobits
+ 629              		.align	2
+ 630              		.set	.LANCHOR4,. + 0
+ 633              	fkal:
+ 634 0000 00000000 		.space	244
+ 634      00000000 
+ 634      00000000 
+ 634      00000000 
+ 634      00000000 
+ 635              		.section	.bss.fre_clust,"aw",%nobits
+ 636              		.align	2
+ 639              	fre_clust:
+ 640 0000 00000000 		.space	4
+ 641              		.section	.bss.free_space,"aw",%nobits
+ 642              		.align	2
+ 645              	free_space:
+ 646 0000 00000000 		.space	4
+ 647              		.section	.bss.fresult,"aw",%nobits
+ 648              		.set	.LANCHOR5,. + 0
+ 651              	fresult:
+ 652 0000 00       		.space	1
+ 653              		.section	.bss.fs,"aw",%nobits
+ 654              		.align	2
+ 657              	fs:
+ 658 0000 00000000 		.space	4152
+ 658      00000000 
+ 658      00000000 
+ 658      00000000 
+ 658      00000000 
+ 659              		.section	.bss.generalTime,"aw",%nobits
+ 660              		.align	2
+ 661              		.set	.LANCHOR8,. + 0
+ 664              	generalTime:
+ 665 0000 00000000 		.space	4
+ 666              		.section	.bss.generalTimeStart,"aw",%nobits
+ 667              		.align	2
+ 668              		.set	.LANCHOR6,. + 0
+ 671              	generalTimeStart:
+ARM GAS  /tmp/ccvrZ0GC.s 			page 16
+
+
+ 672 0000 00000000 		.space	4
+ 673              		.section	.bss.gkal,"aw",%nobits
+ 674              		.align	2
+ 675              		.set	.LANCHOR2,. + 0
+ 678              	gkal:
+ 679 0000 00000000 		.space	200
+ 679      00000000 
+ 679      00000000 
+ 679      00000000 
+ 679      00000000 
+ 680              		.section	.bss.meas,"aw",%nobits
+ 681              		.align	2
+ 682              		.set	.LANCHOR1,. + 0
+ 685              	meas:
+ 686 0000 00000000 		.space	64
+ 686      00000000 
+ 686      00000000 
+ 686      00000000 
+ 686      00000000 
+ 687              		.section	.bss.pfs,"aw",%nobits
+ 688              		.align	2
+ 691              	pfs:
+ 692 0000 00000000 		.space	4
+ 693              		.section	.bss.statXBee,"aw",%nobits
+ 696              	statXBee:
+ 697 0000 00       		.space	1
+ 698              		.section	.bss.total,"aw",%nobits
+ 699              		.align	2
+ 702              	total:
+ 703 0000 00000000 		.space	4
+ 704              		.section	.data.notLanded,"aw"
+ 707              	notLanded:
+ 708 0000 01       		.byte	1
+ 709              		.section	.data.startUpMeas,"aw"
+ 710              		.set	.LANCHOR7,. + 0
+ 713              	startUpMeas:
+ 714 0000 01       		.byte	1
+ 715              		.text
+ 716              	.Letext0:
+ 717              		.file 2 "/usr/lib/gcc/arm-none-eabi/10.3.1/include/stdint.h"
+ 718              		.file 3 "Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h723xx.h"
+ 719              		.file 4 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 720              		.file 5 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_dma.h"
+ 721              		.file 6 "Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim.h"
+ 722              		.file 7 "Core/Inc/StateMachine.h"
+ 723              		.file 8 "Core/Inc/Sensors.h"
+ 724              		.file 9 "Drivers/CMSIS/DSP/Include/arm_math.h"
+ 725              		.file 10 "Core/Inc/GEKF.h"
+ 726              		.file 11 "Core/Inc/AttitudeEstimation.h"
+ 727              		.file 12 "Core/Inc/FEKF.h"
+ 728              		.file 13 "Middlewares/Third_Party/FatFs/src/integer.h"
+ 729              		.file 14 "Middlewares/Third_Party/FatFs/src/ff.h"
+ 730              		.file 15 "Core/Inc/States.h"
+ 731              		.file 16 "Core/Inc/init.h"
+ 732              		.file 17 "Core/Inc/DefFuncs.h"
+ARM GAS  /tmp/ccvrZ0GC.s 			page 17
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 StateMachine.c
+     /tmp/ccvrZ0GC.s:17     .text.BASE_Handle:0000000000000000 $t
+     /tmp/ccvrZ0GC.s:25     .text.BASE_Handle:0000000000000000 BASE_Handle
+     /tmp/ccvrZ0GC.s:46     .text.BASE_Handle:000000000000000c $d
+     /tmp/ccvrZ0GC.s:51     .text.GROUND_Handle:0000000000000000 $t
+     /tmp/ccvrZ0GC.s:58     .text.GROUND_Handle:0000000000000000 GROUND_Handle
+     /tmp/ccvrZ0GC.s:80     .text.GROUND_Handle:0000000000000010 $d
+     /tmp/ccvrZ0GC.s:87     .text.ARMED_Handle:0000000000000000 $t
+     /tmp/ccvrZ0GC.s:94     .text.ARMED_Handle:0000000000000000 ARMED_Handle
+     /tmp/ccvrZ0GC.s:116    .text.ARMED_Handle:0000000000000010 $d
+     /tmp/ccvrZ0GC.s:123    .text.FASTASCENT_Handle:0000000000000000 $t
+     /tmp/ccvrZ0GC.s:130    .text.FASTASCENT_Handle:0000000000000000 FASTASCENT_Handle
+     /tmp/ccvrZ0GC.s:152    .text.FASTASCENT_Handle:0000000000000010 $d
+     /tmp/ccvrZ0GC.s:159    .text.SLOWASCENT_Handle:0000000000000000 $t
+     /tmp/ccvrZ0GC.s:166    .text.SLOWASCENT_Handle:0000000000000000 SLOWASCENT_Handle
+     /tmp/ccvrZ0GC.s:188    .text.SLOWASCENT_Handle:0000000000000010 $d
+     /tmp/ccvrZ0GC.s:195    .text.APOGEE_Handle:0000000000000000 $t
+     /tmp/ccvrZ0GC.s:202    .text.APOGEE_Handle:0000000000000000 APOGEE_Handle
+     /tmp/ccvrZ0GC.s:224    .text.APOGEE_Handle:0000000000000010 $d
+     /tmp/ccvrZ0GC.s:231    .text.FREEFALL_Handle:0000000000000000 $t
+     /tmp/ccvrZ0GC.s:238    .text.FREEFALL_Handle:0000000000000000 FREEFALL_Handle
+     /tmp/ccvrZ0GC.s:260    .text.FREEFALL_Handle:0000000000000010 $d
+     /tmp/ccvrZ0GC.s:267    .text.LANDED_Handle:0000000000000000 $t
+     /tmp/ccvrZ0GC.s:274    .text.LANDED_Handle:0000000000000000 LANDED_Handle
+     /tmp/ccvrZ0GC.s:296    .text.LANDED_Handle:0000000000000010 $d
+     /tmp/ccvrZ0GC.s:303    .rodata.statemachine_init.str1.4:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:316    .text.statemachine_init:0000000000000000 $t
+     /tmp/ccvrZ0GC.s:323    .text.statemachine_init:0000000000000000 statemachine_init
+     /tmp/ccvrZ0GC.s:455    .text.statemachine_init:000000000000009c $d
+     /tmp/ccvrZ0GC.s:657    .bss.fs:0000000000000000 fs
+     /tmp/ccvrZ0GC.s:484    .text.statemachine_run:0000000000000000 $t
+     /tmp/ccvrZ0GC.s:491    .text.statemachine_run:0000000000000000 statemachine_run
+     /tmp/ccvrZ0GC.s:556    .text.statemachine_run:0000000000000040 $d
+     /tmp/ccvrZ0GC.s:696    .bss.statXBee:0000000000000000 statXBee
+     /tmp/ccvrZ0GC.s:707    .data.notLanded:0000000000000000 notLanded
+     /tmp/ccvrZ0GC.s:713    .data.startUpMeas:0000000000000000 startUpMeas
+     /tmp/ccvrZ0GC.s:671    .bss.generalTimeStart:0000000000000000 generalTimeStart
+     /tmp/ccvrZ0GC.s:664    .bss.generalTime:0000000000000000 generalTime
+     /tmp/ccvrZ0GC.s:589    .bss.States:0000000000000000 States
+     /tmp/ccvrZ0GC.s:596    .bss.atd:0000000000000000 atd
+     /tmp/ccvrZ0GC.s:633    .bss.fkal:0000000000000000 fkal
+     /tmp/ccvrZ0GC.s:678    .bss.gkal:0000000000000000 gkal
+     /tmp/ccvrZ0GC.s:645    .bss.free_space:0000000000000000 free_space
+     /tmp/ccvrZ0GC.s:702    .bss.total:0000000000000000 total
+     /tmp/ccvrZ0GC.s:639    .bss.fre_clust:0000000000000000 fre_clust
+     /tmp/ccvrZ0GC.s:691    .bss.pfs:0000000000000000 pfs
+     /tmp/ccvrZ0GC.s:614    .bss.bw:0000000000000000 bw
+     /tmp/ccvrZ0GC.s:602    .bss.br:0000000000000000 br
+     /tmp/ccvrZ0GC.s:608    .bss.buffer:0000000000000000 buffer
+     /tmp/ccvrZ0GC.s:651    .bss.fresult:0000000000000000 fresult
+     /tmp/ccvrZ0GC.s:620    .bss.dir:0000000000000000 dir
+     /tmp/ccvrZ0GC.s:626    .bss.fil:0000000000000000 fil
+     /tmp/ccvrZ0GC.s:685    .bss.meas:0000000000000000 meas
+     /tmp/ccvrZ0GC.s:585    .bss.States:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:592    .bss.atd:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:599    .bss.br:0000000000000000 $d
+ARM GAS  /tmp/ccvrZ0GC.s 			page 18
+
+
+     /tmp/ccvrZ0GC.s:605    .bss.buffer:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:611    .bss.bw:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:617    .bss.dir:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:623    .bss.fil:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:629    .bss.fkal:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:636    .bss.fre_clust:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:642    .bss.free_space:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:652    .bss.fresult:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:654    .bss.fs:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:660    .bss.generalTime:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:667    .bss.generalTimeStart:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:674    .bss.gkal:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:681    .bss.meas:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:688    .bss.pfs:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:697    .bss.statXBee:0000000000000000 $d
+     /tmp/ccvrZ0GC.s:699    .bss.total:0000000000000000 $d
+
+UNDEFINED SYMBOLS
+BaseState
+GroundState
+ArmedState
+FastAscentState
+SlowAscentState
+ApogeeState
+FreefallState
+LandedState
+init_measurements
+GroundEKF_init
+Attitude_init
+FlightEKF_init
+HAL_TIM_Base_Start
+HAL_TIM_Base_Start_IT
+f_mount
+sendS
+HAL_GetTick
+htim2
+htim3
+htim4
+make_measurements
