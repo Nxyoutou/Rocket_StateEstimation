@@ -1,0 +1,62 @@
+Altium Designer Pick and Place Locations
+C:\Users\Public\Documents\Altium\Main_MCU_Board\Project Outputs for Main_MCU_Board\Pick Place for MainBoard.txt
+
+========================================================================================================================
+File Design Information:
+
+Date:       27/02/25
+Time:       14:03
+Revision:   Not in VersionControl
+Variant:    No variations
+Units used: mil
+
+Designator Comment               Layer       Footprint                Center-X(mil) Center-Y(mil) Rotation Description                                                                                                         
+R9         ERJ-3EKF2670V         TopLayer    0603-RES                 251.000       544.000       270      "267 Ohms ±1% 0.1W, 1/10W Chip Resistor 0603 (1608 Metric) Automotive AEC-Q200 Thick Film"                          
+R8         ERJ-3EKF2670V         TopLayer    0603-RES                 156.000       544.000       270      "267 Ohms ±1% 0.1W, 1/10W Chip Resistor 0603 (1608 Metric) Automotive AEC-Q200 Thick Film"                          
+D4         LTST-C190KGKT         TopLayer    FP-LTST-C190KGKT-MFG     251.000       684.000       90       "Green 571nm LED Indication - Discrete 2V 0603 (1608 Metric)"                                                       
+D3         LTST-C190KGKT         TopLayer    FP-LTST-C190KGKT-MFG     156.000       684.000       90       "Green 571nm LED Indication - Discrete 2V 0603 (1608 Metric)"                                                       
+P3         NPPC062KFMS-RC        BottomLayer NPPC062KFMS-RC           2210.000      1250.000      90       "12 Position Receptacle Connector 0.100" (2.54mm) Through Hole Gold"                                                
+IC1        STM32H723VGT6         TopLayer    QFP50P1600X1600X160-100N 1250.000      1250.000      45       "ARM® Cortex®-M7 STM32H7 Microcontroller IC 32-Bit Single-Core 550MHz 1MB (1M x 8) FLASH 100-LQFP (14x14)"          
+Y1         ABLS-8.000MHZ-B2-T    TopLayer    ABLS-8.000MHZ-B2-T       729.000       760.000       315      "8 MHz ±20ppm Crystal 18pF 80 Ohms HC-49/US"                                                                        
+SD1        1040310811            TopLayer    MOLX-104031-0811_V       1225.000      2240.000      0        "10 (8 + 2) Position Card Connector Secure Digital - microSD™ Surface Mount, Right Angle Gold"                      
+R1         ERA-3AEB332V          TopLayer    0603-RES                 642.456       1540.694      225      "3.3 kOhms ±0.1% 0.1W, 1/10W Chip Resistor 0603 (1608 Metric) Automotive AEC-Q200 Thin Film"                        
+R4         ERJ-6GEY0R00V         TopLayer    0805-RES                 754.093       1632.007      45       "0 Ohms Jumper Chip Resistor 0805 (2012 Metric) Automotive AEC-Q200 Thick Film"                                     
+R2         ERA-3AEB332V          TopLayer    0603-RES                 849.749       1577.992      225      "3.3 kOhms ±0.1% 0.1W, 1/10W Chip Resistor 0603 (1608 Metric) Automotive AEC-Q200 Thin Film"                        
+R3         ERJ-6GEY0R00V         TopLayer    0805-RES                 738.684       1486.481      225      "0 Ohms Jumper Chip Resistor 0805 (2012 Metric) Automotive AEC-Q200 Thick Film"                                     
+R7         ERA-3AEB332V          TopLayer    0603-RES                 1359.165      400.815       0        "3.3 kOhms ±0.1% 0.1W, 1/10W Chip Resistor 0603 (1608 Metric) Automotive AEC-Q200 Thin Film"                        
+R6         ERA-3AEB332V          TopLayer    0603-RES                 1091.000      400.827       180      "3.3 kOhms ±0.1% 0.1W, 1/10W Chip Resistor 0603 (1608 Metric) Automotive AEC-Q200 Thin Film"                        
+R5         ERJ-6GEY0R00V         TopLayer    0805-RES                 557.311       1708.911      45       "0 Ohms Jumper Chip Resistor 0805 (2012 Metric) Automotive AEC-Q200 Thick Film"                                     
+P1         HTST-106-01-L-DV-P-TR TopLayer    HTST-106-01-L-DV-P-TR    2210.000      1250.000      90       "Connector Header Through Hole 12 position 0.100" (2.54mm)"                                                         
+P2         22-27-2041            TopLayer    MOLX-22-27-2041_V        1651.355      1851.645      315      "Male Header, Pitch 2.54 mm, 1 x 4 Position, Height 11.7 mm, Tail Length 3.56 mm, RoHS, Bulk"                       
+J2         61300211121           TopLayer    HEADER-2-Pin             610.315       1270.000      90       "Connector Header Through Hole 2 position 0.100" (2.54mm)"                                                          
+J1         61300211121           TopLayer    HEADER-2-Pin             1889.685      1270.000      90       "Connector Header Through Hole 2 position 0.100" (2.54mm)"                                                          
+J3         USB4105-GF-A          TopLayer    USB4105-GF-A             1225.000      221.280       0        "USB-C (USB TYPE-C) USB 2.0 Receptacle Connector 24 (16+8 Dummy) Position Surface Mount, Right Angle; Through Hole" 
+IC2        BME280                TopLayer    BME280                   907.521       1877.539      135      "Pressure Sensor 4.35PSI ~ 15.95PSI (30kPa ~ 110kPa) Absolute 16b 8-SMD"                                            
+IC4        W25Q32JVSSIQ          TopLayer    F-SOIC127P790X216-8N     1884.540      535.135       225      "FLASH - NOR Memory IC 32Mbit SPI - Quad I/O 133 MHz 8-SOIC"                                                        
+IC5        CP2102-GMR            TopLayer    28-VFQFN                 1225.000      652.500       90       "USB Bridge, USB to UART USB 2.0 UART Interface 28-QFN (5x5)"                                                       
+IC3        ICM-20649             TopLayer    24-QFN                   520.000       1860.000      45       "Accelerometer, Gyroscope, Temperature, 6 Axis Sensor I2C, SPI Output"                                              
+D2         USBLC6-2SC6           TopLayer    SOT95P280X145-6N         1225.000      445.000       90       "17V Clamp 5A (8/20µs) Ipp Tvs Diode Surface Mount SOT-23-6"                                                        
+D1         PESD5V0X1UB,135       TopLayer    PESD5V0X1UB,135          1403.375      460.946       0        "8V (Typ) Clamp 1.5A (8/20µs) Ipp Tvs Diode Surface Mount SOD-523"                                                  
+C7         KGM21NR71E104KT       TopLayer    CAP-0805                 1684.285      1134.410      225      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C3         CL10A225KO8NNNC       TopLayer    0603-CAP                 1460.923      1580.797      135      "2.2 µF ±10% 16V Ceramic Capacitor X5R 0603 (1608 Metric)"                                                          
+C5         600F180FT250XT        TopLayer    CAP-0805                 689.000       1010.000      315      "18 pF ±1% 250V Ceramic Capacitor C0G, NP0 0805 (2012 Metric)"                                                      
+C9         KGM21NR71E104KT       TopLayer    CAP-0805                 1051.121      899.955       315      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C8         KGM21NR71E104KT       TopLayer    CAP-0805                 1373.708      824.841       45       "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C10        KGM21NR71E104KT       TopLayer    CAP-0805                 906.981       1045.702      135      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C6         600F180FT250XT        TopLayer    CAP-0805                 989.000       720.000       135      "18 pF ±1% 250V Ceramic Capacitor C0G, NP0 0805 (2012 Metric)"                                                      
+C4         CL10A225KO8NNNC       TopLayer    0603-CAP                 1506.013      1625.558      135      "2.2 µF ±10% 16V Ceramic Capacitor X5R 0603 (1608 Metric)"                                                          
+C2         CL10A225KO8NNNC       TopLayer    0603-CAP                 1625.863      994.450       45       "2.2 µF ±10% 16V Ceramic Capacitor X5R 0603 (1608 Metric)"                                                          
+C12        KGM21NR71E104KT       TopLayer    CAP-0805                 1367.117      1682.205      135      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C1         CL10A225KO8NNNC       TopLayer    0603-CAP                 1581.000      1039.000      45       "2.2 µF ±10% 16V Ceramic Capacitor X5R 0603 (1608 Metric)"                                                          
+C11        KGM21NR71E104KT       TopLayer    CAP-0805                 834.637       1383.799      225      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C20        KGM21NR71E104KT       TopLayer    0805-RES                 1522.000      448.000       180      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C15        KGM21NR71E104KT       TopLayer    CAP-0805                 666.795       1824.519      225      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C22        KGM21NR71E104KT       TopLayer    0805-RES                 1427.626      725.859       180      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C21        C0603C105Z8VAC7867    TopLayer    0603-CAP                 1511.698      374.068       180      "1 µF -20%, +80% 10V Ceramic Capacitor Y5V (F) 0603 (1608 Metric)"                                                  
+C23        865080640004          TopLayer    865080640004             1490.866      586.000       180      "4.7 µF 50 V Aluminum Electrolytic Capacitors Radial, Can - SMD 2000 Hrs @ 105°C"                                   
+C18        KGM21NR71E104KT       TopLayer    CAP-0805                 1753.000      351.000       315      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C19        KGM21NR71E104KT       TopLayer    CAP-0805                 1177.000      1958.000      0        "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C13        KGM21NR71E104KT       TopLayer    CAP-0805                 978.790       1750.708      135      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C17        KGM21NR71E104KT       TopLayer    CAP-0805                 612.000       1950.000      315      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C16        KGM21NR71E104KT       TopLayer    CAP-0805                 428.098       1769.884      315      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
+C14        KGM21NR71E104KT       TopLayer    CAP-0805                 1033.000      1805.000      135      "0.1 µF ±10% 25V Ceramic Capacitor X7R 0805 (2012 Metric)"                                                          
