@@ -12,4 +12,9 @@ Here are some pictures of the project :)
 ![IMG_1385](https://github.com/user-attachments/assets/b0447824-5f3b-4ae6-b6a7-9b74aaad4dd1)
 
 ![Screenshot 2025-04-20 181354](https://github.com/user-attachments/assets/fa294984-cd4d-40fb-b7a3-a4db8eb99e52)
-![Screenshot 2025-04-20 182819](https://github.com/user-attachments/assets/730de103-7326-487c-8d97-47fef52e2b29)
+
+![Screenshot 2025-03-01 173347](https://github.com/user-attachments/assets/c0dbd7b3-02ce-427b-a7ab-6db241117062)
+
+![Screenshot 2025-03-27 190223](https://github.com/user-attachments/assets/7371e994-5396-4bc5-9a8f-e16871f4c969)
+
+![Screenshot 2025-01-26 032650](https://github.com/user-attachments/assets/ec06dc80-231a-48c8-a60a-86c7daab92e4)
